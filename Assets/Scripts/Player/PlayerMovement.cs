@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public sealed class PlayerMovement : MonoBehaviour
 {
     [SerializeField, Min(0f)]
-    private float moveSpeed = 5f;
+    private float moveSpeed = 7f;
 
     [SerializeField]
     private InputActionReference moveAction;
@@ -41,7 +41,7 @@ public sealed class PlayerMovement : MonoBehaviour
             moveInputAction.ReadValue<Vector2>(),
             1f);
 
-        Vector3 movement = new Vector3(input.x, input.y, 0f);
+        Vector3 movement = new Vector3(input.x, 0f, input.y);
         transform.position += movement * (moveSpeed * Time.deltaTime);
     }
 }
