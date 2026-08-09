@@ -7,6 +7,9 @@ public sealed class PlayerMovement : MonoBehaviour
     private float moveSpeed = 7f;
 
     [SerializeField]
+    private Transform movementCamera;
+
+    [SerializeField]
     private InputActionReference moveAction;
 
     private InputAction moveInputAction;
@@ -23,6 +26,14 @@ public sealed class PlayerMovement : MonoBehaviour
         }
 
         moveInputAction = moveAction.action;
+
+        if (movementCamera == null)
+        {
+            Debug.LogError(
+                "PlayerMovement requires a movement Camera Transform.",
+                this);
+            enabled = false;
+        }
     }
 
     private void OnEnable()
@@ -37,11 +48,31 @@ public sealed class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (movementCamera == null)
+        {
+            return;
+        }
+
         Vector2 input = Vector2.ClampMagnitude(
             moveInputAction.ReadValue<Vector2>(),
             1f);
 
-        Vector3 movement = new Vector3(input.x, 0f, input.y);
+        Vector3 cameraForward = movementCamera.forward;
+        Vector3 cameraRight = movementCamera.right;
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+
+        if (cameraForward.sqrMagnitude <= 0.0001f
+            || cameraRight.sqrMagnitude <= 0.0001f)
+        {
+            return;
+        }
+
+        cameraForward.Normalize();
+        cameraRight.Normalize();
+
+        Vector3 movement = cameraRight * input.x + cameraForward * input.y;
+        movement = Vector3.ClampMagnitude(movement, 1f);
         transform.position += movement * (moveSpeed * Time.deltaTime);
     }
 }
