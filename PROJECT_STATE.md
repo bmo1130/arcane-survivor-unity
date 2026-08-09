@@ -1,21 +1,23 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U1-A2 — Player Movement Plane Correction (Editor Verification Pending)**
+**U1-B — Perspective Camera + Follow (Editor Verification Pending)**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
-U1-A의 WASD Input System 연결과 입력 동작은 Unity Editor에서 확인됐다.
+U1-A와 U1-A2의 Player 이동은 Unity Editor에서 확인됐다.
 
-기존 Unity 구현이 XY 평면을 사용해 Three.js Reference Prototype의 XZ 이동과 달랐으므로 이동 평면을 수정했다.
+W/S는 Z축, A/D는 X축으로 이동하며 Player Y는 `0`으로 유지된다.
 
-Unity Editor에서 XZ 이동과 Y 고정을 확인하기 전까지 U1-A와 U1 전체는 완료로 기록하지 않는다.
+Unity Console Error 없이 WASD 이동 검증을 완료했다.
+
+현재 Perspective Camera와 부드러운 Player Follow를 구현 중이며, Unity Editor 검증 전까지 U1-B와 U1 전체는 완료로 기록하지 않는다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U1-A2 — Player Movement Plane Correction**이다.
+현재 구현 범위는 **U1-B — Perspective Camera + Follow**다.
 
 ## Completed Features
 
@@ -38,24 +40,33 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
   - `MIGRATION_NOTES.md`
 - Codex 프로젝트 접근 및 실제 파일 구조 확인
 
+### U1-A / U1-A2 — Player Movement
+- 기존 Input System의 `Player/Move` 액션으로 WASD 입력
+- W/S → World Z, A/D → World X 이동
+- Player World Y `0` 유지
+- 대각선 이동 속도 증가 방지
+- `Time.deltaTime` 기반 이동
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
 ## Current Work
 
-### U1-A2 — Player Movement Plane Correction
-- U1-A에서 기존 `InputSystem_Actions`의 `Player/Move` 액션과 WASD 입력 동작 확인
-- `Player/Move`의 `Vector2` 입력을 World XZ 이동으로 변환
-  - Input X → World X
-  - Input Y → World Z
-  - World Y 유지
-- `Vector2` 입력을 최대 길이 1로 제한해 대각선 속도 증가 방지 유지
-- Inspector에서 조절 가능한 Move Speed 기본값을 Reference Prototype과 같은 `7`로 변경
-- `Time.deltaTime` 기반 Transform 이동 유지
-- Rigidbody2D와 Collider는 현재 충돌 Gameplay가 없어 사용하지 않음
+### U1-B — Perspective Camera + Follow
+- `Assets/Scripts/Camera/CameraFollow.cs` 작성
+- `LateUpdate`에서 Player 이동 후 Camera 갱신
+- Player 위치와 Offset으로 목표 Camera 위치 계산
+- `1 - exp(-sharpness * deltaTime)` 지수 보간으로 framerate-independent Follow
+- Player 바닥 기준 높이 `0.5` 지점을 매 Frame 바라봄
+- Follow Target 미연결 시 NullReference 없이 갱신 중단
+- Reference Prototype 기본값 사용
+  - Offset `(0, 14, 12)`
+  - Follow Sharpness `7`
+  - Look At Height `0.5`
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- 기존 Scene의 `player` Move Speed를 `7`로 변경
-- Play Mode에서 W/S가 Z축, A/D가 X축을 변경하는지 확인
-- 이동 중 Player Y 좌표가 유지되는지 확인
+- Main Camera를 Perspective, FOV `50`으로 설정
+- Main Camera에 `CameraFollow` 연결
+- Play Mode Follow 감각과 Console Error 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -199,6 +210,15 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Player Rotation은 현재 변경하지 않는다.
 - Perspective Camera와 Follow는 U1-B로 분리한다.
 
+### Camera
+- Main Camera는 Perspective Projection과 FOV `50`을 사용한다.
+- Player 기준 기본 Offset은 `(0, 14, 12)`다.
+- 기본 Follow Sharpness는 `7`이다.
+- `LateUpdate`에서 Player 이동 이후 Camera를 갱신한다.
+- 위치 보간 계수는 `1 - exp(-sharpness * deltaTime)`을 사용한다.
+- 매 Frame Player 위치의 Y `+0.5` 지점을 바라본다.
+- Camera Shake, Dead Zone, Zoom, Boundary, Cinemachine은 현재 구현하지 않는다.
+
 ### Git Tracking
 Repository에 포함할 대상:
 - `Assets`와 대응하는 `.meta` 파일
@@ -249,7 +269,10 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `player`
 - `player`는 테스트용 Square SpriteRenderer와 `PlayerMovement`를 사용한다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
-- Scene에 직렬화된 Move Speed는 현재 `5`이며 U1-A2 Editor 검증 전에 `7`로 변경해야 한다.
+- U1-A / U1-A2 이동 동작은 Unity Editor에서 검증됐다.
+- Scene에 직렬화된 Move Speed는 현재 `5`이며 Script 기본값 `7`과 다르다.
+- Main Camera는 현재 Orthographic이며 Transform은 Position `(0, 0, -10)`, Rotation `(0, 0, 0)`이다.
+- Main Camera의 Perspective/FOV/CameraFollow Editor 설정은 아직 적용되지 않았다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
 - `ProjectSettings.asset`의 `templateDefaultScene`에는 프로젝트 템플릿 출처 정보로 기존 `SampleScene` 경로가 남아 있다. Build Scene 항목은 아니며 U1 진행을 막지 않는다.
 - `Assets/Settings/Scenes/URP2DSceneTemplate.unity`는 Unity 2D URP Scene Template이다.
@@ -263,19 +286,25 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - World Y 좌표 유지
   - 기본 Move Speed `7`
   - 대각선 속도 제한과 Null 방어 유지
-  - Editor Compile 및 Play Mode 검증 대기
+  - Editor Compile 및 Play Mode 검증 완료
+- `Assets/Scripts/Camera/CameraFollow.cs`
+  - `LateUpdate` 기반 부드러운 Position Follow
+  - 매 Frame Player LookAt
+  - 기본 Offset `(0, 14, 12)`
+  - 기본 Follow Sharpness `7`
+  - 기본 Look At Height `0.5`
+  - Editor 연결 및 Play Mode 검증 대기
 - Assembly Definition 없음
 
 ## Known Issues
-- U1-A의 WASD 입력 자체는 Unity Editor에서 확인됐지만 이동 평면이 잘못되어 최종 완료로 처리하지 않았다.
-- U1-A2의 XZ 이동과 Y 좌표 유지는 Unity Editor에서 아직 확인되지 않았다.
-- 기존 `player` Component의 직렬화된 Move Speed가 `5`이므로 Inspector에서 `7`로 변경해야 한다.
-- 현재 2D Square와 기존 Camera는 XZ 이동을 최종 시각 방식으로 보여주기 위한 구성이 아니다. Visual과 Camera는 U1-B에서 처리한다.
+- U1-B는 Unity Editor에서 아직 컴파일 및 Play Mode 검증되지 않았다.
+- Main Camera는 아직 Orthographic이며 `CameraFollow`가 연결되지 않았다.
+- 현재 Scene의 `player` Move Speed는 직렬화된 값 `5`로, Reference Prototype 기준 `7`과 다르다.
+- Perspective Camera에서 현재 Square Sprite가 어떻게 보이는지는 U1-B Editor 검증 후 판단한다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
 
 ## Deferred Work
-- Perspective Camera와 Player Follow
 - Physics2D 활용 범위
 - ScriptableObject 활용 범위
 - Common Upgrade 최대 Level
@@ -287,10 +316,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**U1-B — Perspective Camera + Follow**
+**Pending U1-B Editor Verification**
 
-U1-A2의 Unity Editor Compile과 XZ 이동 검증이 완료된 뒤 진행한다.
+먼저 U1-B의 Unity Editor 설정과 Play Mode 검증을 완료한다.
 
-U1-B에서는 Perspective Camera 구성과 Player Follow만 구현한다.
-
-Enemy, Combat, Spell 등 U2 이후 시스템은 함께 구현하지 않는다.
+검증 결과를 확인한 뒤 다음 작은 Phase를 결정한다. U2는 아직 시작하지 않는다.
