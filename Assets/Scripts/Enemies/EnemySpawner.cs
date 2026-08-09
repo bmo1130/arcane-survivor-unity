@@ -10,6 +10,9 @@ public sealed class EnemySpawner : MonoBehaviour
     private SlimeController slimePrefab;
 
     [SerializeField]
+    private ExperienceOrb experienceOrbPrefab;
+
+    [SerializeField]
     private Transform billboardCamera;
 
     [SerializeField, Min(0f)]
@@ -24,6 +27,7 @@ public sealed class EnemySpawner : MonoBehaviour
     private readonly List<SlimeController> spawnedEnemies = new();
 
     private PlayerHealth playerHealth;
+    private PlayerExperience playerExperience;
     private float spawnTimer;
 
     public IReadOnlyList<SlimeController> SpawnedEnemies => spawnedEnemies;
@@ -49,6 +53,15 @@ public sealed class EnemySpawner : MonoBehaviour
             return;
         }
 
+        if (experienceOrbPrefab == null)
+        {
+            Debug.LogError(
+                "EnemySpawner requires an Experience Orb Prefab.",
+                this);
+            enabled = false;
+            return;
+        }
+
         if (billboardCamera == null)
         {
             Debug.LogError(
@@ -59,11 +72,21 @@ public sealed class EnemySpawner : MonoBehaviour
         }
 
         playerHealth = player.GetComponent<PlayerHealth>();
+        playerExperience = player.GetComponent<PlayerExperience>();
 
         if (playerHealth == null)
         {
             Debug.LogError(
                 "EnemySpawner requires PlayerHealth on the Player GameObject.",
+                this);
+            enabled = false;
+            return;
+        }
+
+        if (playerExperience == null)
+        {
+            Debug.LogError(
+                "EnemySpawner requires PlayerExperience on the Player GameObject.",
                 this);
             enabled = false;
             return;
@@ -109,7 +132,13 @@ public sealed class EnemySpawner : MonoBehaviour
             spawnPosition,
             Quaternion.identity);
 
-        if (!slime.Setup(player, playerHealth, spawnedEnemies))
+        if (!slime.Setup(
+                player,
+                playerHealth,
+                spawnedEnemies,
+                experienceOrbPrefab,
+                playerExperience,
+                billboardCamera))
         {
             Destroy(slime.gameObject);
             return;

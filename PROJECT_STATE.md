@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U4-A — Magic Missile Basic Auto Combat / Editor Verification Pending**
+**U5-A — Experience Orb Drop + Direct Pickup / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -29,13 +29,15 @@ Runtime Target/PlayerHealth/Billboard Camera 연결, Slime Chase/Attack, Destroy
 
 U3-B와 U3 전체는 완료됐다.
 
-현재 사용자가 Player에 Test Caster를 명시적으로 추가한 경우에만 Magic Missile Lv.1 자동 전투를 검증하는 U4-A를 진행 중이다.
+Test-only Magic Missile의 자동 Target 선택, Homing, Damage, Target 선행 사망 처리와 Projectile Lifetime을 Unity Editor에서 검증했다. 기존 Spawn/Separation과 U1~U3 기능도 정상이며 Console Error가 없다.
+
+현재 Slime Death 위치에 Experience Orb 하나를 생성하고 Player가 직접 획득해 Experience를 누적하는 U5-A를 진행 중이다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U4-A — Magic Missile Basic Auto Combat**이다.
+현재 구현 범위는 **U5-A — Experience Orb Drop + Direct Pickup**이다.
 
 ## Completed Features
 
@@ -130,26 +132,38 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - U3-A Slime Prefab + Enemy Spawning 완료
 - U3-B Simple Enemy Separation 완료
 
+### U4-A — Magic Missile Basic Auto Combat
+- Slime이 없을 때 발사하지 않음
+- Spawn된 Slime 중 XZ 기준 최근접 Target 자동 선택
+- Magic Missile 자동 발사와 Homing 정상
+- Damage `3`, Slime HP `10 → 7 → 4 → 1 → Death` 확인
+- Target 선행 사망과 Projectile Lifetime 처리 정상
+- Enemy Spawn/Separation, Player Movement/Camera/PlayerHealth Regression 없음
+- Unity Editor Play Mode 및 Console Error 검증 완료
+- Player의 `MagicMissileCaster`는 U4 전투 검증용 Test Caster이며 강제 Starting Skill이 아님
+
 ## Current Work
 
-### U4-A — Magic Missile Basic Auto Combat
-- Player에 수동으로 추가하는 Test-only `MagicMissileCaster`
-- 기존 EnemySpawner Spawned Slime 목록에서 XZ 기준 가장 가까운 살아 있는 Slime 선택
-- Damage `3`, Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`
-- Player Y `+1.25` 위치에서 Projectile 생성
-- Target을 매 Frame 추적하는 XZ Homing Projectile
-- Target 사망 또는 Lifetime 만료 시 Projectile 제거
-- Target과 XZ 거리 기반 명중, `SlimeController.TakeDamage(3)` 후 Projectile 제거
-- Rigidbody, Collider, Physics, FindObjectsByType, Combat Manager를 사용하지 않음
-- Magic Missile은 전투 검증을 위해 수동 활성화하는 Test Caster일 뿐 강제 Starting Skill이 아님
+### U5-A — Experience Orb Drop + Direct Pickup
+- Player의 `Current Experience`를 `0`으로 시작하고 유효한 XP만 누적하는 `PlayerExperience`
+- Slime Experience Reward 기본값 `4`
+- Slime의 기존 단일 Death 경로에서 Experience Orb를 정확히 한 번 생성
+- Experience Orb Value `4`, Pickup Radius `1.1`
+- Collider/Rigidbody 없이 Player와 Orb의 XZ 거리로 직접 Pickup 판정
+- Pickup 시 XP를 한 번 지급하고 Orb Root Destroy
+- EnemySpawner가 PlayerExperience를 Player에서 한 번 조회하고 Orb Prefab/Player/Camera를 Spawn된 Slime에 전달
+- Spawn된 Orb의 하위 Billboard Camera를 Runtime 연결
+- Level, XP Threshold, Level Up, Magnet, Loot Manager는 구현하지 않음
+- Unity 6 프로젝트 Reference를 사용한 독립 C# Compile 검사 통과, Unity Editor Import/Play Mode 검증 대기
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- `Assets/Prefabs/Projectiles/MagicMissile.prefab` Editor 생성
-- Player Root에 Test-only `MagicMissileCaster` 수동 추가 및 Reference 연결
-- Target 없음/최근접 Target/Cooldown/Homing/명중/Lifetime/Target 선행 사망 확인
-- Damage `3`씩 네 번 명중 시 Slime Death 확인
-- Spawn/Separation/Chase/Attack/Player/Camera Regression 확인
+- Player Root에 `PlayerExperience` 추가 및 시작 Current Experience `0` 확인
+- `Assets/Prefabs/Pickups/ExperienceOrb.prefab` Editor 생성
+- EnemySpawner의 Experience Orb Prefab 연결
+- Magic Missile/Debug Damage Death에서 Orb 한 개 생성 확인
+- Player가 직접 Pickup Radius 안에 들어갈 때 `0 → 4 → 8` 누적과 Orb 제거 확인
+- Spawn/Separation/Chase/Attack/Magic Missile/Player/Camera Regression 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -263,13 +277,15 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Starting Spell / Loadout 연동은 후속 Phase에서 처리
 - Magic Missile Lv.2와 다른 Spell은 후속 Phase에서 처리
 
-### U5 — Experience
-- XP Orb
-- Pickup
-- Player Experience
-- Level
+### U5-A — Experience Orb Drop + Direct Pickup
+- Slime Death XP Orb 한 개 생성
+- XZ 거리 기반 직접 Pickup
+- Player Experience 누적
+- Level / Threshold 미구현
 
 ### U6 — Level Up
+- Level / XP Threshold
+- Multiple Level Up 처리
 - Pause
 - Upgrade 3-choice
 - Upgrade Apply
@@ -367,16 +383,17 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Slime Health는 별도 Framework 없이 기존 `SlimeController`가 관리한다.
 - Maximum Health 기본값은 `10`이며 Play 시작 시 Current Health를 Maximum Health로 초기화한다.
 - `TakeDamage(float)`는 NaN, Infinity, 0 이하 값을 무시하고 Current Health를 `0` 이상으로 Clamp한다.
-- Current Health가 `0`이면 중복 Death를 방지하고 Component를 비활성화한 뒤 Slime Root GameObject를 Destroy한다.
-- Spell Combat 전 검증용 Debug Damage 기본값은 `3`이며 Context Menu도 실제 `TakeDamage`를 호출한다.
-- Death Animation, Effect, XP Drop, 범용 Enemy Health 구조는 현재 구현하지 않는다.
+- Current Health가 `0`이면 중복 Death를 방지하고 Component를 비활성화한 뒤 Experience Orb를 한 번 생성하고 Slime Root GameObject를 Destroy한다.
+- Editor 검증용 Debug Damage 기본값은 `3`이며 Context Menu도 실제 `TakeDamage`를 호출한다.
+- Debug Damage와 Magic Missile Damage는 모두 같은 `TakeDamage → Die` 경로를 사용한다.
+- Death Animation, Effect, 범용 Enemy Health 구조는 현재 구현하지 않는다.
 
 ### Enemy Spawning
 - `EnemySpawner`가 첫 Spawn과 이후 Spawn을 기본 `1.5`초 간격으로 처리한다.
 - Spawn 위치는 Player의 X/Z와 임의 각도를 사용하며 반지름은 `14`, World Y는 항상 `0`이다.
 - Spawner가 생성한 살아 있는 Slime은 최대 `20`마리로 제한한다.
 - Destroy된 Slime은 Unity Object의 Null 상태를 목록에서 제거해 Count를 회수한다.
-- Spawn 직후 `SlimeController.Setup`으로 Player Transform과 PlayerHealth를 명시적으로 연결한다.
+- Spawn 직후 `SlimeController.Setup`으로 Player Transform, PlayerHealth, PlayerExperience, Experience Orb Prefab과 Billboard Camera를 명시적으로 연결한다.
 - Spawn 직후 Slime 하위의 `BillboardToCamera`에 Inspector에서 받은 Main Camera Transform을 연결한다.
 - Runtime 연결을 위해 Scene 전체 검색, Enemy Manager Framework, Object Pool, Service Locator를 사용하지 않는다.
 - Difficulty Scaling, Wave, Spawn Interval 감소는 현재 구현하지 않는다.
@@ -404,6 +421,18 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Slime HP `10`에는 네 번 명중해야 Death가 발생한다.
 - Projectile은 Player Y `+1.25`에서 생성되고 XZ 평면으로 이동하며 시각 높이를 유지한다.
 - Rigidbody, Collider, Physics, FindObjectsByType, 범용 Combat/Projectile Framework를 사용하지 않는다.
+
+### Player Experience / Experience Orb
+- `PlayerExperience`는 게임 시작 시 Current Experience를 `0`으로 초기화한다.
+- `AddExperience(float)`는 NaN, Infinity, 0 이하 값을 무시하고 유효한 XP만 누적한다.
+- U5-A에서는 Level, XP Threshold, Level Up을 계산하지 않는다.
+- Slime Experience Reward 기본값은 `4`이며 기존 단일 Death 경로에서 Orb 하나만 생성한다.
+- Experience Orb의 기본 Value는 `4`, Pickup Radius는 `1.1`이다.
+- Orb Pickup은 Collider나 Rigidbody 없이 Player와 Orb의 XZ 거리로만 판정한다.
+- Orb는 Player가 직접 범위 안에 들어왔을 때 XP를 정확히 한 번 지급한 뒤 Root GameObject를 Destroy한다.
+- Magnet, Attraction, Loot Manager, Event Bus, Service Locator를 사용하지 않는다.
+- Orb Root는 Slime Death World Position에 생성하고 Visual Child를 Local Y `0.4`에 두어 Gameplay XZ 위치와 시각 높이를 분리한다.
+- Orb의 `BillboardToCamera`는 Prefab에서 Scene Camera를 저장하지 않고 Runtime Setup으로 Main Camera Transform을 받는다.
 
 ### Prototype Visual Baseline
 - Player와 Slime Gameplay Root는 Position과 Rotation을 담당하며 Rotation `(0, 0, 0)`을 유지한다.
@@ -465,8 +494,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `Global Light 2D`
   - `player`
   - `ground`
-  - `EnemySoawner`
-- `player` Root는 `PlayerMovement`와 `PlayerHealth`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
+  - `EnemySpawner`
+- `player` Root는 `PlayerMovement`, `PlayerHealth`, Test-only `MagicMissileCaster`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
 - `player/Visual` Child는 기존 Square SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0.5, 0)`이다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
 - U1-A / U1-A2의 World XZ 이동 동작은 Unity Editor에서 검증됐다.
@@ -481,15 +510,17 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Look At Height `0.5`
 - U1 Camera Follow는 Unity Editor에서 검증됐다.
 - `player`에는 `PlayerHealth`가 연결되어 있으며 Maximum HP는 `100`이다.
-- `player`에는 아직 `MagicMissileCaster`가 없으며 U4-A Editor Test Setup에서 사용자가 명시적으로 추가해야 한다.
+- `player`의 Test-only `MagicMissileCaster`에는 실제 Magic Missile Prefab과 `EnemySpawner`가 연결되어 있으며 U4-A Play Mode 검증이 완료됐다.
+- `player`에는 아직 `PlayerExperience`가 없으며 U5-A Editor Setup에서 추가해야 한다.
 - 수동 배치 Slime은 Scene에서 제거됐다.
-- `EnemySoawner`에는 `EnemySpawner`가 연결되어 있다.
+- `EnemySpawner` Root에는 `EnemySpawner` Component가 연결되어 있다.
   - Player: `player`
   - Slime Prefab: 실제 Slime Prefab Asset
   - Billboard Camera: `Main Camera`
   - Spawn Interval `1.5`
   - Spawn Distance `14`
   - Maximum Enemy Count `20`
+- 새 Experience Orb Prefab Field는 아직 연결되지 않았으며 U5-A Editor Setup에서 연결해야 한다.
 - U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
@@ -503,9 +534,11 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `Visual`
     - `SpriteRenderer`
     - `BillboardToCamera`
-- Prefab의 Target, PlayerHealth, Billboard Camera는 Runtime에 연결된다.
+- Prefab의 Target, PlayerHealth, PlayerExperience, Experience Orb Prefab과 Billboard Camera는 Runtime에 연결된다.
 - U3-B Separation은 Script 기본값 Radius `0.75`, Strength `0.35`로 Editor 검증 완료됐다.
-- `Assets/Prefabs/Projectiles/MagicMissile.prefab`은 아직 없으며 U4-A Editor Setup에서 생성해야 한다.
+- Magic Missile 실제 경로: `Assets/Prefabs/Projectiles/MagicMissile.prefab`
+- Magic Missile Root에는 `MagicMissileProjectile`, Visual Child에는 Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
+- `Assets/Prefabs/Pickups/ExperienceOrb.prefab`은 아직 없으며 U5-A Editor Setup에서 생성해야 한다.
 
 ### Script
 - `Assets/Scripts/Player/PlayerMovement.cs`
@@ -537,9 +570,10 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - U2-B Editor 연결 및 Play Mode 검증 완료
   - Maximum Health 기본값 `10`, Current Health Play 시작 초기화
   - Invalid Damage 방어, HP 0 Clamp, 중복 Death 방어
-  - HP 0에서 Slime Root GameObject Destroy
+  - HP 0에서 Experience Orb 한 개 생성 후 Slime Root GameObject Destroy
   - Debug Damage 기본값 `3`과 `Debug Take Damage` Context Menu
-  - Runtime `Setup(Transform, PlayerHealth, IReadOnlyList<SlimeController>)`으로 Spawn Reference와 이웃 목록 연결
+  - Experience Reward 기본값 `4`
+  - Runtime `Setup`으로 Player/Health/Experience/Orb Prefab/Camera와 이웃 목록 연결
   - Separation Radius `0.75`, Strength `0.35`
   - XZ 이웃 거리 기반 Separation과 동일 위치 fallback
   - 최종 Move Speed/Stop Distance/Y 보존
@@ -550,7 +584,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Player 주변 XZ 반지름 `14`, World Y `0` Spawn
   - Maximum Enemy Count 기본값 `20`
   - Destroy된 Slime 목록 정리 및 Count 회수
-  - Spawn 시 Player/PlayerHealth/Billboard Camera Runtime 연결
+  - Spawn 시 Player/PlayerHealth/PlayerExperience/Experience Orb Prefab/Billboard Camera Runtime 연결
   - 기존 Spawned Slime 목록을 각 Slime의 Separation 이웃 목록으로 전달
   - Test Combat Targeting용 `SpawnedEnemies` 읽기 전용 목록과 Billboard Camera 제공
   - 필수 Reference Null 방어
@@ -561,14 +595,25 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 기본 Damage `3`, Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`
   - Projectile 생성과 Runtime Target/Camera/수치 전달
   - Target 없음과 필수 Reference Null 방어
-  - U4-A Editor 연결 및 Play Mode 검증 대기
+  - U4-A Editor 연결 및 Play Mode 검증 완료
 - `Assets/Scripts/Combat/MagicMissileProjectile.cs`
   - 살아 있는 Target을 향한 XZ Homing 이동
   - Player Y `+1.25` 발사 높이 유지
   - XZ Collision Radius 명중 판정과 `SlimeController.TakeDamage`
   - 명중, Lifetime 만료, Target 선행 사망 시 Root Destroy
   - 하위 Billboard Camera Runtime 연결
-  - U4-A Projectile Prefab 생성 및 Play Mode 검증 대기
+  - U4-A Projectile Prefab 생성 및 Play Mode 검증 완료
+- `Assets/Scripts/Player/PlayerExperience.cs`
+  - Current Experience Play 시작 시 `0` 초기화
+  - Invalid/0 이하 XP 방어와 유효 XP 누적
+  - Inspector에서 Current Experience 확인 가능
+  - Level/Threshold/Level Up 없음
+- `Assets/Scripts/Experience/ExperienceOrb.cs`
+  - Value 기본값 `4`, Pickup Radius 기본값 `1.1`
+  - Runtime Player/PlayerExperience/Billboard Camera/Reward 연결
+  - XZ 거리 기반 직접 Pickup과 중복 Collect 방어
+  - Pickup 후 Orb Root Destroy
+  - Collider/Rigidbody/Magnet 없음
 - `Assets/Scripts/Player/PlayerHealth.cs`
   - Maximum HP 기본값 `100`
   - Current HP Inspector 확인 가능
@@ -586,9 +631,9 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U4-A Magic Missile Caster/Projectile은 아직 Unity Editor Prefab/Scene 연결 및 Play Mode 검증 전이다.
-- `Assets/Prefabs/Projectiles/MagicMissile.prefab`이 아직 없고 Player에도 Test Caster가 연결되지 않았다.
-- Scene Spawner 이름이 `EnemySpawner`가 아니라 `EnemySoawner`로 저장되어 있다. 기능에는 영향이 없어 이번 Phase에서는 변경하지 않았다.
+- U5-A Script는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
+- `player`에 `PlayerExperience`가 아직 추가되지 않았다.
+- `Assets/Prefabs/Pickups/ExperienceOrb.prefab`이 아직 없고 EnemySpawner의 Experience Orb Prefab Reference도 연결되지 않았다.
 - Player Death와 HP UI는 구현되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
@@ -602,13 +647,15 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
 - Lightning Stagger anti-permastun 필요 여부
 - 최종 Balance
-- U4 이후 Experience, Skill, Synergy 구현
+- U6 Level / XP Threshold / Level Up / Upgrade Selection
+- U7 이후 Starting Spell Selection, Skill, School, Synergy 구현
+- XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U4-A Editor Verification**
+**Pending U5-A Editor Verification**
 
-먼저 Test Caster와 Projectile Prefab을 Unity Editor에서 명시적으로 연결하고 Targeting/Homing/Damage/Lifetime과 기존 Gameplay Regression을 검증한다.
+먼저 PlayerExperience와 Experience Orb Prefab을 Unity Editor에서 명시적으로 연결하고 Slime Death당 Orb 한 개 생성, XZ 직접 Pickup, XP 누적과 기존 Gameplay Regression을 검증한다.
 
-검증 결과를 확인한 뒤 다음 작은 Phase를 제안한다. 이번 작업에서는 U5 XP, Starting Spell Selection, Loadout을 구현하지 않는다.
+검증 결과를 확인한 뒤 다음 작은 Phase를 제안한다. 이번 작업에서는 U6 Level Up, Upgrade System, Starting Spell Selection을 구현하지 않는다.

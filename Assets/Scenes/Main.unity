@@ -479,6 +479,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   player: {fileID: 1779079781}
   slimePrefab: {fileID: 3677997162334901888, guid: 601ffc1ee84783441b1faea710f4ee97, type: 3}
+  experienceOrbPrefab: {fileID: 6806973404670256577, guid: cd0bd3eb5712bbd4f990601131195186, type: 3}
   billboardCamera: {fileID: 519420032}
   spawnInterval: 1.5
   spawnDistance: 14
@@ -509,6 +510,7 @@ GameObject:
   - component: {fileID: 1293121246}
   - component: {fileID: 1293121248}
   - component: {fileID: 1293121247}
+  - component: {fileID: 1293121249}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -603,6 +605,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1293121249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1293121245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1cdca2e792a40388d6030f50a00a9f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerExperience
+  currentExperience: 0
 --- !u!1 &1779079778
 GameObject:
   m_ObjectHideFlags: 0
@@ -615,6 +630,7 @@ GameObject:
   - component: {fileID: 1779079779}
   - component: {fileID: 1779079782}
   - component: {fileID: 1779079783}
+  - component: {fileID: 1779079784}
   m_Layer: 0
   m_Name: player
   m_TagString: Untagged
@@ -686,6 +702,19 @@ MonoBehaviour:
   projectileSpeed: 6
   projectileLifetime: 5
   projectileCollisionRadius: 0.22
+--- !u!114 &1779079784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1cdca2e792a40388d6030f50a00a9f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerExperience
+  currentExperience: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -31,6 +31,9 @@ public sealed class SlimeController : MonoBehaviour
     private float debugDamage = 3f;
 
     [SerializeField, Min(0f)]
+    private float experienceReward = 4f;
+
+    [SerializeField, Min(0f)]
     private float separationRadius = 0.75f;
 
     [SerializeField, Min(0f)]
@@ -40,6 +43,9 @@ public sealed class SlimeController : MonoBehaviour
     private bool isDead;
     private IReadOnlyList<SlimeController> separationNeighbors;
     private Vector3 overlapFallbackDirection;
+    private ExperienceOrb experienceOrbPrefab;
+    private PlayerExperience playerExperience;
+    private Transform billboardCamera;
 
     public float CurrentHealth => currentHealth;
     public float MaximumHealth => maximumHealth;
@@ -67,11 +73,17 @@ public sealed class SlimeController : MonoBehaviour
     public bool Setup(
         Transform newTarget,
         PlayerHealth newPlayerHealth,
-        IReadOnlyList<SlimeController> newSeparationNeighbors)
+        IReadOnlyList<SlimeController> newSeparationNeighbors,
+        ExperienceOrb newExperienceOrbPrefab,
+        PlayerExperience newPlayerExperience,
+        Transform newBillboardCamera)
     {
         target = newTarget;
         playerHealth = newPlayerHealth;
         separationNeighbors = newSeparationNeighbors;
+        experienceOrbPrefab = newExperienceOrbPrefab;
+        playerExperience = newPlayerExperience;
+        billboardCamera = newBillboardCamera;
 
         return ValidateReferences();
     }
@@ -91,6 +103,33 @@ public sealed class SlimeController : MonoBehaviour
         {
             Debug.LogError(
                 "SlimeController requires a PlayerHealth reference.",
+                this);
+            enabled = false;
+            return false;
+        }
+
+        if (experienceOrbPrefab == null)
+        {
+            Debug.LogError(
+                "SlimeController requires an Experience Orb Prefab.",
+                this);
+            enabled = false;
+            return false;
+        }
+
+        if (playerExperience == null)
+        {
+            Debug.LogError(
+                "SlimeController requires a PlayerExperience reference.",
+                this);
+            enabled = false;
+            return false;
+        }
+
+        if (billboardCamera == null)
+        {
+            Debug.LogError(
+                "SlimeController requires a Billboard Camera Transform.",
                 this);
             enabled = false;
             return false;
@@ -242,7 +281,7 @@ public sealed class SlimeController : MonoBehaviour
         }
     }
 
-    // Temporary Editor verification hook until spell combat calls TakeDamage.
+    // Temporary Editor verification hook for manual damage checks.
     [ContextMenu("Debug Take Damage")]
     private void DebugTakeDamage()
     {
@@ -266,6 +305,35 @@ public sealed class SlimeController : MonoBehaviour
 
         isDead = true;
         enabled = false;
+        SpawnExperienceOrb();
         Destroy(gameObject);
+    }
+
+    private void SpawnExperienceOrb()
+    {
+        if (experienceOrbPrefab == null
+            || target == null
+            || playerExperience == null
+            || billboardCamera == null)
+        {
+            Debug.LogError(
+                "SlimeController could not spawn its Experience Orb because a runtime reference is missing.",
+                this);
+            return;
+        }
+
+        ExperienceOrb experienceOrb = Instantiate(
+            experienceOrbPrefab,
+            transform.position,
+            Quaternion.identity);
+
+        if (!experienceOrb.Setup(
+                target,
+                playerExperience,
+                billboardCamera,
+                experienceReward))
+        {
+            Destroy(experienceOrb.gameObject);
+        }
     }
 }
