@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U8-B — School Point Calculation / Editor Verification Pending**
+**U10-Fire — Complete Fire School Runtime / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -29,7 +29,7 @@ Runtime Target/PlayerHealth/Billboard Camera 연결, Slime Chase/Attack, Destroy
 
 U3-B와 U3 전체는 완료됐다.
 
-Test-only Magic Missile의 자동 Target 선택, Homing, Damage, Target 선행 사망 처리와 Projectile Lifetime을 Unity Editor에서 검증했다. 기존 Spawn/Separation과 U1~U3 기능도 정상이며 Console Error가 없다.
+U4-A 당시 Test-only Magic Missile의 자동 Target 선택, Homing, Damage, Target 선행 사망 처리와 Projectile Lifetime을 Unity Editor에서 검증했다. 기존 Spawn/Separation과 U1~U3 기능도 정상이며 Console Error가 없다.
 
 Slime Death 시 Experience Orb 생성, Reward `4`, Pickup Radius `1.1`, 직접 Pickup과 `0 → 4 → 8` 누적을 Unity Editor에서 검증했다. Magnet과 중복 획득은 없으며 기존 Combat/Spawn/Movement도 정상이고 Console Error가 없다.
 
@@ -43,13 +43,21 @@ Active 1/2와 Passive 1의 Empty 시작, 동일 Skill Lv.2 Cap, 새 Active/Passi
 
 SkillCatalog의 실제 School Skill 12개, Active 8/Passive 4, School별 3개, Max Lv.2, Definition 기반 Loadout 획득과 기존 Slot 제한을 Unity Editor에서 검증했다. 시작 Loadout은 Empty이고 Common Upgrade와 Test Caster 분리도 유지되며 Console Error가 없다. U8-A는 완료됐다.
 
-현재 School Point를 별도 상태 없이 장착된 Catalog Skill의 Current Level 합으로 실시간 계산하는 U8-B를 진행 중이다.
+Empty/단일/동일 School/Mixed School Loadout, Arcane 최대 `6`, Debug Placeholder 제외와 Reset 자동 `0`을 Unity Editor에서 검증했다. 별도 mutable Point State는 없고 기존 Gameplay와 Console도 정상이며 U8-B는 완료됐다.
+
+게임 시작 Empty Loadout/Pause, Active 8개 중 한 개 선택, Active Slot 1 Lv.1, Resume, 중복 선택 거부와 School Point 반영을 Unity Editor에서 검증했다. Magic Missile 선택 시에만 기존 Missile Runtime이 작동하고 다른 Starting Spell에서는 발사하지 않으며 Console Error가 없다. U9-A는 완료됐다.
+
+Play 시작 Starting UI 표시, Active 8 Button, Pause, UI 선택 후 Active Slot 1 Lv.1/Close/Resume, Loadout별 Magic Missile gating과 이후 Level-Up UI 분리를 Unity Editor에서 검증했다. Starting Spell은 한 번만 선택되며 Console Error가 없다. U9-B는 완료됐다.
+
+Magic Bolt Starting 선택, `magic-bolt` Loadout gating, non-homing 직선 발사, Magic Missile과 독립 동작, Damage/Collision/Lifetime을 Unity Editor에서 검증했다. Console Error가 없으며 U10-A는 완료됐다.
+
+현재 Fireball, Fire Zone, Burning, Fire Mastery와 각 Active Lv.2 반경 효과를 구현하는 U10-Fire를 진행 중이다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U8-B — School Point Calculation**이다.
+현재 구현 범위는 **U10-Fire — Complete Fire School Runtime**이다.
 
 ## Completed Features
 
@@ -152,7 +160,7 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - Target 선행 사망과 Projectile Lifetime 처리 정상
 - Enemy Spawn/Separation, Player Movement/Camera/PlayerHealth Regression 없음
 - Unity Editor Play Mode 및 Console Error 검증 완료
-- Player의 `MagicMissileCaster`는 U4 전투 검증용 Test Caster이며 강제 Starting Skill이 아님
+- U4-A 검증 당시 `MagicMissileCaster`는 Test Caster였으며 강제 Starting Skill은 아니었음. U9-A부터 실제 Loadout 장착 여부로 동작
 
 ### U5-A — Experience Orb Drop + Direct Pickup
 - Slime Death 시 Experience Orb 한 개 생성
@@ -183,7 +191,7 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 ### U6-C — Common Upgrade Choices + Application
 - Maximum Health 선택 시 Maximum/Current HP 각각 `+10` 정상
 - Magic Power 선택 시 Magic Damage Bonus `+1` 정상
-- Test-only Magic Missile Base Damage `3` + Bonus 연동 정상
+- U4-A Magic Missile Base Damage `3` + Bonus 연동 정상
 - Regeneration 선택당 `+0.5 HP/sec` 적용 정상
 - Level-Up Pause 중 Regeneration 정지 정상
 - Common Upgrade Level과 Level-Up UI Label 갱신 정상
@@ -198,7 +206,7 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - Passive 한 개 장착 후 두 번째 다른 Passive 거부 정상
 - Debug Reset으로 세 Slot Empty 복구 정상
 - 기존 Gameplay Regression과 Console Error 없음
-- Magic Missile Test Caster와 Loadout은 의도적으로 분리
+- U7-A 검증 당시 Magic Missile Test Caster와 Loadout은 의도적으로 분리했으며 U9-A에서 실제 장착 조건으로 전환
 
 ### U8-A — Skill Definition + School Metadata
 - SkillCatalog에 실제 School Skill `12`개 등록
@@ -207,33 +215,72 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - 모든 School Skill Max Level `2`
 - Definition 기반 SkillLoadout 획득과 Active 2/Passive 1 제한 정상
 - 시작 Loadout Empty와 Common Upgrade Catalog 외부 유지
-- Magic Missile Test Caster와 Loadout 분리 유지
+- U8-A 검증 당시 Magic Missile Test Caster와 Loadout 분리 유지
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
+### U8-B — School Point Calculation
+- Empty Loadout에서 Arcane/Fire/Lightning/Frost 모두 `0`
+- Magic Missile Lv.1/Lv.2에서 Arcane `1/2`
+- 동일 School Skill Level 합산과 Arcane 최대 `6` 정상
+- Mixed School별 독립 계산 정상
+- Debug Placeholder Skill은 Point 계산에서 제외
+- Loadout Reset만으로 모든 School Point 자동 `0`
+- 별도 mutable School Point State 없음
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
+### U9-A — Starting Spell Selection Core
+- Play 시작 직후 Loadout Empty와 `Awaiting Selection = true`
+- Gameplay Pause, Enemy Spawn 정지, Magic Missile 발사 정지 정상
+- Magic Missile 선택 시 Active Slot 1 Lv.1, Resume와 자동 공격 시작
+- 다른 Starting Active 선택 시 Active Slot 1 Lv.1과 Resume, Magic Missile 미발사
+- Starting Spell 중복 선택 거부 정상
+- 선택한 Skill School Point `1` 자연 반영
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
+### U9-B — Starting Spell Selection UI
+- Play 시작 시 Starting Spell UI와 Active 8 Button 표시 정상
+- Starting Selection 중 Gameplay Pause 정상
+- Magic Missile UI 선택 후 Active Slot 1 Lv.1, UI Close, Resume와 공격 시작
+- 다른 Starting Spell 선택 후 Active Slot 1 Lv.1과 Resume, Magic Missile 미발사
+- Starting Spell 1회 제한 정상
+- 이후 Level-Up UI와 Starting UI 충돌 없음
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
+### U10-A — Magic Bolt Runtime
+- Magic Bolt Starting Spell 선택과 `magic-bolt` Loadout gating 정상
+- Cast 시점 방향으로만 이동하는 non-homing 직선 발사 정상
+- Magic Missile과 Loadout에 따라 독립적으로 동작
+- Damage, 첫 Collision, Lifetime 처리 정상
 - Unity Editor Play Mode 및 Console Error 검증 완료
 
 ## Current Work
 
-### U8-B — School Point Calculation
-- `SkillLoadout.GetSchoolPoints(SkillSchool)` API 추가
-- Active Slot 1/2와 Passive Slot 1을 호출 시점마다 직접 조회
-- Slot Skill ID를 SkillCatalog Definition으로 변환하고 해당 School이면 Current Level 합산
-- Arcane/Fire/Lightning/Frost 네 School 독립 계산
-- Skill Level 1당 School Point 1
-- Empty ID, Level 0, Catalog에 없는 Debug Placeholder는 Point 0
-- 별도 mutable School Point Field/Counter/Manager 없음
-- Loadout Reset만으로 모든 School Point가 자동으로 0
-- 현재 Slot/Max Lv.2 규칙으로 School별 자연스러운 최대 `6`
-- `Debug Log School Points` Context Menu 추가
-- 2/4/6 Synergy, Point HUD, Spell Runtime 연동은 구현하지 않음
+### U10-Fire — Complete Fire School Runtime
+- `BurnStatus` Slime 전용 Component 구현
+- Burn 재적용 시 Duration/Damage/Tick Interval 갱신과 기존 Tick 진행도 유지
+- Fireball non-homing 직선 Projectile과 첫 Segment Hit 구현
+- Fireball Direct Damage `1`, Cooldown `1.35`, Speed `7.5`, Lifetime `4`, Collision Radius `0.22`
+- Fireball Lv.1/Lv.2 Explosion Radius `2.2/3.4`
+- Fire Zone 고정 World Position, Cooldown/Duration `4`, Burn Apply Interval `0.5`
+- Fire Zone Lv.1/Lv.2 Radius `2.2/3.5`
+- Burn Base Damage `1`, Duration `3`, Tick Interval `1`
+- Fire Mastery Lv.1/Lv.2 Burn Bonus `+1/+3`
+- Fireball Direct와 Burn 모두 PlayerMagicPower 적용
+- Fireball/Fire Zone/Fire Mastery Level을 SkillLoadout 공개 API로 조회
+- Pause 중 Caster, Projectile, Zone, Burn의 모든 시간 진행 정지
+- Fire Synergy, Generic Status/Ability Framework, Physics와 Object Pool 없음
 
 남은 확인:
-- Unity Editor Script Import 및 C# Compile
-- Empty Loadout에서 모든 School `0` 확인
-- Magic Missile Lv.1/Lv.2에서 Arcane `1/2` 확인
-- Magic Missile/Magic Bolt/Arcane Mastery 합산 Arcane `4 → 6` 확인
-- Mixed School에서 Arcane/Fire 독립 계산 확인
-- Placeholder Debug Skill Point 제외 확인
-- Reset 직후 모든 School `0` 확인
-- U1~U8-A Gameplay Regression 확인
+- Slime Prefab Root에 `BurnStatus` 추가
+- `Fireball.prefab`과 `FireZone.prefab` 생성 및 Runtime Visual 확인
+- Player에 `FireballCaster`와 `FireZoneCaster` 추가 및 Reference 연결
+- Fireball Lv.1/Lv.2 Direct Damage, Explosion Radius와 Burn 확인
+- Fire Zone Lv.1/Lv.2 고정 위치, Radius, Duration과 Burn refresh 확인
+- Fire Mastery Lv.1/Lv.2 및 Magic Power Damage 계산 확인
+- Pause 중 Fire Runtime 전체 정지 확인
+- 기존 U1~U10-A Gameplay Regression과 Console Error 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -386,10 +433,22 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 ### U8-B — School Point Calculation
 - 현재 Loadout Skill의 School + Current Level 기반 계산
 
-### U9 — Starting Spell Selection
+### U9-A — Starting Spell Selection Core
 - Empty Loadout Start
 - 8 Active Choice
 - Lv.1 Active Slot 1
+
+### U9-B — Starting Spell Selection UI
+- 8 Active Button Choice
+
+### U10-A — Magic Bolt Runtime
+- Magic Bolt 자동 공격 Runtime
+
+### U10-Fire — Complete Fire School Runtime
+- Fireball, Fire Zone, Burning, Fire Mastery와 Active Lv.2 반경 효과
+
+### U10-Lightning — Complete Lightning School Runtime
+- Fire School Editor 검증 후 진행할 다음 School Runtime
 
 ### U10 — Complete School Skills
 - Arcane
@@ -490,11 +549,11 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - 두 Slime의 X/Z가 완전히 같으면 Instance ID 기반 고정 방향을 사용해 NaN 없이 겹침에서 빠져나온다.
 - Rigidbody, Collider, Spatial Hash, Quadtree, Enemy Manager Framework는 사용하지 않는다.
 
-### Magic Missile Test Combat
-- **Magic Missile is enabled manually for combat verification only and is NOT a forced starting skill.**
-- Magic Missile은 U4-A 전투 검증을 위해 사용자가 Player에 `MagicMissileCaster`를 수동 추가할 때만 활성화된다.
-- 이 Test Caster는 Starting Skill System이나 실제 Loadout 획득을 의미하지 않는다.
-- 게임 시작 규칙은 Active 1 Empty / Active 2 Empty / Passive Empty이며 Magic Missile을 강제로 지급하지 않는다.
+### Magic Missile Runtime
+- Magic Missile은 강제 Starting Skill이 아니며 8개 Active Starting Choice 중 하나다.
+- `MagicMissileCaster`는 Player에 유지하되 현재 `SkillLoadout`에 `magic-missile`이 Lv.1 이상 장착된 경우에만 동작한다.
+- Empty Loadout 또는 다른 Starting Spell 선택 시 Target을 찾거나 Projectile을 발사하지 않는다.
+- Magic Missile 선택 시 기존 U4-A 전투 동작을 그대로 사용한다.
 - 기존 EnemySpawner 목록에서 Player와 XZ 기준 가장 가까운 살아 있는 Slime 하나를 선택한다.
 - Target이 없으면 발사하지 않고 Cooldown 준비 상태를 유지한다.
 - Reference Prototype과 같이 Projectile은 살아 있는 Target을 매 Frame 추적하는 Homing 방식이다.
@@ -503,6 +562,52 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Slime HP `10`에는 네 번 명중해야 Death가 발생한다.
 - Projectile은 Player Y `+1.25`에서 생성되고 XZ 평면으로 이동하며 시각 높이를 유지한다.
 - Rigidbody, Collider, Physics, FindObjectsByType, 범용 Combat/Projectile Framework를 사용하지 않는다.
+
+### Magic Bolt Runtime
+- Magic Bolt는 `magic-bolt`가 현재 SkillLoadout에 Lv.1 이상 장착된 경우에만 자동 시전한다.
+- Cast 시 Player와 XZ 기준 가장 가까운 살아 있는 Slime 방향을 정하고 이후 Target을 보관하지 않는다.
+- Projectile은 초기 Direction으로만 직진하며 Enemy 이동이나 원래 Target Death에 반응해 방향을 바꾸지 않는다.
+- 빠른 이동의 Frame 통과를 줄이기 위해 이전→다음 XZ Segment와 각 살아 있는 Slime 중심의 Collision Radius 교차를 계산한다.
+- 하나의 Segment에서 가장 이른 충돌 한 개만 처리하며 Piercing과 다중 Hit는 없다.
+- Base Damage `4`, Cooldown `0.9`, Speed `9`, Lifetime `4`, Collision Radius `0.2`를 사용한다.
+- PlayerMagicPower Bonus는 Caster에서 Base Damage에 더해 최종 Damage로 Projectile에 전달한다.
+- Projectile은 Player Y `+1.25`에서 생성되고 그 높이를 유지한다.
+- Pause 중 Cooldown, Projectile 이동과 Lifetime은 진행하지 않는다.
+- Magic Bolt Lv.2 전용 Damage/Projectile Count 효과는 아직 없으며 Lv.1 Runtime과 동일하게 동작한다.
+- Magic Missile과 별도 작은 구현을 유지하며 Generic Projectile Base, Rigidbody/Collider와 Object Pool을 사용하지 않는다.
+
+### Burning Runtime
+- `BurnStatus`는 Slime Root에 하나만 부착하는 Fire 전용 상태 Component다.
+- Burn 재적용은 중첩 Stack을 추가하지 않고 남은 Duration, Tick Damage와 Tick Interval을 최신 값으로 갱신한다.
+- 재적용 시 기존 Tick Progress는 유지하므로 Fire Zone의 `0.5`초 재적용이 `1`초 Burn Tick을 막지 않는다.
+- 기본 Tick Damage `1`, Duration `3`, Tick Interval `1`을 사용한다.
+- Tick은 기존 `SlimeController.TakeDamage` 단일 Damage/Death 경로를 사용한다.
+- Pause 중 Duration과 Tick Progress는 진행하지 않는다.
+- Generic Status Framework와 Status Manager는 사용하지 않는다.
+
+### Fireball Runtime
+- `fireball`이 SkillLoadout에 Lv.1 이상 장착된 경우에만 자동 시전한다.
+- Cast 시 XZ 최근접 살아 있는 Slime 방향을 한 번 정하고 이후 Target을 추적하지 않는다.
+- XZ Segment Collision의 첫 Enemy 한 개에 Direct Damage 후 Impact 반경의 모든 살아 있는 Slime에 Burn을 적용한다.
+- Base Direct Damage `1`, Cooldown `1.35`, Speed `7.5`, Lifetime `4`, Collision Radius `0.22`를 사용한다.
+- Explosion Radius는 Lv.1 `2.2`, Lv.2 `3.4`이며 Lv.2의 다른 전용 효과는 없다.
+- Direct Damage와 Burn Damage 모두 PlayerMagicPower Bonus를 사용한다.
+- 아무 Enemy도 맞히지 못하고 Lifetime이 끝나면 Explosion 없이 Destroy한다.
+
+### Fire Zone Runtime
+- `fire-zone`이 SkillLoadout에 Lv.1 이상 장착된 경우에만 가장 가까운 살아 있는 Slime의 Cast 시점 위치에 생성한다.
+- 생성된 Zone은 Target을 따라가지 않고 고정된 XZ World Position을 유지한다.
+- Cooldown `4`, Duration `4`, Burn Apply Interval `0.5`를 사용하며 Zone 자체 Direct Damage는 없다.
+- Radius는 Lv.1 `2.2`, Lv.2 `3.5`다.
+- 범위 내 Slime의 기존 Burn을 반복 갱신하며 Tick Progress는 `BurnStatus`에서 유지한다.
+- Runtime이 Circle Visual Scale을 Diameter에 맞게 설정한다.
+
+### Fire Mastery Runtime
+- 별도 MonoBehaviour 없이 `SkillLoadout.GetSkillLevel("fire-mastery")`를 조회한다.
+- Lv.0/Lv.1/Lv.2 Burn Bonus는 각각 `0/+1/+3`이다.
+- Fireball Direct Damage에는 적용하지 않고 Fireball/Fire Zone이 적용하는 Burn Tick Damage에만 적용한다.
+- Burn 최종 Damage는 Base Burn + Fire Mastery Bonus + PlayerMagicPower Bonus다.
+- Fire 2/4/6 Synergy는 아직 구현하지 않는다.
 
 ### Player Experience / Experience Orb
 - `PlayerExperience`는 게임 시작 시 Level `1`, Current Experience `0`으로 초기화한다.
@@ -527,8 +632,9 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - `Debug Complete Pending Level Up` Context Menu는 Upgrade를 적용하지 않는 Pause/Pending 검사용 fallback으로 유지한다.
 - Pending이 남아 있으면 Pause를 유지하고 `0`이 되면 `Time.timeScale = 1`로 Resume한다.
 - Controller Disable/Destroy 시 이 Controller가 소유한 Pause를 복구한다.
-- Player Movement, Slime AI/Attack, Enemy Spawn, Test Caster, Projectile, Orb Pickup은 `Time.timeScale = 0`일 때 Update Gameplay를 처리하지 않는다.
-- Starting Spell Selection Pause는 아직 구현하지 않는다.
+- Player Movement, Slime AI/Attack, Enemy Spawn, Magic Missile Runtime, Projectile, Orb Pickup은 `Time.timeScale = 0`일 때 Update Gameplay를 처리하지 않는다.
+- Starting Spell Selection은 게임 시작 `Awake`에서 `Time.timeScale = 0`을 소유하고, 유효한 1회 선택 성공 후에만 `1`로 복구한다.
+- 별도 Pause Manager는 만들지 않으며, Starting Selection 중에는 XP 획득과 Level-Up Pause가 발생하지 않는 정상 Gameplay 경로를 사용한다.
 
 ### Level-Up Choice UI
 - 기존 uGUI `2.0.0`의 Canvas, Button, Legacy Text를 사용하고 새 Package를 설치하지 않는다.
@@ -546,7 +652,7 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Maximum Health, Magic Power, Regeneration Level은 각각 `0`으로 시작하고 선택 시 `+1`된다.
 - Maximum Health는 Maximum HP와 Current HP를 각각 `+10`하며 Current HP는 Maximum HP를 넘지 않는다.
 - Magic Power는 별도 `PlayerMagicPower`의 Magic Damage Bonus를 `+1`한다.
-- Test-only Magic Missile은 Inspector Damage `3`을 Base Damage로 유지하고 발사 시 Bonus를 더한 최종 Damage를 Projectile에 전달한다.
+- Magic Missile Runtime은 Inspector Damage `3`을 Base Damage로 유지하고 발사 시 Bonus를 더한 최종 Damage를 Projectile에 전달한다.
 - Regeneration은 PlayerHealth가 보유하며 선택당 `+0.5 HP/sec`다. Player HP가 `0`보다 크고 Maximum 미만일 때만 `Time.deltaTime`으로 회복한다.
 - Maximum Level, Random Upgrade Pool, ScriptableObject Upgrade Database, 범용 Damage/Ability Framework는 구현하지 않는다.
 
@@ -559,8 +665,9 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - 같은 Skill ID를 두 Slot에 중복 장착하지 않는다.
 - Common Upgrade는 Slot을 사용하지 않으며 SkillLoadout에 넣지 않는다.
 - U7-A Debug Placeholder ID는 규칙 검증용 상태일 뿐 실제 Skill Content가 아니다.
-- Magic Missile Test Caster는 SkillLoadout과 연결하지 않으며 자동 장착하지 않는다.
-- School Point와 Spell 효과 연동은 후속 Phase로 미룬다.
+- `GetSkillLevel(string)`은 외부 Runtime이 직렬화 Slot Field를 직접 건드리지 않고 현재 장착 Level을 조회하는 최소 read-only API다.
+- Magic Missile은 자동 장착하지 않으며, `MagicMissileCaster`는 Loadout의 `magic-missile` Level이 `1` 이상일 때만 동작한다.
+- Magic Missile Lv.2 효과와 다른 Spell Runtime은 후속 Phase로 미룬다.
 
 ### Skill Definition / Catalog
 - Definition은 ID, Display Name, School, SkillType, MaxLevel만 가진 불변 C# 데이터다.
@@ -603,12 +710,26 @@ Repository에서 무시할 대상:
 ### Starting Spell
 Magic Missile 강제 시작은 폐기됐다.
 
-U4-A의 `MagicMissileCaster`는 Editor 전투 검증을 위한 수동 Test Component이며 이 규칙을 변경하지 않는다.
-
 현재 규칙:
 Active 1 Empty / Active 2 Empty / Passive Empty
 → 8 Active 중 하나 선택
 → 선택한 Spell Lv.1을 Active 1에 장착
+
+- Starting Choice는 별도 Content Database가 아니라 `SkillCatalog`의 Active Definition 8개에서 만든다.
+- 게임 시작 즉시 `Time.timeScale = 0`, `Awaiting Selection = true` 상태가 된다.
+- 선택은 `TrySelectStartingSpell(string)`을 통해 정확히 한 번만 성공한다.
+- Passive Mastery, Common Upgrade, Unknown ID와 비어 있지 않은 시작 Loadout은 거부한다.
+- 선택 성공 후 `Awaiting Selection = false`, `Time.timeScale = 1`로 Gameplay를 시작한다.
+- Magic Missile도 여덟 선택지 중 하나일 뿐이며 자동 지급하지 않는다.
+- `MagicMissileCaster`는 실제 `magic-missile` 장착 여부로 활성화된다.
+- 다른 일곱 Active는 선택과 Loadout/Resume만 지원하며 실제 공격은 아직 구현하지 않는다.
+- Starting UI는 기존 Canvas 아래의 별도 `StartingSpellPanel`을 사용하고 기존 `LevelUpPanel`과 상태를 공유하지 않는다.
+- `StartingSpellSelectionUI`는 고정 Button/Text 8쌍의 표시와 클릭만 관리하며 SkillLoadout을 직접 수정하지 않는다.
+- Choice 순서와 Label은 Controller가 제공하는 Catalog Active 8개의 `DisplayName`을 사용한다.
+- UI 클릭 흐름은 `StartingSpellSelectionUI → StartingSpellSelectionController → SkillLoadout`이다.
+- 시작 시 UI를 표시하고 선택 성공 시 숨기며, 실패 시 Pause/UI를 유지하고 Button을 다시 활성화한다.
+- Scene의 기존 Canvas, Canvas Scaler `1920x1080`, EventSystem과 Input System UI Input Module을 재사용한다.
+- Dynamic Prefab List, Generic Menu Builder와 새 Canvas/EventSystem을 만들지 않는다.
 
 ### School Point
 - School Point의 Source of Truth는 현재 `SkillLoadout`의 세 Slot뿐이다.
@@ -644,7 +765,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `GameSystems`
   - `EventSystem`
   - `Canvas`
-- 저장된 `player` Root는 `PlayerMovement`, `PlayerHealth`, Test-only `MagicMissileCaster`, `PlayerExperience`, `PlayerMagicPower`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
+- 저장된 `player` Root는 `PlayerMovement`, `PlayerHealth`, `MagicMissileCaster`, `PlayerExperience`, `PlayerMagicPower`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
 - `player/Visual` Child는 기존 Square SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0.5, 0)`이다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
 - U1-A / U1-A2의 World XZ 이동 동작은 Unity Editor에서 검증됐다.
@@ -659,7 +780,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Look At Height `0.5`
 - U1 Camera Follow는 Unity Editor에서 검증됐다.
 - `player`에는 `PlayerHealth`가 연결되어 있으며 Maximum HP는 `100`이다.
-- `player`의 Test-only `MagicMissileCaster`에는 실제 Magic Missile Prefab, `EnemySpawner`, `PlayerMagicPower`가 연결되어 있으며 Base Damage + Bonus 적용을 검증했다.
+- `player`의 `MagicMissileCaster`에는 실제 Magic Missile Prefab, `EnemySpawner`, `PlayerMagicPower`, `GameSystems`의 `SkillLoadout`이 연결되어 있으며 U9-A Loadout gating과 기존 Base Damage + Bonus 적용을 검증했다.
 - `player` Root의 `PlayerExperience`는 U5-A Play Mode 검증에 사용됐다.
 - `player/Visual`의 중복 PlayerExperience는 제거됐으며 Root에 하나만 남아 있다.
 - 수동 배치 Slime은 Scene에서 제거됐다.
@@ -680,6 +801,11 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - 저장된 Main Scene의 `LevelUpChoiceUI`에는 LevelUpPanel과 Button/Label 세 쌍이 모두 연결되어 있다.
 - `GameSystems`에는 PlayerHealth/PlayerMagicPower가 연결된 `CommonUpgradeController`가 있으며 U6-C Play Mode 검증이 완료됐다.
 - `GameSystems`에는 `SkillLoadout`이 저장되어 있으며 Active Slot 1/2와 Passive Slot 1은 빈 Skill ID와 Level `0`으로 시작한다. U7-A Slot Rule은 Editor 검증 완료됐고 U8-A에도 새 Scene Reference는 필요하지 않다.
+- `GameSystems`의 `StartingSpellSelectionController`에는 같은 Object의 `SkillLoadout`과 Canvas의 `StartingSpellSelectionUI`가 연결되어 있다.
+- 기존 Canvas에는 `StartingSpellSelectionUI`, Inactive 저장된 별도 `StartingSpellPanel`, Title과 서로 다른 Button/Label 8쌍이 연결되어 있다.
+- U9-B Starting UI 표시/선택/Close/Resume와 Level-Up UI 분리는 Unity Editor에서 검증 완료됐다.
+- `player`에는 `MagicBoltCaster`와 `MagicBolt.prefab`, EnemySpawner, PlayerMagicPower, SkillLoadout Reference 및 요청된 기본 수치가 저장되어 있고 U10-A Editor 검증이 완료됐다.
+- `player`의 `FireballCaster`와 `FireZoneCaster`는 U10-Fire Editor Setup에서 추가/연결해야 한다.
 - U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
@@ -694,9 +820,14 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
     - `SpriteRenderer`
     - `BillboardToCamera`
 - Prefab의 Target, PlayerHealth, PlayerExperience, Experience Orb Prefab과 Billboard Camera는 Runtime에 연결된다.
+- `BurnStatus`는 U10-Fire Editor Setup에서 Slime Root에 추가해야 하며 현재 Prefab에는 아직 없다.
 - U3-B Separation은 Script 기본값 Radius `0.75`, Strength `0.35`로 Editor 검증 완료됐다.
 - Magic Missile 실제 경로: `Assets/Prefabs/Projectiles/MagicMissile.prefab`
 - Magic Missile Root에는 `MagicMissileProjectile`, Visual Child에는 Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
+- Magic Bolt 실제 경로: `Assets/Prefabs/Projectiles/MagicBolt.prefab`
+- Magic Bolt Root에는 `MagicBoltProjectile`, Visual Child에는 SpriteRenderer와 `BillboardToCamera`가 있으며 Player Caster 연결과 Play Mode 검증이 완료됐다.
+- Fireball 권장 경로: `Assets/Prefabs/Projectiles/Fireball.prefab`이며 Editor 생성 전이다.
+- Fire Zone 권장 경로: `Assets/Prefabs/Areas/FireZone.prefab`이며 Editor 생성 전이다.
 - Experience Orb 실제 경로: `Assets/Prefabs/Pickups/ExperienceOrb.prefab`
 - Experience Orb Root에는 `ExperienceOrb`, Visual Child에는 Cyan Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
 - Experience Orb Value `4`, Pickup Radius `1.1`, Visual Local Position `(0, 0.4, 0)`, Scale `(0.35, 0.35, 0.35)`다.
@@ -747,11 +878,13 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Destroy된 Slime 목록 정리 및 Count 회수
   - Spawn 시 Player/PlayerHealth/PlayerExperience/Experience Orb Prefab/Billboard Camera Runtime 연결
   - 기존 Spawned Slime 목록을 각 Slime의 Separation 이웃 목록으로 전달
-  - Test Combat Targeting용 `SpawnedEnemies` 읽기 전용 목록과 Billboard Camera 제공
+  - Magic Missile Runtime Targeting용 `SpawnedEnemies` 읽기 전용 목록과 Billboard Camera 제공
   - 필수 Reference Null 방어
   - U3-A Editor 연결 및 Play Mode 검증 완료
 - `Assets/Scripts/Combat/MagicMissileCaster.cs`
-  - Player에 사용자가 수동 추가하는 Test-only Component
+  - Player의 기존 Magic Missile Runtime Component
+  - `SkillLoadout` read-only 조회로 `magic-missile` Lv.1 이상 장착 여부 확인
+  - Magic Missile 미장착 또는 Gameplay Pause 중에는 Target 검색과 발사를 수행하지 않음
   - EnemySpawner 목록에서 XZ 최근접 살아 있는 Slime 선택
   - 기본 Damage `3`을 Base Damage로 유지하며 `PlayerMagicPower` Bonus를 발사 시 합산
   - Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`
@@ -765,6 +898,39 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 명중, Lifetime 만료, Target 선행 사망 시 Root Destroy
   - 하위 Billboard Camera Runtime 연결
   - U4-A Projectile Prefab 생성 및 Play Mode 검증 완료
+- `Assets/Scripts/Combat/MagicBoltCaster.cs`
+  - `magic-bolt` Loadout Lv.1 이상 gating
+  - XZ 최근접 살아 있는 Slime Target 선택과 발사 순간 고정 Direction 계산
+  - Base Damage `4` + PlayerMagicPower Bonus
+  - Cooldown `0.9`, Speed `9`, Lifetime `4`, Collision Radius `0.2`
+  - Enemy 없음/Gameplay Pause에서 발사와 Cooldown 소비 없음
+  - 필수 Prefab/Spawner/MagicPower/Loadout/Billboard Camera Reference 방어
+- `Assets/Scripts/Combat/MagicBoltProjectile.cs`
+  - Target Reference 없는 XZ non-homing 직선 이동
+  - 이전→다음 Position Segment와 살아 있는 Slime의 XZ Collision 검사
+  - 가장 이른 첫 Hit 하나에 Damage 후 Root Destroy
+  - 원래 Target Death와 무관하게 Lifetime까지 진행
+  - Runtime Billboard Camera 연결과 고정 Visual Height
+  - Pause 중 이동/Lifetime 정지, Invalid Setup 방어
+- `Assets/Scripts/Combat/BurnStatus.cs`
+  - Slime별 단일 Burning 상태와 Inspector Runtime 값
+  - 재적용 시 Duration/Damage/Interval 갱신, Tick Progress 유지
+  - `SlimeController.TakeDamage`를 사용하는 `1`초 Tick과 Pause 정지
+- `Assets/Scripts/Combat/FireballCaster.cs`
+  - `fireball` Loadout gating과 XZ 최근접 Target 방향 선택
+  - Direct/Burn Magic Power 및 Fire Mastery 계산
+  - 요청된 Fireball 수치와 Lv.1/Lv.2 Explosion Radius 전달
+- `Assets/Scripts/Combat/FireballProjectile.cs`
+  - Target Reference 없는 non-homing XZ 직선 이동과 Segment Collision
+  - 첫 Enemy Direct Damage 후 Impact Radius 내 Burn 적용
+  - Runtime Billboard Camera, Lifetime, Pause와 Invalid Setup 방어
+- `Assets/Scripts/Combat/FireZoneCaster.cs`
+  - `fire-zone` Loadout gating과 최근접 Enemy 현재 위치에 고정 Zone 생성
+  - 요청된 Zone/Burn 수치, Lv.1/Lv.2 Radius 및 Mastery/Magic Power 계산
+- `Assets/Scripts/Combat/FireZoneArea.cs`
+  - 고정 XZ Area, Duration `4`, Apply Interval `0.5`
+  - 범위 내 살아 있는 Slime Burn 반복 갱신과 Radius 기반 Visual Scale
+  - Pause 중 Timer 정지와 Direct Damage 없음
 - `Assets/Scripts/Player/PlayerExperience.cs`
   - Level `1`, Current Experience `0`, 첫 Requirement `8` 초기화
   - Base Requirement `8`, Level당 Growth `4`
@@ -788,6 +954,22 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Debug Context Menu로 Pending 하나씩 완료
   - Pending `0`에서 `Time.timeScale = 1` Resume
   - Disable/Destroy UI 숨김/Pause 복구와 필수 Reference Null 방어
+- `Assets/Scripts/Progression/StartingSpellSelectionController.cs`
+  - 게임 시작 Pause와 `Awaiting Selection` 상태 관리
+  - SkillCatalog Active Definition 8개를 read-only Starting Choice로 제공
+  - Empty 시작 Loadout 검증과 `TrySelectStartingSpell(string)` 1회 선택 API
+  - `StartingSpellSelectionUI` 초기화와 시작 UI 표시
+  - 선택 Active를 Active Slot 1 Lv.1로 장착하고 Starting UI를 숨긴 뒤 Gameplay Resume
+  - Passive/Unknown/중복 선택과 비정상 시작 Loadout 안전 거부
+  - 8개 Active Debug Context Menu 제공
+  - U9-A Core와 U9-B UI 연결 Editor 검증 완료
+- `Assets/Scripts/UI/StartingSpellSelectionUI.cs`
+  - 기존 Canvas에 부착하는 Starting Spell 전용 uGUI Component
+  - Starting Panel과 서로 다른 Button/Legacy Text Reference 8쌍 검증
+  - Controller의 Active 8개 Definition을 받아 `DisplayName` Label 적용
+  - 선택 중 Button 잠금, 성공 시 Hide, 실패 시 재활성화
+  - SkillLoadout 직접 접근 없음
+  - U9-B Editor 연결 및 Play Mode 검증 완료
 - `Assets/Scripts/UI/LevelUpChoiceUI.cs`
   - Panel 한 개와 서로 다른 uGUI Button/Text Reference 세 쌍 관리
   - 시작 시 Panel 숨김
@@ -820,11 +1002,12 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Null/공백 ID, Type 불일치, 중복 Slot, Level Cap 방어
   - 실제 콘텐츠가 아닌 Debug Placeholder Context Menu와 Reset
   - `SkillDefinition` 기반 Can/Acquire 오버로드와 Definition MaxLevel 적용
-  - Magic Missile/Magic Bolt/Fireball/Arcane Mastery/Fire Mastery Definition Debug Context Menu
+  - Magic Missile/Magic Bolt/Fireball/Fire Zone/Arcane Mastery/Fire Mastery Definition Debug Context Menu
+  - Strict Empty 상태 조회와 `GetSkillLevel(string)` read-only Runtime API
   - 현재 세 Slot을 조회하는 `GetSchoolPoints(SkillSchool)` 실시간 계산 API
   - Empty/Level 0/Unknown Debug ID 제외와 Invalid School 안전한 `0`
   - `Debug Log School Points` Context Menu
-  - 외부 System Reference 및 Spell Runtime/Common Upgrade 연동 없음
+  - Starting Selection과 Magic Missile Runtime이 공개 API만 사용하며 직렬화 Slot Field에 직접 접근하지 않음
 - `Assets/Scripts/Skills/SkillDefinition.cs`
   - `SkillSchool.Arcane/Fire/Lightning/Frost`
   - ID, Display Name, School, 기존 SkillType, MaxLevel read-only Property
@@ -845,7 +1028,12 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U8-B School Point 계산과 Debug Log는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
+- U10-Fire Script는 구현됐지만 Slime `BurnStatus`, Fireball/FireZone Prefab, Player Caster 연결과 Play Mode 검증 전이다.
+- Fireball 또는 Fire Zone 범위의 Slime Prefab에 `BurnStatus`가 없으면 NullReference는 발생하지 않지만 Burning이 적용되지 않는다.
+- Magic Bolt Lv.2는 안전하게 발사되지만 아직 Lv.1과 같은 Runtime이며 전용 Lv.2 효과가 없다.
+- Fireball Lv.2는 Explosion Radius만, Fire Zone Lv.2는 Radius만 증가하며 요청 범위 외 추가 효과는 없다.
+- Magic Missile, Magic Bolt, Fireball, Fire Zone 외 4개 Starting Active는 선택/Loadout만 지원하며 실제 공격 Runtime은 아직 구현되지 않았다.
+- U9-A Debug Context Menu는 개발용 fallback으로 남아 있다.
 - Skill Definition은 Metadata뿐이며 실제 Spell/Passive 효과를 실행하지 않는다.
 - U7-A Debug Placeholder Skill ID는 슬롯 규칙 검증용이며 Catalog의 실제 Skill이 아니다.
 - 2/4/6 Synergy 효과와 UI는 아직 구현되지 않았다.
@@ -862,14 +1050,14 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
 - Lightning Stagger anti-permastun 필요 여부
 - 최종 Balance
-- U9 Starting Spell Selection, 실제 Skill 효과와 2/4/6 Synergy 구현
+- 남은 Lightning/Frost Skill 효과와 2/4/6 Synergy 구현
 - XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U8-B Editor Verification**
+**Pending U10-Fire Editor Verification**
 
-기존 `GameSystems/SkillLoadout`의 Definition Debug와 `Debug Log School Points`로 Empty, 단일 Skill, Same School `6`, Mixed School, Placeholder 제외와 Reset 자동 `0`을 검증한다.
+Unity Editor에서 Slime Prefab에 `BurnStatus`를 추가하고 `Fireball.prefab`, `FireZone.prefab`, Player의 두 Caster와 Reference를 연결한 뒤 Fireball/Fire Zone/Burning/Fire Mastery/Lv.2 Radius와 Pause 동작을 검증한다.
 
-검증 성공 후 다음 Phase로 `U9-A — Starting Spell Selection Data + Flow`를 제안한다. 이번 작업에서는 Starting Spell, Spell Runtime 연동, Synergy를 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U10-Lightning — Complete Lightning School Runtime`을 제안한다. 이번 작업에서는 Lightning, Frost, Fire Synergy와 Level-Up Skill Pool을 구현하지 않는다.

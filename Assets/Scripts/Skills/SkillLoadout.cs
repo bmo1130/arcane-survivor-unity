@@ -46,6 +46,12 @@ public sealed class SkillLoadout : MonoBehaviour
     public int ActiveSlot2Level => activeSlot2Level;
     public string PassiveSlot1SkillId => passiveSlot1SkillId;
     public int PassiveSlot1Level => passiveSlot1Level;
+    public bool IsEmpty => string.IsNullOrEmpty(activeSlot1SkillId)
+        && activeSlot1Level == 0
+        && string.IsNullOrEmpty(activeSlot2SkillId)
+        && activeSlot2Level == 0
+        && string.IsNullOrEmpty(passiveSlot1SkillId)
+        && passiveSlot1Level == 0;
 
     private enum SlotIndex
     {
@@ -92,6 +98,22 @@ public sealed class SkillLoadout : MonoBehaviour
                 skill.Id,
                 skill.Type,
                 skill.MaxLevel);
+    }
+
+    public int GetSkillLevel(string skillId)
+    {
+        if (!TryNormalizeSkillId(skillId, out string normalizedSkillId))
+        {
+            return 0;
+        }
+
+        return TryFindEquippedSkill(
+            normalizedSkillId,
+            out _,
+            out _,
+            out int currentLevel)
+            ? currentLevel
+            : 0;
     }
 
     public int GetSchoolPoints(SkillSchool school)
@@ -253,6 +275,12 @@ public sealed class SkillLoadout : MonoBehaviour
     private void DebugAcquireFireball()
     {
         RunDebugAcquireDefinition("fireball");
+    }
+
+    [ContextMenu("Debug Acquire Fire Zone")]
+    private void DebugAcquireFireZone()
+    {
+        RunDebugAcquireDefinition("fire-zone");
     }
 
     [ContextMenu("Debug Acquire Arcane Mastery")]

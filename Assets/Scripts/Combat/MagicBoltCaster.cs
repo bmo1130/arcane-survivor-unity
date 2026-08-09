@@ -1,18 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Runs the existing Magic Missile combat only while the Skill is equipped.
 [DisallowMultipleComponent]
-public sealed class MagicMissileCaster : MonoBehaviour
+public sealed class MagicBoltCaster : MonoBehaviour
 {
     private const float LaunchHeight = 1.25f;
-    private const string MagicMissileSkillId = "magic-missile";
+    private const string MagicBoltSkillId = "magic-bolt";
 
     [SerializeField]
-    private SkillLoadout skillLoadout;
-
-    [SerializeField]
-    private MagicMissileProjectile projectilePrefab;
+    private MagicBoltProjectile projectilePrefab;
 
     [SerializeField]
     private EnemySpawner enemySpawner;
@@ -20,39 +16,33 @@ public sealed class MagicMissileCaster : MonoBehaviour
     [SerializeField]
     private PlayerMagicPower playerMagicPower;
 
+    [SerializeField]
+    private SkillLoadout skillLoadout;
+
     [SerializeField, Min(0f)]
     [Tooltip("Base damage before the Player's Magic Damage Bonus.")]
-    private float damage = 3f;
+    private float damage = 4f;
 
     [SerializeField, Min(0f)]
-    private float cooldown = 0.65f;
+    private float cooldown = 0.9f;
 
     [SerializeField, Min(0f)]
-    private float projectileSpeed = 6f;
+    private float projectileSpeed = 9f;
 
     [SerializeField, Min(0f)]
-    private float projectileLifetime = 5f;
+    private float projectileLifetime = 4f;
 
     [SerializeField, Min(0f)]
-    private float projectileCollisionRadius = 0.22f;
+    private float projectileCollisionRadius = 0.2f;
 
     private float cooldownRemaining;
 
     private void Awake()
     {
-        if (skillLoadout == null)
-        {
-            Debug.LogError(
-                "MagicMissileCaster requires a SkillLoadout reference.",
-                this);
-            enabled = false;
-            return;
-        }
-
         if (projectilePrefab == null)
         {
             Debug.LogError(
-                "MagicMissileCaster requires a Projectile Prefab.",
+                "MagicBoltCaster requires a Projectile Prefab.",
                 this);
             enabled = false;
             return;
@@ -61,7 +51,7 @@ public sealed class MagicMissileCaster : MonoBehaviour
         if (enemySpawner == null)
         {
             Debug.LogError(
-                "MagicMissileCaster requires an EnemySpawner reference.",
+                "MagicBoltCaster requires an EnemySpawner reference.",
                 this);
             enabled = false;
             return;
@@ -70,7 +60,16 @@ public sealed class MagicMissileCaster : MonoBehaviour
         if (playerMagicPower == null)
         {
             Debug.LogError(
-                "MagicMissileCaster requires the Player's PlayerMagicPower component.",
+                "MagicBoltCaster requires the Player's PlayerMagicPower component.",
+                this);
+            enabled = false;
+            return;
+        }
+
+        if (skillLoadout == null)
+        {
+            Debug.LogError(
+                "MagicBoltCaster requires a SkillLoadout reference.",
                 this);
             enabled = false;
             return;
@@ -79,7 +78,7 @@ public sealed class MagicMissileCaster : MonoBehaviour
         if (enemySpawner.BillboardCamera == null)
         {
             Debug.LogError(
-                "MagicMissileCaster requires the EnemySpawner Billboard Camera.",
+                "MagicBoltCaster requires the EnemySpawner Billboard Camera.",
                 this);
             enabled = false;
         }
@@ -88,7 +87,7 @@ public sealed class MagicMissileCaster : MonoBehaviour
     private void Update()
     {
         if (Time.timeScale <= 0f
-            || skillLoadout.GetSkillLevel(MagicMissileSkillId) <= 0)
+            || skillLoadout.GetSkillLevel(MagicBoltSkillId) <= 0)
         {
             return;
         }
@@ -109,9 +108,17 @@ public sealed class MagicMissileCaster : MonoBehaviour
             return;
         }
 
+        Vector3 direction = target.transform.position - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= 0.0001f)
+        {
+            return;
+        }
+
         Vector3 launchPosition = transform.position
             + Vector3.up * LaunchHeight;
-        MagicMissileProjectile projectile = Instantiate(
+        MagicBoltProjectile projectile = Instantiate(
             projectilePrefab,
             launchPosition,
             Quaternion.identity);
@@ -119,11 +126,12 @@ public sealed class MagicMissileCaster : MonoBehaviour
             .GetModifiedMagicDamage(damage);
 
         if (!projectile.Setup(
-                target,
+                direction.normalized,
                 modifiedDamage,
                 projectileSpeed,
                 projectileLifetime,
                 projectileCollisionRadius,
+                enemySpawner,
                 enemySpawner.BillboardCamera))
         {
             enabled = false;
