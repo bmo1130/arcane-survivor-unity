@@ -1,17 +1,19 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U0 — Project Setup Complete**
+**U1-A — Basic Player Movement (Editor Verification Pending)**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
-Gameplay 구현은 아직 시작하지 않았다.
+Player 이동 Script 준비를 시작했다.
+
+Unity Editor에서 Player GameObject 구성과 Play Mode 이동 확인이 끝나기 전까지 U1은 완료로 기록하지 않는다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-다음 구현 Phase는 **U1 — Player**다.
+현재 구현 범위는 **U1-A — Basic Player Movement**다.
 
 ## Completed Features
 
@@ -34,7 +36,21 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
   - `MIGRATION_NOTES.md`
 - Codex 프로젝트 접근 및 실제 파일 구조 확인
 
-현재 Unity Gameplay 기능은 구현되지 않았다.
+## Current Work
+
+### U1-A — Basic Player Movement
+- `Assets/Scripts/Player/PlayerMovement.cs` 작성
+- 기존 `InputSystem_Actions`의 `Player/Move` 액션 재사용
+- WASD `Vector2` 입력을 최대 길이 1로 제한해 대각선 속도 증가 방지
+- Inspector에서 조절 가능한 Move Speed 제공
+- `Time.deltaTime` 기반 XY Transform 이동
+- Rigidbody2D와 Collider는 현재 충돌 Gameplay가 없어 사용하지 않음
+
+남은 확인:
+- Unity Editor Script Import 및 C# Compile
+- Player GameObject와 최소 SpriteRenderer 구성
+- `Player/Move` Input Action 연결
+- Play Mode WASD 이동 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -78,10 +94,12 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - 문서 배치
 - Codex 프로젝트 접근 확인
 
-### U1 — Player
+### U1-A — Basic Player Movement
 - Player GameObject
 - SpriteRenderer
 - WASD Movement
+
+### U1-B — Camera Follow
 - Camera
 
 ### U2 — Slime
@@ -158,6 +176,14 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Build Scene List에는 `Main.unity` 하나만 활성화되어 있다.
 - 현재 Phase에 필요하지 않은 빈 폴더나 시스템은 미리 만들지 않는다.
 
+### Player Movement
+- 기존 `Assets/InputSystem_Actions.inputactions`의 `Player/Move` 액션을 사용한다.
+- 이동 Script는 `InputActionReference`를 통해 해당 액션을 직접 참조한다.
+- 이동은 현재 충돌이 필요하지 않으므로 Rigidbody2D 없이 Transform에 적용한다.
+- 이동은 X/Y 평면에서만 처리하며 Z축은 변경하지 않는다.
+- 대각선 입력은 정규화하고 이동량에는 `Time.deltaTime`을 적용한다.
+- Camera Follow는 U1-B로 분리한다.
+
 ### Git Tracking
 Repository에 포함할 대상:
 - `Assets`와 대응하는 `.meta` 파일
@@ -205,6 +231,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Root GameObjects:
   - `Main Camera`
   - `Global Light 2D`
+- Player GameObject는 아직 Scene에 생성하지 않았다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
 - `ProjectSettings.asset`의 `templateDefaultScene`에는 프로젝트 템플릿 출처 정보로 기존 `SampleScene` 경로가 남아 있다. Build Scene 항목은 아니며 U1 진행을 막지 않는다.
 - `Assets/Settings/Scenes/URP2DSceneTemplate.unity`는 Unity 2D URP Scene Template이다.
@@ -213,17 +240,16 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - 없음
 
 ### Script
-- C# Gameplay Script 없음
+- `Assets/Scripts/Player/PlayerMovement.cs`
+  - 기존 `Player/Move` Input Action을 읽어 XY Transform 이동
+  - 기본 Move Speed `5`
+  - Editor 연결 및 Play Mode 검증 대기
 - Assembly Definition 없음
 
 ## Known Issues
-- U1 진행을 막는 Unity Project Setup 문제는 현재 확인되지 않았다.
+- U1-A는 Unity Editor에서 아직 동작 확인되지 않았다.
+- `Main.unity`에는 아직 Player GameObject가 없으며 Script와 Input Action Reference가 연결되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
-- Scene 이름 변경과 Unity 설정 변경은 아직 Git에 stage/commit되지 않았다.
-  - 삭제: `Assets/Scenes/SampleScene.unity` 및 `.meta`
-  - 추가: `Assets/Scenes/Main.unity` 및 `.meta`
-  - 수정: `ProjectSettings/EditorBuildSettings.asset`
-  - 추가: `ProjectSettings/SceneTemplateSettings.json`
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
 
 ## Deferred Work
@@ -239,12 +265,10 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**U1 — Player**
+**U1-B — Camera Follow**
 
-다음 작은 Phase의 범위:
-- Player GameObject
-- 최소 SpriteRenderer 표현
-- WASD Movement
-- Player를 따라가는 Camera
+U1-A의 Unity Editor 설정과 Play Mode 검증이 완료된 뒤 진행한다.
 
-U1 범위를 넘는 Enemy, Combat, Skill 시스템은 함께 구현하지 않는다.
+U1-B에서는 Player를 따라가는 Camera만 구현한다.
+
+Enemy, Combat, Spell 등 U2 이후 시스템은 함께 구현하지 않는다.
