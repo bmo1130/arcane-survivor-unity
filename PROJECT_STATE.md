@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U7-A — Skill Loadout Core / Editor Verification Pending**
+**U8-B — School Point Calculation / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -39,13 +39,17 @@ Level Up 시 정확히 3개의 Button 표시, Pause 상태의 클릭, Pending �
 
 Maximum Health, Magic Power, Magic Missile Base Damage + Bonus, Regeneration, Pause 중 Regeneration 정지, Common Upgrade Level/UI Label 갱신과 Pending 순차 처리를 Unity Editor에서 검증했다. Console Error가 없으며 U6-C는 완료됐다.
 
-현재 실제 Spell 데이터 없이 Active 1/2와 Passive 1의 장착·업그레이드·슬롯 제한 규칙만 표현하는 U7-A를 진행 중이다.
+Active 1/2와 Passive 1의 Empty 시작, 동일 Skill Lv.2 Cap, 새 Active/Passive Slot 제한, Debug Reset과 기존 Gameplay Regression을 Unity Editor에서 검증했다. Console Error가 없으며 U7-A는 완료됐다.
+
+SkillCatalog의 실제 School Skill 12개, Active 8/Passive 4, School별 3개, Max Lv.2, Definition 기반 Loadout 획득과 기존 Slot 제한을 Unity Editor에서 검증했다. 시작 Loadout은 Empty이고 Common Upgrade와 Test Caster 분리도 유지되며 Console Error가 없다. U8-A는 완료됐다.
+
+현재 School Point를 별도 상태 없이 장착된 Catalog Skill의 Current Level 합으로 실시간 계산하는 U8-B를 진행 중이다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U7-A — Skill Loadout Core**다.
+현재 구현 범위는 **U8-B — School Point Calculation**이다.
 
 ## Completed Features
 
@@ -186,31 +190,50 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - Pending Level Ups 순차 처리 정상
 - Unity Editor Play Mode 및 Console Error 검증 완료
 
+### U7-A — Skill Loadout Core
+- 시작 시 Active Slot 1/2와 Passive Slot 1 모두 Empty, Level `0`
+- 같은 Active와 Passive 재획득 시 Level `1 → 2`
+- School Skill Level `2` Cap 정상
+- Active 두 개 장착 후 세 번째 다른 Active 거부 정상
+- Passive 한 개 장착 후 두 번째 다른 Passive 거부 정상
+- Debug Reset으로 세 Slot Empty 복구 정상
+- 기존 Gameplay Regression과 Console Error 없음
+- Magic Missile Test Caster와 Loadout은 의도적으로 분리
+
+### U8-A — Skill Definition + School Metadata
+- SkillCatalog에 실제 School Skill `12`개 등록
+- Active `8`, Passive Mastery `4`
+- Arcane/Fire/Lightning/Frost 각각 Active 2 + Passive 1
+- 모든 School Skill Max Level `2`
+- Definition 기반 SkillLoadout 획득과 Active 2/Passive 1 제한 정상
+- 시작 Loadout Empty와 Common Upgrade Catalog 외부 유지
+- Magic Missile Test Caster와 Loadout 분리 유지
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
 ## Current Work
 
-### U7-A — Skill Loadout Core
-- 시작 상태 Active Slot 1/2와 Passive Slot 1 모두 Empty, Level `0`
-- 새로운 Active는 Active 1부터, 다음은 Active 2에 장착
-- Active 두 Slot이 차면 세 번째 서로 다른 Active 거부
-- Passive는 한 Slot만 사용하며 다른 Passive가 장착됐으면 새 Passive 거부
-- 이미 장착된 같은 Skill ID는 같은 Type일 때 Level `1 → 2`
-- School Skill Maximum Level 상수 `2`
-- 같은 Skill ID의 중복 Slot 장착과 Type 불일치 획득 거부
-- Null/공백 Skill ID와 정의되지 않은 SkillType 거부
-- Inspector에서 각 Slot의 Skill ID와 Level 확인 가능
-- Debug Placeholder ID와 Context Menu로 슬롯 규칙 검증 가능
-- Magic Missile Test Caster와 Loadout은 연결하지 않으며 시작 Loadout은 Empty
-- Common Upgrade는 Slotless이고 SkillLoadout과 독립
-- 실제 Skill Data, School, Starting Selection, Spell 효과 연동은 구현하지 않음
+### U8-B — School Point Calculation
+- `SkillLoadout.GetSchoolPoints(SkillSchool)` API 추가
+- Active Slot 1/2와 Passive Slot 1을 호출 시점마다 직접 조회
+- Slot Skill ID를 SkillCatalog Definition으로 변환하고 해당 School이면 Current Level 합산
+- Arcane/Fire/Lightning/Frost 네 School 독립 계산
+- Skill Level 1당 School Point 1
+- Empty ID, Level 0, Catalog에 없는 Debug Placeholder는 Point 0
+- 별도 mutable School Point Field/Counter/Manager 없음
+- Loadout Reset만으로 모든 School Point가 자동으로 0
+- 현재 Slot/Max Lv.2 규칙으로 School별 자연스러운 최대 `6`
+- `Debug Log School Points` Context Menu 추가
+- 2/4/6 Synergy, Point HUD, Spell Runtime 연동은 구현하지 않음
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- `GameSystems`에 `SkillLoadout` Component 추가 및 Main Scene 저장
-- 시작 시 세 Slot Empty/Level `0` 확인
-- Active 첫/둘째 Slot 채우기, 셋째 Active 거부, 동일 Active Lv.2 Cap 확인
-- Passive 단일 Slot, 동일 Passive Lv.2 Cap, 다른 Passive 거부 확인
-- Debug Reset 후 Empty 복구 확인
-- U1~U6-C Gameplay Regression 확인
+- Empty Loadout에서 모든 School `0` 확인
+- Magic Missile Lv.1/Lv.2에서 Arcane `1/2` 확인
+- Magic Missile/Magic Bolt/Arcane Mastery 합산 Arcane `4 → 6` 확인
+- Mixed School에서 Arcane/Fire 독립 계산 확인
+- Placeholder Debug Skill Point 제외 확인
+- Reset 직후 모든 School `0` 확인
+- U1~U8-A Gameplay Regression 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -353,12 +376,15 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Skill Lv.1 / Lv.2
 - Eligibility
 
-### U8 — Skill Data / School
+### U8-A — Skill Definition + School Metadata
 - Arcane
 - Fire
 - Lightning
 - Frost
-- School Point 계산
+- 8 Active + 4 Passive Metadata
+
+### U8-B — School Point Calculation
+- 현재 Loadout Skill의 School + Current Level 기반 계산
 
 ### U9 — Starting Spell Selection
 - Empty Loadout Start
@@ -534,7 +560,18 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Common Upgrade는 Slot을 사용하지 않으며 SkillLoadout에 넣지 않는다.
 - U7-A Debug Placeholder ID는 규칙 검증용 상태일 뿐 실제 Skill Content가 아니다.
 - Magic Missile Test Caster는 SkillLoadout과 연결하지 않으며 자동 장착하지 않는다.
-- School, School Point, 실제 Skill Definition, Spell 효과 연동은 후속 Phase로 미룬다.
+- School Point와 Spell 효과 연동은 후속 Phase로 미룬다.
+
+### Skill Definition / Catalog
+- Definition은 ID, Display Name, School, SkillType, MaxLevel만 가진 불변 C# 데이터다.
+- Current Level은 Definition이 아니라 Runtime `SkillLoadout` 상태에만 저장한다.
+- School은 Arcane, Fire, Lightning, Frost 네 개만 정의한다.
+- Catalog는 각 School의 Active 2개와 Passive Mastery 1개, 총 12개만 포함한다.
+- 전체 구성은 Active 8, Passive 4이며 모든 School Skill MaxLevel은 `2`다.
+- Catalog는 ID의 Ordinal Dictionary를 만들며 중복 ID를 허용하지 않고 null/공백 조회는 안전하게 실패한다.
+- Common Upgrade 3종은 School Skill이 아니므로 Catalog에 포함하지 않는다.
+- School Point는 별도 상태로 저장하지 않고 현재 Loadout에서 계산한다.
+- ScriptableObject Database, Reflection Registry, Generic Ability Framework를 사용하지 않는다.
 
 ### Prototype Visual Baseline
 - Player와 Slime Gameplay Root는 Position과 Rotation을 담당하며 Rotation `(0, 0, 0)`을 유지한다.
@@ -574,7 +611,14 @@ Active 1 Empty / Active 2 Empty / Passive Empty
 → 선택한 Spell Lv.1을 Active 1에 장착
 
 ### School Point
-별도 누적 상태보다 현재 Skill Loadout의 Level 합으로 계산하는 것을 우선한다.
+- School Point의 Source of Truth는 현재 `SkillLoadout`의 세 Slot뿐이다.
+- `GetSchoolPoints(SkillSchool)` 호출 시 Active 1/2와 Passive 1을 다시 조회한다.
+- 각 Slot의 Catalog Definition School이 요청 School과 같으면 Current Level을 합산한다.
+- Skill Level 1당 Point 1이며 현재 Active 2 + Passive 1, 각 Max Lv.2 규칙으로 School별 최대는 자연스럽게 `6`이다.
+- Empty, Level `0`, Catalog에 없는 Debug Placeholder Skill은 Point를 제공하지 않는다.
+- Loadout Reset 뒤 별도 Point Reset 없이 계산 결과가 자동으로 모두 `0`이 된다.
+- 별도 Point Field, 누적 Counter, Manager를 만들지 않는다.
+- 2/4/6 Synergy와 활성 여부는 아직 구현하지 않는다.
 
 ### Balance
 Prototype 구현 중 기존 Balance 수치를 이유 없이 재조정하지 않는다.
@@ -635,7 +679,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `Canvas`, `EventSystem`, 비활성 `LevelUpPanel`, Title과 세 Choice Button이 Main Scene에 존재한다.
 - 저장된 Main Scene의 `LevelUpChoiceUI`에는 LevelUpPanel과 Button/Label 세 쌍이 모두 연결되어 있다.
 - `GameSystems`에는 PlayerHealth/PlayerMagicPower가 연결된 `CommonUpgradeController`가 있으며 U6-C Play Mode 검증이 완료됐다.
-- `GameSystems`의 `SkillLoadout` 추가는 U7-A Editor 적용 대기다. 다른 Reference는 필요하지 않다.
+- `GameSystems`에는 `SkillLoadout`이 저장되어 있으며 Active Slot 1/2와 Passive Slot 1은 빈 Skill ID와 Level `0`으로 시작한다. U7-A Slot Rule은 Editor 검증 완료됐고 U8-A에도 새 Scene Reference는 필요하지 않다.
 - U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
@@ -775,7 +819,22 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `CanAcquireOrUpgrade`와 `AcquireOrUpgrade`의 슬롯/Type/Level 규칙
   - Null/공백 ID, Type 불일치, 중복 Slot, Level Cap 방어
   - 실제 콘텐츠가 아닌 Debug Placeholder Context Menu와 Reset
-  - 외부 System Reference 및 Spell/Common Upgrade 연동 없음
+  - `SkillDefinition` 기반 Can/Acquire 오버로드와 Definition MaxLevel 적용
+  - Magic Missile/Magic Bolt/Fireball/Arcane Mastery/Fire Mastery Definition Debug Context Menu
+  - 현재 세 Slot을 조회하는 `GetSchoolPoints(SkillSchool)` 실시간 계산 API
+  - Empty/Level 0/Unknown Debug ID 제외와 Invalid School 안전한 `0`
+  - `Debug Log School Points` Context Menu
+  - 외부 System Reference 및 Spell Runtime/Common Upgrade 연동 없음
+- `Assets/Scripts/Skills/SkillDefinition.cs`
+  - `SkillSchool.Arcane/Fire/Lightning/Frost`
+  - ID, Display Name, School, 기존 SkillType, MaxLevel read-only Property
+  - Invalid text, School, Type, MaxLevel 생성 방어
+  - School Skill Maximum Level 상수 `2`
+- `Assets/Scripts/Skills/SkillCatalog.cs`
+  - 4 School의 Active 8 + Passive 4, 총 12 Definition
+  - Read-only 전체 목록과 ID 기반 안전한 `TryGet`
+  - Ordinal Dictionary 구성으로 중복 ID 방어
+  - Common Upgrade 미포함
 - `Assets/Scripts/Visual/BillboardToCamera.cs`
   - Camera Transform 참조
   - Spawn된 Visual용 Runtime `SetCamera(Transform)` 연결 지점
@@ -786,9 +845,10 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U7-A `SkillLoadout`은 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
-- `SkillLoadout` Component는 아직 저장된 Main Scene의 `GameSystems`에 추가되지 않았다.
-- Debug Placeholder Skill ID는 슬롯 규칙 검증용이며 실제 Spell/Passive가 아니다.
+- U8-B School Point 계산과 Debug Log는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
+- Skill Definition은 Metadata뿐이며 실제 Spell/Passive 효과를 실행하지 않는다.
+- U7-A Debug Placeholder Skill ID는 슬롯 규칙 검증용이며 Catalog의 실제 Skill이 아니다.
+- 2/4/6 Synergy 효과와 UI는 아직 구현되지 않았다.
 - Player Death와 HP UI는 구현되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
@@ -802,14 +862,14 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
 - Lightning Stagger anti-permastun 필요 여부
 - 최종 Balance
-- U8 이후 Skill Definition, School, Starting Spell Selection, Synergy 구현
+- U9 Starting Spell Selection, 실제 Skill 효과와 2/4/6 Synergy 구현
 - XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U7-A Editor Verification**
+**Pending U8-B Editor Verification**
 
-먼저 `GameSystems`에 `SkillLoadout`을 추가하고 Empty 시작 상태, Active 2 Slot, Passive 1 Slot, 동일 Skill Lv.2 Cap, 새 Skill 거부, Debug Reset과 기존 Gameplay Regression을 검증한다.
+기존 `GameSystems/SkillLoadout`의 Definition Debug와 `Debug Log School Points`로 Empty, 단일 Skill, Same School `6`, Mixed School, Placeholder 제외와 Reset 자동 `0`을 검증한다.
 
-검증 성공 후 다음 Phase로 `U8-A — Skill Definition + School Metadata`를 제안한다. 이번 작업에서는 U8, School Point, Starting Spell Selection을 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U9-A — Starting Spell Selection Data + Flow`를 제안한다. 이번 작업에서는 Starting Spell, Spell Runtime 연동, Synergy를 구현하지 않는다.

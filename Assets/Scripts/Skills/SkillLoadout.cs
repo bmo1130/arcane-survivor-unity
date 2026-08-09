@@ -10,7 +10,8 @@ public enum SkillType
 [DisallowMultipleComponent]
 public sealed class SkillLoadout : MonoBehaviour
 {
-    public const int MaximumSkillLevel = 2;
+    public const int MaximumSkillLevel =
+        SkillDefinition.SchoolSkillMaximumLevel;
 
     private const string DebugActiveAId = "debug-active-a";
     private const string DebugActiveBId = "debug-active-b";
@@ -61,8 +62,67 @@ public sealed class SkillLoadout : MonoBehaviour
 
     public bool CanAcquireOrUpgrade(string skillId, SkillType type)
     {
+        return CanAcquireOrUpgradeInternal(
+            skillId,
+            type,
+            MaximumSkillLevel);
+    }
+
+    public bool CanAcquireOrUpgrade(SkillDefinition skill)
+    {
+        return skill != null
+            && CanAcquireOrUpgradeInternal(
+                skill.Id,
+                skill.Type,
+                skill.MaxLevel);
+    }
+
+    public bool AcquireOrUpgrade(string skillId, SkillType type)
+    {
+        return AcquireOrUpgradeInternal(
+            skillId,
+            type,
+            MaximumSkillLevel);
+    }
+
+    public bool AcquireOrUpgrade(SkillDefinition skill)
+    {
+        return skill != null
+            && AcquireOrUpgradeInternal(
+                skill.Id,
+                skill.Type,
+                skill.MaxLevel);
+    }
+
+    public int GetSchoolPoints(SkillSchool school)
+    {
+        if (!IsSupportedSchool(school))
+        {
+            return 0;
+        }
+
+        return GetSlotSchoolPoints(
+                activeSlot1SkillId,
+                activeSlot1Level,
+                school)
+            + GetSlotSchoolPoints(
+                activeSlot2SkillId,
+                activeSlot2Level,
+                school)
+            + GetSlotSchoolPoints(
+                passiveSlot1SkillId,
+                passiveSlot1Level,
+                school);
+    }
+
+    private bool CanAcquireOrUpgradeInternal(
+        string skillId,
+        SkillType type,
+        int maxLevel)
+    {
         if (!TryNormalizeSkillId(skillId, out string normalizedSkillId)
-            || !IsSupportedType(type))
+            || !IsSupportedType(type)
+            || maxLevel <= 0)
         {
             return false;
         }
@@ -75,7 +135,7 @@ public sealed class SkillLoadout : MonoBehaviour
         {
             return equippedType == type
                 && slotIndex != SlotIndex.None
-                && currentLevel < MaximumSkillLevel;
+                && currentLevel < maxLevel;
         }
 
         return type == SkillType.Active
@@ -84,10 +144,14 @@ public sealed class SkillLoadout : MonoBehaviour
             : IsSlotEmpty(passiveSlot1SkillId, passiveSlot1Level);
     }
 
-    public bool AcquireOrUpgrade(string skillId, SkillType type)
+    private bool AcquireOrUpgradeInternal(
+        string skillId,
+        SkillType type,
+        int maxLevel)
     {
         if (!TryNormalizeSkillId(skillId, out string normalizedSkillId)
-            || !IsSupportedType(type))
+            || !IsSupportedType(type)
+            || maxLevel <= 0)
         {
             return false;
         }
@@ -99,7 +163,7 @@ public sealed class SkillLoadout : MonoBehaviour
                 out int currentLevel))
         {
             if (equippedType != type
-                || currentLevel >= MaximumSkillLevel)
+                || currentLevel >= maxLevel)
             {
                 return false;
             }
@@ -173,6 +237,36 @@ public sealed class SkillLoadout : MonoBehaviour
         RunDebugAcquire(DebugPassiveBId, SkillType.Passive);
     }
 
+    [ContextMenu("Debug Acquire Magic Missile")]
+    private void DebugAcquireMagicMissile()
+    {
+        RunDebugAcquireDefinition("magic-missile");
+    }
+
+    [ContextMenu("Debug Acquire Magic Bolt")]
+    private void DebugAcquireMagicBolt()
+    {
+        RunDebugAcquireDefinition("magic-bolt");
+    }
+
+    [ContextMenu("Debug Acquire Fireball")]
+    private void DebugAcquireFireball()
+    {
+        RunDebugAcquireDefinition("fireball");
+    }
+
+    [ContextMenu("Debug Acquire Arcane Mastery")]
+    private void DebugAcquireArcaneMastery()
+    {
+        RunDebugAcquireDefinition("arcane-mastery");
+    }
+
+    [ContextMenu("Debug Acquire Fire Mastery")]
+    private void DebugAcquireFireMastery()
+    {
+        RunDebugAcquireDefinition("fire-mastery");
+    }
+
     [ContextMenu("Debug Reset Loadout")]
     private void DebugResetLoadout()
     {
@@ -186,6 +280,25 @@ public sealed class SkillLoadout : MonoBehaviour
 
         ResetLoadoutState();
         Debug.Log("SkillLoadout debug state reset to empty.", this);
+    }
+
+    [ContextMenu("Debug Log School Points")]
+    private void DebugLogSchoolPoints()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning(
+                "Debug Log School Points is available only in Play Mode.",
+                this);
+            return;
+        }
+
+        Debug.Log(
+            $"Arcane: {GetSchoolPoints(SkillSchool.Arcane)} | "
+            + $"Fire: {GetSchoolPoints(SkillSchool.Fire)} | "
+            + $"Lightning: {GetSchoolPoints(SkillSchool.Lightning)} | "
+            + $"Frost: {GetSchoolPoints(SkillSchool.Frost)}",
+            this);
     }
 
     private void RunDebugAcquire(string skillId, SkillType type)
@@ -202,6 +315,31 @@ public sealed class SkillLoadout : MonoBehaviour
         string result = succeeded ? "succeeded" : "was rejected";
         Debug.Log(
             $"SkillLoadout debug acquisition for '{skillId}' {result}.",
+            this);
+    }
+
+    private void RunDebugAcquireDefinition(string skillId)
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning(
+                "SkillLoadout definition debug acquisition is available only in Play Mode.",
+                this);
+            return;
+        }
+
+        if (!SkillCatalog.TryGet(skillId, out SkillDefinition definition))
+        {
+            Debug.LogWarning(
+                $"SkillLoadout could not find debug Skill Definition '{skillId}'.",
+                this);
+            return;
+        }
+
+        bool succeeded = AcquireOrUpgrade(definition);
+        string result = succeeded ? "succeeded" : "was rejected";
+        Debug.Log(
+            $"SkillLoadout definition acquisition for '{definition.Id}' {result}.",
             this);
     }
 
@@ -298,6 +436,32 @@ public sealed class SkillLoadout : MonoBehaviour
     private static bool IsSupportedType(SkillType type)
     {
         return type == SkillType.Active || type == SkillType.Passive;
+    }
+
+    private static bool IsSupportedSchool(SkillSchool school)
+    {
+        return school == SkillSchool.Arcane
+            || school == SkillSchool.Fire
+            || school == SkillSchool.Lightning
+            || school == SkillSchool.Frost;
+    }
+
+    private static int GetSlotSchoolPoints(
+        string skillId,
+        int level,
+        SkillSchool school)
+    {
+        if (string.IsNullOrEmpty(skillId)
+            || level <= 0
+            || !SkillCatalog.TryGet(
+                skillId,
+                out SkillDefinition definition)
+            || definition.School != school)
+        {
+            return 0;
+        }
+
+        return level;
     }
 
     private static bool IsSlotEmpty(string skillId, int level)
