@@ -13,7 +13,11 @@ public sealed class MagicMissileCaster : MonoBehaviour
     [SerializeField]
     private EnemySpawner enemySpawner;
 
+    [SerializeField]
+    private PlayerMagicPower playerMagicPower;
+
     [SerializeField, Min(0f)]
+    [Tooltip("Base damage before the Player's Magic Damage Bonus.")]
     private float damage = 3f;
 
     [SerializeField, Min(0f)]
@@ -45,6 +49,15 @@ public sealed class MagicMissileCaster : MonoBehaviour
         {
             Debug.LogError(
                 "MagicMissileCaster requires an EnemySpawner reference.",
+                this);
+            enabled = false;
+            return;
+        }
+
+        if (playerMagicPower == null)
+        {
+            Debug.LogError(
+                "MagicMissileCaster requires the Player's PlayerMagicPower component.",
                 this);
             enabled = false;
             return;
@@ -88,10 +101,12 @@ public sealed class MagicMissileCaster : MonoBehaviour
             projectilePrefab,
             launchPosition,
             Quaternion.identity);
+        float modifiedDamage = playerMagicPower
+            .GetModifiedMagicDamage(damage);
 
         if (!projectile.Setup(
                 target,
-                damage,
+                modifiedDamage,
                 projectileSpeed,
                 projectileLifetime,
                 projectileCollisionRadius,

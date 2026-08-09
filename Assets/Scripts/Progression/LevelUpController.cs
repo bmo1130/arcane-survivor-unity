@@ -9,6 +9,9 @@ public sealed class LevelUpController : MonoBehaviour
     [SerializeField]
     private LevelUpChoiceUI levelUpChoiceUI;
 
+    [SerializeField]
+    private CommonUpgradeController commonUpgradeController;
+
     [SerializeField, Min(0)]
     private int pendingLevelUps;
 
@@ -20,20 +23,36 @@ public sealed class LevelUpController : MonoBehaviour
     {
         pendingLevelUps = 0;
 
-        if (playerExperience != null)
+        if (playerExperience == null)
         {
+            Debug.LogError(
+                "LevelUpController requires the Player's PlayerExperience component.",
+                this);
+            enabled = false;
             return;
         }
 
-        Debug.LogError(
-            "LevelUpController requires the Player's PlayerExperience component.",
-            this);
-        enabled = false;
-        return;
+        if (commonUpgradeController == null)
+        {
+            Debug.LogError(
+                "LevelUpController requires a CommonUpgradeController.",
+                this);
+            enabled = false;
+        }
     }
 
     private void Start()
     {
+        if (commonUpgradeController == null
+            || !commonUpgradeController.enabled)
+        {
+            Debug.LogError(
+                "LevelUpController requires an enabled CommonUpgradeController.",
+                this);
+            enabled = false;
+            return;
+        }
+
         if (levelUpChoiceUI != null
             && levelUpChoiceUI.Initialize(this))
         {
@@ -105,8 +124,23 @@ public sealed class LevelUpController : MonoBehaviour
             return;
         }
 
-        // U6-B validates the UI flow only. Upgrade effects begin in U6-C.
+        if (!commonUpgradeController.ApplyUpgrade(choiceIndex))
+        {
+            Debug.LogError(
+                "LevelUpController could not apply the selected Common Upgrade.",
+                this);
+            levelUpChoiceUI.ShowChoices();
+            return;
+        }
+
         CompletePendingLevelUp();
+    }
+
+    public string GetChoiceLabel(int choiceIndex)
+    {
+        return commonUpgradeController != null
+            ? commonUpgradeController.GetChoiceLabel(choiceIndex)
+            : string.Empty;
     }
 
     public void CompletePendingLevelUp()
@@ -133,7 +167,7 @@ public sealed class LevelUpController : MonoBehaviour
         }
     }
 
-    // Editor fallback while U6-B verifies the normal Button flow.
+    // Editor fallback for testing pause/pending flow without applying an upgrade.
     [ContextMenu("Debug Complete Pending Level Up")]
     private void DebugCompletePendingLevelUp()
     {

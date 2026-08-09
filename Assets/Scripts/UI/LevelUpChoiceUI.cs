@@ -4,11 +4,7 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class LevelUpChoiceUI : MonoBehaviour
 {
-    public const int ChoiceCount = 3;
-
-    private const string ChoiceLabelA = "Prototype Choice A";
-    private const string ChoiceLabelB = "Prototype Choice B";
-    private const string ChoiceLabelC = "Prototype Choice C";
+    public const int ChoiceCount = CommonUpgradeController.ChoiceCount;
 
     [SerializeField]
     private GameObject levelUpPanel;
@@ -56,7 +52,6 @@ public sealed class LevelUpChoiceUI : MonoBehaviour
         choiceButton1.onClick.AddListener(SelectChoice1);
         choiceButton2.onClick.AddListener(SelectChoice2);
         choiceButton3.onClick.AddListener(SelectChoice3);
-        ApplyPlaceholderLabels();
         HideChoices();
     }
 
@@ -97,7 +92,7 @@ public sealed class LevelUpChoiceUI : MonoBehaviour
             return;
         }
 
-        ApplyPlaceholderLabels();
+        ApplyChoiceLabels();
         isChoiceLocked = false;
         SetButtonsInteractable(true);
         levelUpPanel.SetActive(true);
@@ -155,22 +150,16 @@ public sealed class LevelUpChoiceUI : MonoBehaviour
         return true;
     }
 
-    private void ApplyPlaceholderLabels()
+    private void ApplyChoiceLabels()
     {
-        if (choiceLabel1 != null)
+        if (levelUpController == null)
         {
-            choiceLabel1.text = ChoiceLabelA;
+            return;
         }
 
-        if (choiceLabel2 != null)
-        {
-            choiceLabel2.text = ChoiceLabelB;
-        }
-
-        if (choiceLabel3 != null)
-        {
-            choiceLabel3.text = ChoiceLabelC;
-        }
+        choiceLabel1.text = levelUpController.GetChoiceLabel(0);
+        choiceLabel2.text = levelUpController.GetChoiceLabel(1);
+        choiceLabel3.text = levelUpController.GetChoiceLabel(2);
     }
 
     private void SetButtonsInteractable(bool interactable)

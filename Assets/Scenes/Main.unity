@@ -234,8 +234,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -40}
-  m_SizeDelta: {x: 760, y: 90}
+  m_AnchoredPosition: {x: 0, y: -50}
+  m_SizeDelta: {x: 760, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &232326780
 MonoBehaviour:
@@ -386,7 +386,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 28
+    m_FontSize: 22
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -525,8 +525,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -160}
-  m_SizeDelta: {x: 760, y: 90}
+  m_AnchoredPosition: {x: 0, y: -190}
+  m_SizeDelta: {x: 760, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &380286572
 MonoBehaviour:
@@ -796,7 +796,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d9662accedb4e48999da47bfeb1e73d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelUpChoiceUI
-  levelUpPanel: {fileID: 0}
+  levelUpPanel: {fileID: 1155007384}
   choiceButton1: {fileID: 746589961}
   choiceButton2: {fileID: 232326782}
   choiceButton3: {fileID: 380286574}
@@ -953,7 +953,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 28
+    m_FontSize: 22
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -1085,8 +1085,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 80}
-  m_SizeDelta: {x: 760, y: 90}
+  m_AnchoredPosition: {x: 0, y: 90}
+  m_SizeDelta: {x: 760, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &746589959
 MonoBehaviour:
@@ -1210,7 +1210,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 28
+    m_FontSize: 22
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -1573,6 +1573,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1448863804}
   - component: {fileID: 1448863803}
+  - component: {fileID: 1448863805}
   m_Layer: 0
   m_Name: GameSystems
   m_TagString: Untagged
@@ -1594,6 +1595,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelUpController
   playerExperience: {fileID: 1779079784}
   levelUpChoiceUI: {fileID: 545538704}
+  commonUpgradeController: {fileID: 1448863805}
   pendingLevelUps: 0
 --- !u!4 &1448863804
 Transform:
@@ -1610,6 +1612,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1448863805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448863802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8242ca0545344d1bfd7c9904745b8d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CommonUpgradeController
+  playerHealth: {fileID: 1779079782}
+  playerMagicPower: {fileID: 1779079785}
+  maximumHealthLevel: 0
+  magicPowerLevel: 0
+  regenerationLevel: 0
 --- !u!1 &1779079778
 GameObject:
   m_ObjectHideFlags: 0
@@ -1623,6 +1642,7 @@ GameObject:
   - component: {fileID: 1779079782}
   - component: {fileID: 1779079783}
   - component: {fileID: 1779079784}
+  - component: {fileID: 1779079785}
   m_Layer: 0
   m_Name: player
   m_TagString: Untagged
@@ -1675,6 +1695,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maximumHealth: 100
   currentHealth: 0
+  healthRegeneration: 0
 --- !u!114 &1779079783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1689,6 +1710,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MagicMissileCaster
   projectilePrefab: {fileID: 2302918851076451865, guid: 38e52a66a72c30b4f929e202ace0dd77, type: 3}
   enemySpawner: {fileID: 1033940372}
+  playerMagicPower: {fileID: 1779079785}
   damage: 3
   cooldown: 0.65
   projectileSpeed: 6
@@ -1711,6 +1733,19 @@ MonoBehaviour:
   baseExperienceToLevel: 8
   experienceGrowthPerLevel: 4
   experienceToNextLevel: 8
+--- !u!114 &1779079785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fb7d490d7fe4c389f33569491b4d714, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMagicPower
+  magicDamageBonus: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
