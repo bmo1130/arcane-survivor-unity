@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U2-C — Slime HP / Take Damage / Death / Editor Verification Pending**
+**U4-A — Magic Missile Basic Auto Combat / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -17,15 +17,25 @@ Main Scene의 Slime 한 개가 Player를 추적하고 Stop Distance 안에서 Co
 
 Player HP는 `100`에서 Damage `8`씩 약 `1.2`초 간격으로 감소하며 Unity Console Error가 없다.
 
-U2-B는 완료됐지만 U2 전체는 아직 완료하지 않았다.
+Slime Maximum Health `10`, Debug Damage `3`, HP 감소와 네 번째 피격 시 Root/Visual Destroy를 Unity Editor에서 검증했다.
 
-현재 Slime에 Maximum/Current Health, `TakeDamage`, Death와 임시 Debug Damage 수단을 추가하는 U2-C를 진행 중이다.
+죽은 Slime의 Attack 중단과 기존 Player Movement, Camera Follow, Billboard Regression도 확인했으며 Console Error가 없다. U2 전체는 완료됐다.
+
+Slime 자동 Spawn, `1.5`초 간격, Player 기준 거리 `14`, 여러 방향 Spawn과 Maximum Enemy Count `20`을 Unity Editor에서 검증했다.
+
+Runtime Target/PlayerHealth/Billboard Camera 연결, Slime Chase/Attack, Destroy 이후 Count 회수와 재Spawn도 정상이며 Console Error가 없다. U3-A는 완료됐다.
+
+최대 20 Slime에서 한 점 겹침 완화, 자연스러운 무리 형태, 심각한 떨림/튕김 없음과 기존 Chase/Attack/HP/Death/Re-Spawn을 Unity Editor에서 검증했다.
+
+U3-B와 U3 전체는 완료됐다.
+
+현재 사용자가 Player에 Test Caster를 명시적으로 추가한 경우에만 Magic Missile Lv.1 자동 전투를 검증하는 U4-A를 진행 중이다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U2-C — Slime HP / Take Damage / Death**다.
+현재 구현 범위는 **U4-A — Magic Missile Basic Auto Combat**이다.
 
 ## Completed Features
 
@@ -88,24 +98,58 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - Player Movement, Camera Follow, Slime Chase Regression 없음
 - Unity Editor Play Mode 및 Console Error 검증 완료
 
+### U2-C — Slime HP / Take Damage / Death
+- Slime Maximum Health `10`, Debug Damage `3`
+- Current Health `10 → 7 → 4 → 1` 감소 확인
+- 네 번째 Debug Damage에서 Slime Root와 Visual Destroy
+- Death 이후 Player Attack 중단
+- Player Movement, Camera Follow, Billboard Regression 없음
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
+### U2 — Slime
+- U2-A Chase, U2-B Attack + Player HP, U2-C Slime HP + Death 완료
+- 수동 배치 Slime 한 마리의 전체 기본 동작 검증 완료
+
+### U3-A — Slime Prefab + Enemy Spawning
+- Slime Prefab 자동 Spawn
+- Spawn Interval `1.5`, Spawn Distance `14`, Maximum Enemy Count `20`
+- 여러 방향의 XZ Spawn과 Slime Y `0`
+- Runtime Target, PlayerHealth, Billboard Camera 연결
+- Spawn된 Slime Chase/Attack 정상
+- Destroy 이후 Count 회수와 재Spawn 정상
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
+### U3-B — Simple Enemy Separation
+- 최대 20 Slime의 완전한 한 점 겹침 완화
+- 자연스러운 Enemy 무리 형태 유지
+- 심각한 떨림과 튕김 없음
+- Chase, Attack, HP, Death, Destroy 후 Re-Spawn Regression 없음
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
+### U3 — Enemy Spawning / Separation
+- U3-A Slime Prefab + Enemy Spawning 완료
+- U3-B Simple Enemy Separation 완료
+
 ## Current Work
 
-### U2-C — Slime HP / Take Damage / Death
-- 기존 `SlimeController`에 Maximum/Current Health 추가
-- Maximum Health 기본값 `10`, Play 시작 시 Current Health를 Maximum Health로 초기화
-- `TakeDamage(float)`에서 NaN, Infinity, 0 이하 Damage 무시
-- Current Health를 `0` 이상으로 Clamp
-- HP `0` 도달 시 중복 Death를 방지하고 Slime Root GameObject 전체 Destroy
-- Debug Damage 기본값 `3`
-- Component Context Menu의 `Debug Take Damage`가 실제 `TakeDamage`를 호출
-- Enemy Framework, Interface, Event System을 추가하지 않음
+### U4-A — Magic Missile Basic Auto Combat
+- Player에 수동으로 추가하는 Test-only `MagicMissileCaster`
+- 기존 EnemySpawner Spawned Slime 목록에서 XZ 기준 가장 가까운 살아 있는 Slime 선택
+- Damage `3`, Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`
+- Player Y `+1.25` 위치에서 Projectile 생성
+- Target을 매 Frame 추적하는 XZ Homing Projectile
+- Target 사망 또는 Lifetime 만료 시 Projectile 제거
+- Target과 XZ 거리 기반 명중, `SlimeController.TakeDamage(3)` 후 Projectile 제거
+- Rigidbody, Collider, Physics, FindObjectsByType, Combat Manager를 사용하지 않음
+- Magic Missile은 전투 검증을 위해 수동 활성화하는 Test Caster일 뿐 강제 Starting Skill이 아님
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- Play 시작 시 Current Health `10` 확인
-- Context Menu Debug Damage로 `10 → 7 → 4 → 1 → 0` 확인
-- HP `0`에서 Slime Root와 Visual Child 제거 및 Attack 중단 확인
-- Chase/Attack, PlayerMovement, CameraFollow, Billboard/Ground Regression 확인
+- `Assets/Prefabs/Projectiles/MagicMissile.prefab` Editor 생성
+- Player Root에 Test-only `MagicMissileCaster` 수동 추가 및 Reference 연결
+- Target 없음/최근접 Target/Cooldown/Homing/명중/Lifetime/Target 선행 사망 확인
+- Damage `3`씩 네 번 명중 시 Slime Death 확인
+- Spawn/Separation/Chase/Attack/Player/Camera Regression 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -190,21 +234,34 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Slime Root Destroy
 - Context Menu Debug Damage
 
-### U2 — Remaining Slime Features
+### U2 — Slime
+- Chase
+- Attack + Player HP
+- Slime HP + Death
+
+### U3-A — Slime Prefab + Enemy Spawning
 - Slime Prefab
-- U2 전체 Editor 검증 및 완료 판단
+- Spawn Interval `1.5`
+- Spawn Distance `14`
+- Maximum Enemy Count `20`
+- Runtime Player / PlayerHealth / Billboard Camera 연결
 
-### U3 — Enemy Spawning
-- Spawn Timer
-- Spawn Distance
-- Enemy Count 제한
+### U3-B — Simple Enemy Separation
+- Spawned Slime 목록 재사용
+- XZ Separation Radius / Strength
+- 동일 위치 fallback
+- 기존 Move Speed와 Stop Distance 보존
 
-### U4 — First Combat
-- Magic Missile
-- Nearest Enemy Targeting
-- Projectile
-- Damage
-- Enemy Death
+### U4-A — Magic Missile Basic Auto Combat
+- Test-only Magic Missile Caster
+- Nearest Alive Slime Targeting
+- Homing Projectile
+- Damage / Lifetime / Collision Radius
+- Existing Slime Death 연결
+
+### U4 — Remaining First Combat
+- Starting Spell / Loadout 연동은 후속 Phase에서 처리
+- Magic Missile Lv.2와 다른 Spell은 후속 Phase에서 처리
 
 ### U5 — Experience
 - XP Orb
@@ -314,6 +371,40 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Spell Combat 전 검증용 Debug Damage 기본값은 `3`이며 Context Menu도 실제 `TakeDamage`를 호출한다.
 - Death Animation, Effect, XP Drop, 범용 Enemy Health 구조는 현재 구현하지 않는다.
 
+### Enemy Spawning
+- `EnemySpawner`가 첫 Spawn과 이후 Spawn을 기본 `1.5`초 간격으로 처리한다.
+- Spawn 위치는 Player의 X/Z와 임의 각도를 사용하며 반지름은 `14`, World Y는 항상 `0`이다.
+- Spawner가 생성한 살아 있는 Slime은 최대 `20`마리로 제한한다.
+- Destroy된 Slime은 Unity Object의 Null 상태를 목록에서 제거해 Count를 회수한다.
+- Spawn 직후 `SlimeController.Setup`으로 Player Transform과 PlayerHealth를 명시적으로 연결한다.
+- Spawn 직후 Slime 하위의 `BillboardToCamera`에 Inspector에서 받은 Main Camera Transform을 연결한다.
+- Runtime 연결을 위해 Scene 전체 검색, Enemy Manager Framework, Object Pool, Service Locator를 사용하지 않는다.
+- Difficulty Scaling, Wave, Spawn Interval 감소는 현재 구현하지 않는다.
+
+### Simple Enemy Separation
+- 현재 Maximum Enemy Count `20`에서는 각 Slime이 Spawned Slime 목록을 직접 순회하는 O(n²) 계산을 사용한다.
+- 기본 Separation Radius는 `0.75`, Separation Strength는 `0.35`다.
+- Separation은 Chase를 대체하지 않고 XZ 평면의 작은 보정 이동으로 추가한다.
+- 이웃별 보정은 거리 비율로 약화하고 평균낸 뒤 최대 길이 `1`로 제한한다.
+- Chase와 Separation의 최종 Frame 이동량은 기존 Move Speed `2.6`을 넘지 않는다.
+- Stop Distance 안쪽을 향하는 이동 성분은 제거해 기존 접근 경계를 보존한다.
+- 두 Slime의 X/Z가 완전히 같으면 Instance ID 기반 고정 방향을 사용해 NaN 없이 겹침에서 빠져나온다.
+- Rigidbody, Collider, Spatial Hash, Quadtree, Enemy Manager Framework는 사용하지 않는다.
+
+### Magic Missile Test Combat
+- **Magic Missile is enabled manually for combat verification only and is NOT a forced starting skill.**
+- Magic Missile은 U4-A 전투 검증을 위해 사용자가 Player에 `MagicMissileCaster`를 수동 추가할 때만 활성화된다.
+- 이 Test Caster는 Starting Skill System이나 실제 Loadout 획득을 의미하지 않는다.
+- 게임 시작 규칙은 Active 1 Empty / Active 2 Empty / Passive Empty이며 Magic Missile을 강제로 지급하지 않는다.
+- 기존 EnemySpawner 목록에서 Player와 XZ 기준 가장 가까운 살아 있는 Slime 하나를 선택한다.
+- Target이 없으면 발사하지 않고 Cooldown 준비 상태를 유지한다.
+- Reference Prototype과 같이 Projectile은 살아 있는 Target을 매 Frame 추적하는 Homing 방식이다.
+- Target이 먼저 죽으면 Retarget하지 않고 Projectile을 제거한다.
+- 기본값은 Damage `3`, Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`다.
+- Slime HP `10`에는 네 번 명중해야 Death가 발생한다.
+- Projectile은 Player Y `+1.25`에서 생성되고 XZ 평면으로 이동하며 시각 높이를 유지한다.
+- Rigidbody, Collider, Physics, FindObjectsByType, 범용 Combat/Projectile Framework를 사용하지 않는다.
+
 ### Prototype Visual Baseline
 - Player와 Slime Gameplay Root는 Position과 Rotation을 담당하며 Rotation `(0, 0, 0)`을 유지한다.
 - SpriteRenderer와 `BillboardToCamera`는 각 Root 아래의 `Visual` Child에 둔다.
@@ -344,6 +435,8 @@ Repository에서 무시할 대상:
 ### Starting Spell
 Magic Missile 강제 시작은 폐기됐다.
 
+U4-A의 `MagicMissileCaster`는 Editor 전투 검증을 위한 수동 Test Component이며 이 규칙을 변경하지 않는다.
+
 현재 규칙:
 Active 1 Empty / Active 2 Empty / Passive Empty
 → 8 Active 중 하나 선택
@@ -371,15 +464,15 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `Main Camera`
   - `Global Light 2D`
   - `player`
-  - `slime`
   - `ground`
+  - `EnemySoawner`
 - `player` Root는 `PlayerMovement`와 `PlayerHealth`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
 - `player/Visual` Child는 기존 Square SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0.5, 0)`이다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
 - U1-A / U1-A2의 World XZ 이동 동작은 Unity Editor에서 검증됐다.
 - Scene에 직렬화된 Player Move Speed는 `7`이다.
 - U1-D Camera-relative movement는 Unity Editor에서 검증 완료됐다.
-- 현재 디스크의 `Main.unity`에는 PlayerMovement의 `movementCamera` 직렬화 항목이 아직 기록되지 않았다. Editor에서 연결 상태를 확인하고 Scene을 저장해야 영구 보존된다.
+- PlayerMovement의 Movement Camera는 `Main Camera`에 연결되어 있다.
 - Main Camera는 Perspective, FOV `50`이다.
 - Main Camera에는 `CameraFollow`가 연결되어 있다.
   - Follow Target: `player`
@@ -387,22 +480,32 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Follow Sharpness `7`
   - Look At Height `0.5`
 - U1 Camera Follow는 Unity Editor에서 검증됐다.
-- `slime` Root는 `SlimeController`를 사용하며 Position `(4, 0, 4)`, Rotation `(0, 0, 0)`이다.
-- `slime/Visual` Child는 기존 Circle SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0, 0)`이다.
-- 현재 디스크의 `Main.unity`에는 `slime` Root에도 SpriteRenderer가 남아 있다. Editor에서 검증한 구조와 차이가 있다면 Scene의 미저장 상태를 확인해야 한다.
-- `slime`의 Target은 `player`, Move Speed는 `2.6`, Stop Distance는 `1.15`다.
-- U2-A Slime Chase는 Unity Editor에서 검증됐다.
 - `player`에는 `PlayerHealth`가 연결되어 있으며 Maximum HP는 `100`이다.
-- `slime`에는 PlayerHealth Reference, Damage `8`, Attack Cooldown `1.2`가 연결되어 있다.
-- U2-B Slime Attack과 Player HP는 Unity Editor에서 검증됐다.
-- Player와 Slime의 Billboard Camera Reference는 `Main Camera`에 연결되어 있다.
+- `player`에는 아직 `MagicMissileCaster`가 없으며 U4-A Editor Test Setup에서 사용자가 명시적으로 추가해야 한다.
+- 수동 배치 Slime은 Scene에서 제거됐다.
+- `EnemySoawner`에는 `EnemySpawner`가 연결되어 있다.
+  - Player: `player`
+  - Slime Prefab: 실제 Slime Prefab Asset
+  - Billboard Camera: `Main Camera`
+  - Spawn Interval `1.5`
+  - Spawn Distance `14`
+  - Maximum Enemy Count `20`
+- U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
 - `ProjectSettings.asset`의 `templateDefaultScene`에는 프로젝트 템플릿 출처 정보로 기존 `SampleScene` 경로가 남아 있다. Build Scene 항목은 아니며 U1 진행을 막지 않는다.
 - `Assets/Settings/Scenes/URP2DSceneTemplate.unity`는 Unity 2D URP Scene Template이다.
 
 ### Prefab
-- 없음
+- Slime 실제 경로: `Assets/Prefabs/Enemies/Slime.prefab`
+- Root `Slime`
+  - `SlimeController`
+  - `Visual`
+    - `SpriteRenderer`
+    - `BillboardToCamera`
+- Prefab의 Target, PlayerHealth, Billboard Camera는 Runtime에 연결된다.
+- U3-B Separation은 Script 기본값 Radius `0.75`, Strength `0.35`로 Editor 검증 완료됐다.
+- `Assets/Prefabs/Projectiles/MagicMissile.prefab`은 아직 없으며 U4-A Editor Setup에서 생성해야 한다.
 
 ### Script
 - `Assets/Scripts/Player/PlayerMovement.cs`
@@ -436,7 +539,36 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Invalid Damage 방어, HP 0 Clamp, 중복 Death 방어
   - HP 0에서 Slime Root GameObject Destroy
   - Debug Damage 기본값 `3`과 `Debug Take Damage` Context Menu
-  - U2-C Editor 검증 대기
+  - Runtime `Setup(Transform, PlayerHealth, IReadOnlyList<SlimeController>)`으로 Spawn Reference와 이웃 목록 연결
+  - Separation Radius `0.75`, Strength `0.35`
+  - XZ 이웃 거리 기반 Separation과 동일 위치 fallback
+  - 최종 Move Speed/Stop Distance/Y 보존
+  - 외부 Targeting용 `IsAlive` 읽기 전용 상태
+  - U2-C Editor 검증 완료
+- `Assets/Scripts/Enemies/EnemySpawner.cs`
+  - 첫 Spawn과 이후 Spawn Interval 기본값 `1.5`
+  - Player 주변 XZ 반지름 `14`, World Y `0` Spawn
+  - Maximum Enemy Count 기본값 `20`
+  - Destroy된 Slime 목록 정리 및 Count 회수
+  - Spawn 시 Player/PlayerHealth/Billboard Camera Runtime 연결
+  - 기존 Spawned Slime 목록을 각 Slime의 Separation 이웃 목록으로 전달
+  - Test Combat Targeting용 `SpawnedEnemies` 읽기 전용 목록과 Billboard Camera 제공
+  - 필수 Reference Null 방어
+  - U3-A Editor 연결 및 Play Mode 검증 완료
+- `Assets/Scripts/Combat/MagicMissileCaster.cs`
+  - Player에 사용자가 수동 추가하는 Test-only Component
+  - EnemySpawner 목록에서 XZ 최근접 살아 있는 Slime 선택
+  - 기본 Damage `3`, Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`
+  - Projectile 생성과 Runtime Target/Camera/수치 전달
+  - Target 없음과 필수 Reference Null 방어
+  - U4-A Editor 연결 및 Play Mode 검증 대기
+- `Assets/Scripts/Combat/MagicMissileProjectile.cs`
+  - 살아 있는 Target을 향한 XZ Homing 이동
+  - Player Y `+1.25` 발사 높이 유지
+  - XZ Collision Radius 명중 판정과 `SlimeController.TakeDamage`
+  - 명중, Lifetime 만료, Target 선행 사망 시 Root Destroy
+  - 하위 Billboard Camera Runtime 연결
+  - U4-A Projectile Prefab 생성 및 Play Mode 검증 대기
 - `Assets/Scripts/Player/PlayerHealth.cs`
   - Maximum HP 기본값 `100`
   - Current HP Inspector 확인 가능
@@ -446,6 +578,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Editor 연결 및 Play Mode 검증 완료
 - `Assets/Scripts/Visual/BillboardToCamera.cs`
   - Camera Transform 참조
+  - Spawn된 Visual용 Runtime `SetCamera(Transform)` 연결 지점
   - `LateUpdate`에서 Visual Child만 Camera 방향으로 회전
   - Camera Null 방어
   - Player/Slime Visual Child와 Main Camera 연결 완료
@@ -453,28 +586,29 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U2-C Slime Health, Debug Damage, Death는 아직 Unity Editor 검증 전이다.
-- 현재 디스크의 `Main.unity`에는 PlayerMovement `movementCamera` 참조가 직렬화되지 않았고 `slime` Root SpriteRenderer도 남아 있다. 사용자가 보고한 정상 Editor 상태가 미저장 상태라면 Scene 저장이 필요하다.
+- U4-A Magic Missile Caster/Projectile은 아직 Unity Editor Prefab/Scene 연결 및 Play Mode 검증 전이다.
+- `Assets/Prefabs/Projectiles/MagicMissile.prefab`이 아직 없고 Player에도 Test Caster가 연결되지 않았다.
+- Scene Spawner 이름이 `EnemySpawner`가 아니라 `EnemySoawner`로 저장되어 있다. 기능에는 영향이 없어 이번 Phase에서는 변경하지 않았다.
 - Player Death와 HP UI는 구현되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
 
 ## Deferred Work
-- Slime Prefab
-- Enemy Spawn 및 Enemy Manager
+- Spawn Difficulty Scaling, Wave, Spawn Interval 감소
+- Enemy Manager Framework와 Object Pool
 - Physics2D 활용 범위
 - ScriptableObject 활용 범위
 - Common Upgrade 최대 Level
 - Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
 - Lightning Stagger anti-permastun 필요 여부
 - 최종 Balance
-- U2 이후 Enemy, Combat, Experience, Skill, Synergy 구현
+- U4 이후 Experience, Skill, Synergy 구현
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U2-C Editor Verification**
+**Pending U4-A Editor Verification**
 
-먼저 U2-C의 Current Health, Debug Damage, Root Destroy와 기존 Gameplay Regression을 Unity Editor에서 검증한다.
+먼저 Test Caster와 Projectile Prefab을 Unity Editor에서 명시적으로 연결하고 Targeting/Homing/Damage/Lifetime과 기존 Gameplay Regression을 검증한다.
 
-검증 결과로 U2 전체 완료 여부를 판단한 뒤 다음 작은 Phase를 제안한다. 이번 작업에서는 U3, Spell Combat, XP를 구현하지 않는다.
+검증 결과를 확인한 뒤 다음 작은 Phase를 제안한다. 이번 작업에서는 U5 XP, Starting Spell Selection, Loadout을 구현하지 않는다.

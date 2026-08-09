@@ -5,6 +5,11 @@ public sealed class BillboardToCamera : MonoBehaviour
     [SerializeField]
     private Transform cameraTransform;
 
+    public void SetCamera(Transform newCameraTransform)
+    {
+        cameraTransform = newCameraTransform;
+    }
+
     private void LateUpdate()
     {
         if (cameraTransform == null)

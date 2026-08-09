@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class SlimeController : MonoBehaviour
@@ -29,24 +30,61 @@ public sealed class SlimeController : MonoBehaviour
     [SerializeField, Min(0f)]
     private float debugDamage = 3f;
 
+    [SerializeField, Min(0f)]
+    private float separationRadius = 0.75f;
+
+    [SerializeField, Min(0f)]
+    private float separationStrength = 0.35f;
+
     private float attackCooldownRemaining;
     private bool isDead;
+    private IReadOnlyList<SlimeController> separationNeighbors;
+    private Vector3 overlapFallbackDirection;
 
     public float CurrentHealth => currentHealth;
     public float MaximumHealth => maximumHealth;
+    public bool IsAlive => !isDead && currentHealth > 0f;
 
     private void Awake()
     {
         maximumHealth = Mathf.Max(0f, maximumHealth);
         currentHealth = maximumHealth;
 
+        int fallbackIndex = unchecked(GetInstanceID() * 397) & 1023;
+        float fallbackAngle = fallbackIndex
+            * (Mathf.PI * 2f / 1024f);
+        overlapFallbackDirection = new Vector3(
+            Mathf.Cos(fallbackAngle),
+            0f,
+            Mathf.Sin(fallbackAngle));
+    }
+
+    private void Start()
+    {
+        ValidateReferences();
+    }
+
+    public bool Setup(
+        Transform newTarget,
+        PlayerHealth newPlayerHealth,
+        IReadOnlyList<SlimeController> newSeparationNeighbors)
+    {
+        target = newTarget;
+        playerHealth = newPlayerHealth;
+        separationNeighbors = newSeparationNeighbors;
+
+        return ValidateReferences();
+    }
+
+    private bool ValidateReferences()
+    {
         if (target == null)
         {
             Debug.LogError(
                 "SlimeController requires a target Transform.",
                 this);
             enabled = false;
-            return;
+            return false;
         }
 
         if (playerHealth == null)
@@ -55,7 +93,11 @@ public sealed class SlimeController : MonoBehaviour
                 "SlimeController requires a PlayerHealth reference.",
                 this);
             enabled = false;
+            return false;
         }
+
+        enabled = true;
+        return true;
     }
 
     private void Update()
@@ -75,20 +117,100 @@ public sealed class SlimeController : MonoBehaviour
 
         float distance = toTarget.magnitude;
         float minimumDistance = Mathf.Max(0f, stopDistance);
+        float maxMoveDistance = Mathf.Max(0f, moveSpeed) * Time.deltaTime;
+        Vector3 chaseMovement = Vector3.zero;
 
         if (distance <= minimumDistance)
         {
             TryAttack();
-            return;
+        }
+        else
+        {
+            float moveDistance = Mathf.Min(
+                maxMoveDistance,
+                distance - minimumDistance);
+            chaseMovement = toTarget / distance * moveDistance;
         }
 
-        float maxMoveDistance = Mathf.Max(0f, moveSpeed) * Time.deltaTime;
-        float moveDistance = Mathf.Min(
-            maxMoveDistance,
-            distance - minimumDistance);
+        Vector3 separationMovement = CalculateSeparationDirection()
+            * (maxMoveDistance * Mathf.Max(0f, separationStrength));
+        Vector3 movement = Vector3.ClampMagnitude(
+            chaseMovement + separationMovement,
+            maxMoveDistance);
 
-        transform.position = currentPosition
-            + toTarget / distance * moveDistance;
+        if (distance > 0.0001f)
+        {
+            Vector3 towardTarget = toTarget / distance;
+            float towardMovement = Vector3.Dot(movement, towardTarget);
+            float remainingDistance = Mathf.Max(
+                0f,
+                distance - minimumDistance);
+
+            if (towardMovement > remainingDistance)
+            {
+                movement -= towardTarget
+                    * (towardMovement - remainingDistance);
+            }
+        }
+
+        movement.y = 0f;
+
+        transform.position = currentPosition + movement;
+    }
+
+    private Vector3 CalculateSeparationDirection()
+    {
+        float radius = Mathf.Max(0f, separationRadius);
+
+        if (radius <= 0f || separationNeighbors == null)
+        {
+            return Vector3.zero;
+        }
+
+        float radiusSquared = radius * radius;
+        Vector3 separation = Vector3.zero;
+        int neighborCount = 0;
+
+        foreach (SlimeController neighbor in separationNeighbors)
+        {
+            if (neighbor == null || neighbor == this || neighbor.isDead)
+            {
+                continue;
+            }
+
+            Vector3 awayFromNeighbor = transform.position
+                - neighbor.transform.position;
+            awayFromNeighbor.y = 0f;
+
+            float distanceSquared = awayFromNeighbor.sqrMagnitude;
+
+            if (distanceSquared >= radiusSquared)
+            {
+                continue;
+            }
+
+            if (distanceSquared <= 0.0001f)
+            {
+                separation += overlapFallbackDirection;
+            }
+            else
+            {
+                float distance = Mathf.Sqrt(distanceSquared);
+                float proximity = 1f - distance / radius;
+                separation += awayFromNeighbor / distance * proximity;
+            }
+
+            neighborCount++;
+        }
+
+        if (neighborCount == 0)
+        {
+            return Vector3.zero;
+        }
+
+        return Vector3.ClampMagnitude(
+            separation / neighborCount,
+            1f);
     }
 
     private void TryAttack()
