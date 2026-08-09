@@ -87,7 +87,8 @@ public sealed class ExperienceOrb : MonoBehaviour
 
     private void Update()
     {
-        if (!isInitialized
+        if (Time.timeScale <= 0f
+            || !isInitialized
             || isCollected
             || player == null
             || playerExperience == null)

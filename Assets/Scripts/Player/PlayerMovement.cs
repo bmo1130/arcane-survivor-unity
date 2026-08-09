@@ -48,7 +48,7 @@ public sealed class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (movementCamera == null)
+        if (Time.timeScale <= 0f || movementCamera == null)
         {
             return;
         }

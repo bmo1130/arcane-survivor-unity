@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U5-A — Experience Orb Drop + Direct Pickup / Editor Verification Pending**
+**U6-A — Level Progression + Level-Up Pause / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -31,13 +31,15 @@ U3-B와 U3 전체는 완료됐다.
 
 Test-only Magic Missile의 자동 Target 선택, Homing, Damage, Target 선행 사망 처리와 Projectile Lifetime을 Unity Editor에서 검증했다. 기존 Spawn/Separation과 U1~U3 기능도 정상이며 Console Error가 없다.
 
-현재 Slime Death 위치에 Experience Orb 하나를 생성하고 Player가 직접 획득해 Experience를 누적하는 U5-A를 진행 중이다.
+Slime Death 시 Experience Orb 생성, Reward `4`, Pickup Radius `1.1`, 직접 Pickup과 `0 → 4 → 8` 누적을 Unity Editor에서 검증했다. Magnet과 중복 획득은 없으며 기존 Combat/Spawn/Movement도 정상이고 Console Error가 없다.
+
+현재 XP Threshold 도달 시 Level 증가, 초과 XP 이월, 다중 Level 계산과 Pending Level-Up 기반 Gameplay Pause를 처리하는 U6-A를 진행 중이다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U5-A — Experience Orb Drop + Direct Pickup**이다.
+현재 구현 범위는 **U6-A — Level Progression + Level-Up Pause**다.
 
 ## Completed Features
 
@@ -142,28 +144,41 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - Unity Editor Play Mode 및 Console Error 검증 완료
 - Player의 `MagicMissileCaster`는 U4 전투 검증용 Test Caster이며 강제 Starting Skill이 아님
 
+### U5-A — Experience Orb Drop + Direct Pickup
+- Slime Death 시 Experience Orb 한 개 생성
+- Experience Reward `4`, Pickup Radius `1.1`
+- 자동 Magnet 없이 Player의 직접 Pickup 정상
+- Current Experience `0 → 4 → 8` 누적 정상
+- Orb 중복 획득 없음
+- Combat, Spawn, Movement Regression 없음
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
 ## Current Work
 
-### U5-A — Experience Orb Drop + Direct Pickup
-- Player의 `Current Experience`를 `0`으로 시작하고 유효한 XP만 누적하는 `PlayerExperience`
-- Slime Experience Reward 기본값 `4`
-- Slime의 기존 단일 Death 경로에서 Experience Orb를 정확히 한 번 생성
-- Experience Orb Value `4`, Pickup Radius `1.1`
-- Collider/Rigidbody 없이 Player와 Orb의 XZ 거리로 직접 Pickup 판정
-- Pickup 시 XP를 한 번 지급하고 Orb Root Destroy
-- EnemySpawner가 PlayerExperience를 Player에서 한 번 조회하고 Orb Prefab/Player/Camera를 Spawn된 Slime에 전달
-- Spawn된 Orb의 하위 Billboard Camera를 Runtime 연결
-- Level, XP Threshold, Level Up, Magnet, Loot Manager는 구현하지 않음
+### U6-A — Level Progression + Level-Up Pause
+- Starting Level `1`, Starting Experience `0`
+- Base Experience To Level `8`, Experience Growth Per Level `4`
+- 현재 Requirement: `8 + (Level - 1) * 4`
+- Threshold 도달 시 XP 차감, Level 증가, 다음 Requirement 계산
+- 초과 XP 이월과 한 번의 XP 추가에서 모든 Level Up 계산
+- `LevelsGained` 알림으로 획득 Level 수 전달
+- `LevelUpController`가 Pending Level Ups를 누적하고 `Time.timeScale = 0`으로 Pause
+- Debug Context Menu로 Pending을 하나씩 완료하고 `0`에서 `Time.timeScale = 1` 복구
+- Controller Disable/Destroy 시 자신이 소유한 Pause 복구
+- Pause 중 추가 Experience Orb Pickup 차단
+- Player/Slime/Spawner/Test Caster/Projectile Update 진입부에서 Pause 상태를 확인해 Pause 직후의 추가 Gameplay 처리도 차단
+- Upgrade Choice UI, Upgrade 적용, Starting Spell Pause는 구현하지 않음
 - Unity 6 프로젝트 Reference를 사용한 독립 C# Compile 검사 통과, Unity Editor Import/Play Mode 검증 대기
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- Player Root에 `PlayerExperience` 추가 및 시작 Current Experience `0` 확인
-- `Assets/Prefabs/Pickups/ExperienceOrb.prefab` Editor 생성
-- EnemySpawner의 Experience Orb Prefab 연결
-- Magic Missile/Debug Damage Death에서 Orb 한 개 생성 확인
-- Player가 직접 Pickup Radius 안에 들어갈 때 `0 → 4 → 8` 누적과 Orb 제거 확인
-- Spawn/Separation/Chase/Attack/Magic Missile/Player/Camera Regression 확인
+- `player/Visual`에 잘못 중복된 `PlayerExperience` 제거
+- `GameSystems` Root와 `LevelUpController` Editor 생성/연결
+- Level `1`, XP `0/8` 시작과 Orb 2개 후 Level `2`, XP `0/12`, Pending `1` 확인
+- Pause 중 Player/Slime/Spawn/Projectile 정지 확인
+- Debug Pending 완료 후 Resume 확인
+- 다음 Level Requirement `12`와 Orb 3개 후 Level `3` 확인
+- U1~U5 Gameplay Regression 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -283,11 +298,16 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Player Experience 누적
 - Level / Threshold 미구현
 
-### U6 — Level Up
+### U6-A — Level Progression + Level-Up Pause
 - Level / XP Threshold
 - Multiple Level Up 처리
-- Pause
-- Upgrade 3-choice
+- Pending Level Ups
+- Level-Up Pause / Debug Resume
+
+### U6-B — Level-Up 3-Choice UI Skeleton
+- Upgrade Choice UI
+- 3-choice 표시
+- Pending Level Up 순차 완료
 - Upgrade Apply
 - Resume
 
@@ -423,16 +443,30 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Rigidbody, Collider, Physics, FindObjectsByType, 범용 Combat/Projectile Framework를 사용하지 않는다.
 
 ### Player Experience / Experience Orb
-- `PlayerExperience`는 게임 시작 시 Current Experience를 `0`으로 초기화한다.
+- `PlayerExperience`는 게임 시작 시 Level `1`, Current Experience `0`으로 초기화한다.
 - `AddExperience(float)`는 NaN, Infinity, 0 이하 값을 무시하고 유효한 XP만 누적한다.
-- U5-A에서는 Level, XP Threshold, Level Up을 계산하지 않는다.
+- Base Experience To Level 기본값은 `8`, Experience Growth Per Level 기본값은 `4`다.
+- 현재 Requirement는 `8 + (Level - 1) * 4`이며 Inspector의 Experience To Next Level에서 확인한다.
+- Threshold 이상이면 현재 Requirement를 차감하고 Level을 올린 뒤 다음 Requirement를 계산한다.
+- 남는 XP는 보존하며 한 번의 AddExperience에서 모든 Level Up을 처리한다.
+- 한 번의 AddExperience에서 획득한 Level 수는 `LevelsGained` 알림으로 전달한다.
 - Slime Experience Reward 기본값은 `4`이며 기존 단일 Death 경로에서 Orb 하나만 생성한다.
 - Experience Orb의 기본 Value는 `4`, Pickup Radius는 `1.1`이다.
 - Orb Pickup은 Collider나 Rigidbody 없이 Player와 Orb의 XZ 거리로만 판정한다.
 - Orb는 Player가 직접 범위 안에 들어왔을 때 XP를 정확히 한 번 지급한 뒤 Root GameObject를 Destroy한다.
+- `Time.timeScale`이 `0`인 동안에는 추가 Orb Pickup을 처리하지 않는다.
 - Magnet, Attraction, Loot Manager, Event Bus, Service Locator를 사용하지 않는다.
 - Orb Root는 Slime Death World Position에 생성하고 Visual Child를 Local Y `0.4`에 두어 Gameplay XZ 위치와 시각 높이를 분리한다.
 - Orb의 `BillboardToCamera`는 Prefab에서 Scene Camera를 저장하지 않고 Runtime Setup으로 Main Camera Transform을 받는다.
+
+### Level-Up Pause
+- `LevelUpController`는 PlayerExperience의 `LevelsGained` 알림을 구독한다.
+- 획득한 Level 수를 Pending Level Ups에 누적하고 하나 이상이면 `Time.timeScale = 0`으로 Gameplay를 Pause한다.
+- U6-A에서는 Upgrade UI 대신 `Debug Complete Pending Level Up` Context Menu로 Pending을 하나씩 완료한다.
+- Pending이 남아 있으면 Pause를 유지하고 `0`이 되면 `Time.timeScale = 1`로 Resume한다.
+- Controller Disable/Destroy 시 이 Controller가 소유한 Pause를 복구한다.
+- Player Movement, Slime AI/Attack, Enemy Spawn, Test Caster, Projectile, Orb Pickup은 `Time.timeScale = 0`일 때 Update Gameplay를 처리하지 않는다.
+- Starting Spell Selection Pause와 Upgrade Choice UI는 U6-A에서 구현하지 않는다.
 
 ### Prototype Visual Baseline
 - Player와 Slime Gameplay Root는 Position과 Rotation을 담당하며 Rotation `(0, 0, 0)`을 유지한다.
@@ -495,7 +529,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `player`
   - `ground`
   - `EnemySpawner`
-- `player` Root는 `PlayerMovement`, `PlayerHealth`, Test-only `MagicMissileCaster`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
+- `player` Root는 `PlayerMovement`, `PlayerHealth`, Test-only `MagicMissileCaster`, `PlayerExperience`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
 - `player/Visual` Child는 기존 Square SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0.5, 0)`이다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
 - U1-A / U1-A2의 World XZ 이동 동작은 Unity Editor에서 검증됐다.
@@ -511,7 +545,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - U1 Camera Follow는 Unity Editor에서 검증됐다.
 - `player`에는 `PlayerHealth`가 연결되어 있으며 Maximum HP는 `100`이다.
 - `player`의 Test-only `MagicMissileCaster`에는 실제 Magic Missile Prefab과 `EnemySpawner`가 연결되어 있으며 U4-A Play Mode 검증이 완료됐다.
-- `player`에는 아직 `PlayerExperience`가 없으며 U5-A Editor Setup에서 추가해야 한다.
+- `player` Root의 `PlayerExperience`는 U5-A Play Mode 검증에 사용됐다.
+- 실제 Scene에는 `player/Visual` Child에도 `PlayerExperience`가 하나 더 붙어 있다. Gameplay가 사용하는 것은 Root Component이며 Visual의 중복 Component는 U6-A Editor Setup에서 제거한다.
 - 수동 배치 Slime은 Scene에서 제거됐다.
 - `EnemySpawner` Root에는 `EnemySpawner` Component가 연결되어 있다.
   - Player: `player`
@@ -520,7 +555,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Spawn Interval `1.5`
   - Spawn Distance `14`
   - Maximum Enemy Count `20`
-- 새 Experience Orb Prefab Field는 아직 연결되지 않았으며 U5-A Editor Setup에서 연결해야 한다.
+- Experience Orb Prefab: `Assets/Prefabs/Pickups/ExperienceOrb.prefab`
 - U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
@@ -538,7 +573,9 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - U3-B Separation은 Script 기본값 Radius `0.75`, Strength `0.35`로 Editor 검증 완료됐다.
 - Magic Missile 실제 경로: `Assets/Prefabs/Projectiles/MagicMissile.prefab`
 - Magic Missile Root에는 `MagicMissileProjectile`, Visual Child에는 Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
-- `Assets/Prefabs/Pickups/ExperienceOrb.prefab`은 아직 없으며 U5-A Editor Setup에서 생성해야 한다.
+- Experience Orb 실제 경로: `Assets/Prefabs/Pickups/ExperienceOrb.prefab`
+- Experience Orb Root에는 `ExperienceOrb`, Visual Child에는 Cyan Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
+- Experience Orb Value `4`, Pickup Radius `1.1`, Visual Local Position `(0, 0.4, 0)`, Scale `(0.35, 0.35, 0.35)`다.
 
 ### Script
 - `Assets/Scripts/Player/PlayerMovement.cs`
@@ -604,16 +641,25 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 하위 Billboard Camera Runtime 연결
   - U4-A Projectile Prefab 생성 및 Play Mode 검증 완료
 - `Assets/Scripts/Player/PlayerExperience.cs`
-  - Current Experience Play 시작 시 `0` 초기화
+  - Level `1`, Current Experience `0`, 첫 Requirement `8` 초기화
+  - Base Requirement `8`, Level당 Growth `4`
   - Invalid/0 이하 XP 방어와 유효 XP 누적
-  - Inspector에서 Current Experience 확인 가능
-  - Level/Threshold/Level Up 없음
+  - 초과 XP 보존과 다중 Level Up 계산
+  - 획득 Level 수 `LevelsGained` 알림
+  - Inspector에서 Level, Current Experience, Experience To Next Level 확인 가능
 - `Assets/Scripts/Experience/ExperienceOrb.cs`
   - Value 기본값 `4`, Pickup Radius 기본값 `1.1`
   - Runtime Player/PlayerExperience/Billboard Camera/Reward 연결
   - XZ 거리 기반 직접 Pickup과 중복 Collect 방어
   - Pickup 후 Orb Root Destroy
+  - Pause 중 추가 Pickup 차단
   - Collider/Rigidbody/Magnet 없음
+- `Assets/Scripts/Progression/LevelUpController.cs`
+  - PlayerExperience `LevelsGained` 구독
+  - Pending Level Ups 누적과 `Time.timeScale = 0` Pause
+  - Debug Context Menu로 Pending 하나씩 완료
+  - Pending `0`에서 `Time.timeScale = 1` Resume
+  - Disable/Destroy Pause 복구와 PlayerExperience Null 방어
 - `Assets/Scripts/Player/PlayerHealth.cs`
   - Maximum HP 기본값 `100`
   - Current HP Inspector 확인 가능
@@ -631,9 +677,10 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U5-A Script는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
-- `player`에 `PlayerExperience`가 아직 추가되지 않았다.
-- `Assets/Prefabs/Pickups/ExperienceOrb.prefab`이 아직 없고 EnemySpawner의 Experience Orb Prefab Reference도 연결되지 않았다.
+- U6-A Script는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
+- `GameSystems`와 `LevelUpController`는 아직 Main Scene에 추가되지 않았다.
+- `player/Visual`에 불필요한 두 번째 `PlayerExperience`가 붙어 있어 Editor에서 제거해야 한다.
+- Level-Up Upgrade Choice UI는 아직 없으며 U6-A에서는 Debug Context Menu로 Pending을 완료한다.
 - Player Death와 HP UI는 구현되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
@@ -647,15 +694,15 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
 - Lightning Stagger anti-permastun 필요 여부
 - 최종 Balance
-- U6 Level / XP Threshold / Level Up / Upgrade Selection
+- U6-B Level-Up 3-Choice UI / 실제 Upgrade 적용
 - U7 이후 Starting Spell Selection, Skill, School, Synergy 구현
 - XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U5-A Editor Verification**
+**Pending U6-A Editor Verification**
 
-먼저 PlayerExperience와 Experience Orb Prefab을 Unity Editor에서 명시적으로 연결하고 Slime Death당 Orb 한 개 생성, XZ 직접 Pickup, XP 누적과 기존 Gameplay Regression을 검증한다.
+먼저 중복 PlayerExperience를 제거하고 `GameSystems/LevelUpController`를 연결한 뒤 Level/Threshold/초과 XP/Pending/Pause/Debug Resume와 기존 Gameplay Regression을 검증한다.
 
-검증 결과를 확인한 뒤 다음 작은 Phase를 제안한다. 이번 작업에서는 U6 Level Up, Upgrade System, Starting Spell Selection을 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U6-B — Level-Up 3-Choice UI Skeleton`을 제안한다. 이번 작업에서는 U6-B, Upgrade 적용, Starting Spell Selection을 구현하지 않는다.

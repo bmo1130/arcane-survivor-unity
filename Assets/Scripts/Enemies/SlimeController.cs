@@ -141,7 +141,10 @@ public sealed class SlimeController : MonoBehaviour
 
     private void Update()
     {
-        if (isDead || target == null || playerHealth == null)
+        if (Time.timeScale <= 0f
+            || isDead
+            || target == null
+            || playerHealth == null)
         {
             return;
         }

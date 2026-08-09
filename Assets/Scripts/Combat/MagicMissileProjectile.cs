@@ -69,7 +69,9 @@ public sealed class MagicMissileProjectile : MonoBehaviour
 
     private void Update()
     {
-        if (!isInitialized || isFinished)
+        if (Time.timeScale <= 0f
+            || !isInitialized
+            || isFinished)
         {
             return;
         }
