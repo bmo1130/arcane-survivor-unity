@@ -1,23 +1,27 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U1-B — Perspective Camera + Follow (Editor Verification Pending)**
+**U2-A — Basic Slime Chase / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
-U1-A와 U1-A2의 Player 이동은 Unity Editor에서 확인됐다.
+U1 Player Movement와 Perspective Camera Follow는 Unity Editor에서 확인됐다.
 
 W/S는 Z축, A/D는 X축으로 이동하며 Player Y는 `0`으로 유지된다.
 
 Unity Console Error 없이 WASD 이동 검증을 완료했다.
 
-현재 Perspective Camera와 부드러운 Player Follow를 구현 중이며, Unity Editor 검증 전까지 U1-B와 U1 전체는 완료로 기록하지 않는다.
+Perspective Camera는 FOV `50`으로 Player를 부드럽게 추적하며 Unity Console Error가 없다.
+
+U1은 완료됐다.
+
+현재 Main Scene에 Slime 하나를 수동 배치해 Player를 추적시키는 U2-A를 진행 중이며, Unity Editor 검증 전까지 U2-A와 U2 전체는 완료로 기록하지 않는다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U1-B — Perspective Camera + Follow**다.
+현재 구현 범위는 **U2-A — Basic Slime Chase**다.
 
 ## Completed Features
 
@@ -48,25 +52,36 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - `Time.deltaTime` 기반 이동
 - Unity Editor Play Mode 및 Console Error 검증 완료
 
+### U1-B — Perspective Camera + Follow
+- Perspective Camera, FOV `50`
+- Player 기준 Offset `(0, 14, 12)`
+- Follow Sharpness `7`
+- Look At Height `0.5`
+- `LateUpdate` 기반 framerate-independent exponential smoothing
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
+### U1 — Player
+- U1-A, U1-A2, U1-B 완료
+- Player WASD XZ 이동과 Perspective Camera Follow 동작 확인
+
 ## Current Work
 
-### U1-B — Perspective Camera + Follow
-- `Assets/Scripts/Camera/CameraFollow.cs` 작성
-- `LateUpdate`에서 Player 이동 후 Camera 갱신
-- Player 위치와 Offset으로 목표 Camera 위치 계산
-- `1 - exp(-sharpness * deltaTime)` 지수 보간으로 framerate-independent Follow
-- Player 바닥 기준 높이 `0.5` 지점을 매 Frame 바라봄
-- Follow Target 미연결 시 NullReference 없이 갱신 중단
+### U2-A — Basic Slime Chase
+- `Assets/Scripts/Enemies/SlimeController.cs` 작성
+- Target을 향해 XZ 평면에서만 이동
+- Slime World Y 좌표 유지
+- Stop Distance 밖에서만 접근하고 도달하면 정지
+- 한 Frame 이동량을 남은 거리로 제한해 Stop Distance overshoot 방지
+- Target 미연결 시 명확한 Console Error 출력 후 Component 비활성화
 - Reference Prototype 기본값 사용
-  - Offset `(0, 14, 12)`
-  - Follow Sharpness `7`
-  - Look At Height `0.5`
+  - Move Speed `2.6`
+  - Stop Distance `1.15`
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- Main Camera를 Perspective, FOV `50`으로 설정
-- Main Camera에 `CameraFollow` 연결
-- Play Mode Follow 감각과 Console Error 확인
+- Main Scene에 테스트용 Slime Sprite 하나 수동 배치
+- Target에 기존 `player` 연결
+- Play Mode XZ 추적, Y 유지, Stop Distance 정지 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -124,10 +139,13 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Perspective Camera
 - Player Follow
 
-### U2 — Slime
+### U2-A — Basic Slime Chase
+- 수동 배치 Slime
+- XZ Chase
+- Stop Distance
+
+### U2 — Remaining Slime Features
 - Slime Prefab
-- Spawn
-- Chase
 - Attack
 - HP
 - Death
@@ -219,6 +237,14 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - 매 Frame Player 위치의 Y `+0.5` 지점을 바라본다.
 - Camera Shake, Dead Zone, Zoom, Boundary, Cinemachine은 현재 구현하지 않는다.
 
+### Slime Chase
+- Slime은 현재 Rigidbody, Collider, NavMesh 없이 Transform으로 이동한다.
+- Target과의 거리는 XZ 평면에서만 계산하고 Slime Y는 변경하지 않는다.
+- 기본 Move Speed는 `2.6`, Stop Distance는 `1.15`다.
+- 한 Frame에 이동할 수 있는 거리를 `distance - stopDistance` 이하로 제한한다.
+- Stop Distance에 도달하면 Player 중심까지 더 파고들지 않고 정지한다.
+- Slime 회전과 Visual 방향 보정은 현재 구현하지 않는다.
+
 ### Git Tracking
 Repository에 포함할 대상:
 - `Assets`와 대응하는 `.meta` 파일
@@ -270,9 +296,15 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `player`는 테스트용 Square SpriteRenderer와 `PlayerMovement`를 사용한다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
 - U1-A / U1-A2 이동 동작은 Unity Editor에서 검증됐다.
-- Scene에 직렬화된 Move Speed는 현재 `5`이며 Script 기본값 `7`과 다르다.
-- Main Camera는 현재 Orthographic이며 Transform은 Position `(0, 0, -10)`, Rotation `(0, 0, 0)`이다.
-- Main Camera의 Perspective/FOV/CameraFollow Editor 설정은 아직 적용되지 않았다.
+- Scene에 직렬화된 Player Move Speed는 `7`이다.
+- Main Camera는 Perspective, FOV `50`이다.
+- Main Camera에는 `CameraFollow`가 연결되어 있다.
+  - Follow Target: `player`
+  - Offset `(0, 14, 12)`
+  - Follow Sharpness `7`
+  - Look At Height `0.5`
+- U1 Camera Follow는 Unity Editor에서 검증됐다.
+- Slime GameObject는 아직 Scene에 생성하지 않았다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
 - `ProjectSettings.asset`의 `templateDefaultScene`에는 프로젝트 템플릿 출처 정보로 기존 `SampleScene` 경로가 남아 있다. Build Scene 항목은 아니며 U1 진행을 막지 않는다.
 - `Assets/Settings/Scenes/URP2DSceneTemplate.unity`는 Unity 2D URP Scene Template이다.
@@ -293,18 +325,29 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 기본 Offset `(0, 14, 12)`
   - 기본 Follow Sharpness `7`
   - 기본 Look At Height `0.5`
+  - Editor 연결 및 Play Mode 검증 완료
+- `Assets/Scripts/Enemies/SlimeController.cs`
+  - XZ 평면 Target 추적
+  - 기본 Move Speed `2.6`
+  - 기본 Stop Distance `1.15`
+  - Stop Distance overshoot 방지
+  - Target Null 방어
   - Editor 연결 및 Play Mode 검증 대기
 - Assembly Definition 없음
 
 ## Known Issues
-- U1-B는 Unity Editor에서 아직 컴파일 및 Play Mode 검증되지 않았다.
-- Main Camera는 아직 Orthographic이며 `CameraFollow`가 연결되지 않았다.
-- 현재 Scene의 `player` Move Speed는 직렬화된 값 `5`로, Reference Prototype 기준 `7`과 다르다.
-- Perspective Camera에서 현재 Square Sprite가 어떻게 보이는지는 U1-B Editor 검증 후 판단한다.
+- U2-A는 Unity Editor에서 아직 컴파일 및 Play Mode 검증되지 않았다.
+- Main Scene에 Slime GameObject와 `SlimeController` 연결이 아직 없다.
+- 현재 Slime은 추적과 정지만 지원하며 Attack, HP, Death는 구현되지 않았다.
+- 테스트용 2D Sprite의 Visual Rotation 보정은 Deferred 상태다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
 
 ## Deferred Work
+- Slime Prefab
+- Slime Attack, HP, Death
+- Slime Visual Rotation
+- Enemy Spawn 및 Enemy Manager
 - Physics2D 활용 범위
 - ScriptableObject 활용 범위
 - Common Upgrade 최대 Level
@@ -316,8 +359,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U1-B Editor Verification**
+**Pending U2-A Editor Verification**
 
-먼저 U1-B의 Unity Editor 설정과 Play Mode 검증을 완료한다.
+먼저 U2-A의 Unity Editor 설정과 Play Mode 검증을 완료한다.
 
-검증 결과를 확인한 뒤 다음 작은 Phase를 결정한다. U2는 아직 시작하지 않는다.
+검증 결과를 확인한 뒤 다음 작은 Phase를 제안한다. 이번 작업에서는 후속 Slime 기능이나 U3를 구현하지 않는다.
