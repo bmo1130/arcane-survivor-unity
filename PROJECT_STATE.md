@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U6-C — Common Upgrade Choices + Application / Editor Verification Pending**
+**U7-A — Skill Loadout Core / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -37,13 +37,15 @@ Level `1`, XP `0/8`, 두 Orb 후 Level `2`, XP `0/12`, Pending `1`, `Time.timeSc
 
 Level Up 시 정확히 3개의 Button 표시, Pause 상태의 클릭, Pending 순차 감소, Multiple Pending 동안 Pause 유지와 마지막 Pending 이후 Resume를 Unity Editor에서 검증했다. Console Error가 없으며 U6-B는 완료됐다.
 
-Placeholder Choice를 Maximum Health, Magic Power, Regeneration으로 교체하고 실제 Player 상태에 적용하는 코드를 구현했으며 U6-C Editor 검증을 기다리고 있다.
+Maximum Health, Magic Power, Magic Missile Base Damage + Bonus, Regeneration, Pause 중 Regeneration 정지, Common Upgrade Level/UI Label 갱신과 Pending 순차 처리를 Unity Editor에서 검증했다. Console Error가 없으며 U6-C는 완료됐다.
+
+현재 실제 Spell 데이터 없이 Active 1/2와 Passive 1의 장착·업그레이드·슬롯 제한 규칙만 표현하는 U7-A를 진행 중이다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U6-C — Common Upgrade Choices + Application**이다.
+현재 구현 범위는 **U7-A — Skill Loadout Core**다.
 
 ## Completed Features
 
@@ -174,30 +176,41 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - 마지막 Pending 처리 후 Panel 숨김과 Gameplay Resume
 - Unity Editor Play Mode 및 Console Error 검증 완료
 
+### U6-C — Common Upgrade Choices + Application
+- Maximum Health 선택 시 Maximum/Current HP 각각 `+10` 정상
+- Magic Power 선택 시 Magic Damage Bonus `+1` 정상
+- Test-only Magic Missile Base Damage `3` + Bonus 연동 정상
+- Regeneration 선택당 `+0.5 HP/sec` 적용 정상
+- Level-Up Pause 중 Regeneration 정지 정상
+- Common Upgrade Level과 Level-Up UI Label 갱신 정상
+- Pending Level Ups 순차 처리 정상
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
 ## Current Work
 
-### U6-C — Common Upgrade Choices + Application
-- 세 고정 Choice를 Maximum Health, Magic Power, Regeneration으로 교체
-- Common Upgrade별 선택 Level을 `0`부터 독립적으로 누적
-- Maximum Health 선택 시 Maximum/Current HP 각각 `+10`
-- Magic Power 선택 시 모든 Magic Damage Bonus `+1`
-- Regeneration 선택 시 Health Regeneration `+0.5 HP/sec`
-- Test-only Magic Missile의 Base Damage `3`에 Player Magic Damage Bonus 적용
-- 선택 효과와 Level 증가 후 Pending을 하나 감소
-- Multiple Pending에서 Pause를 유지하고 갱신된 Level Label로 다음 Choice 표시
-- Regeneration은 `Time.deltaTime` 기반이며 Level-Up Pause 중 정지
-- Random Pool, Maximum Level, Skill/School/Loadout은 구현하지 않음
-- Unity 6 Engine/uGUI/Input System Reference를 포함한 전체 Gameplay C# 독립 Compile 검사 통과, Unity Editor Import/Play Mode 검증 대기
+### U7-A — Skill Loadout Core
+- 시작 상태 Active Slot 1/2와 Passive Slot 1 모두 Empty, Level `0`
+- 새로운 Active는 Active 1부터, 다음은 Active 2에 장착
+- Active 두 Slot이 차면 세 번째 서로 다른 Active 거부
+- Passive는 한 Slot만 사용하며 다른 Passive가 장착됐으면 새 Passive 거부
+- 이미 장착된 같은 Skill ID는 같은 Type일 때 Level `1 → 2`
+- School Skill Maximum Level 상수 `2`
+- 같은 Skill ID의 중복 Slot 장착과 Type 불일치 획득 거부
+- Null/공백 Skill ID와 정의되지 않은 SkillType 거부
+- Inspector에서 각 Slot의 Skill ID와 Level 확인 가능
+- Debug Placeholder ID와 Context Menu로 슬롯 규칙 검증 가능
+- Magic Missile Test Caster와 Loadout은 연결하지 않으며 시작 Loadout은 Empty
+- Common Upgrade는 Slotless이고 SkillLoadout과 독립
+- 실제 Skill Data, School, Starting Selection, Spell 효과 연동은 구현하지 않음
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- `player`에 PlayerMagicPower 추가 및 Test Caster Reference 연결
-- `GameSystems`에 CommonUpgradeController 추가 및 LevelUpController Reference 연결
-- 저장된 Main Scene의 LevelUpPanel Reference 재연결
-- Maximum/Current HP `+10`, Magic Damage `+1`, Regeneration `+0.5/sec` 확인
-- Common Upgrade Level 및 UI Label 갱신 확인
-- Pending `2+`의 순차 적용/Pause/Resume 확인
-- U1~U6-B Gameplay Regression 확인
+- `GameSystems`에 `SkillLoadout` Component 추가 및 Main Scene 저장
+- 시작 시 세 Slot Empty/Level `0` 확인
+- Active 첫/둘째 Slot 채우기, 셋째 Active 거부, 동일 Active Lv.2 Cap 확인
+- Passive 단일 Slot, 동일 Passive Lv.2 Cap, 다른 Passive 거부 확인
+- Debug Reset 후 Empty 복구 확인
+- U1~U6-C Gameplay Regression 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -334,7 +347,7 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Maximum Health / Magic Power / Regeneration
 - 실제 Upgrade Apply
 
-### U7 — Skill Loadout
+### U7-A — Skill Loadout Core
 - Active Slot 2
 - Passive Slot 1
 - Skill Lv.1 / Lv.2
@@ -511,6 +524,18 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Regeneration은 PlayerHealth가 보유하며 선택당 `+0.5 HP/sec`다. Player HP가 `0`보다 크고 Maximum 미만일 때만 `Time.deltaTime`으로 회복한다.
 - Maximum Level, Random Upgrade Pool, ScriptableObject Upgrade Database, 범용 Damage/Ability Framework는 구현하지 않는다.
 
+### Skill Loadout Core
+- School Skill Slot은 Active Slot 1, Active Slot 2, Passive Slot 1로 고정한다.
+- 게임 시작 시 세 Slot은 빈 Skill ID와 Level `0`으로 초기화한다.
+- 새 Active는 Active 1부터 채우고 다음 Active를 Active 2에 넣으며, 두 Slot이 차면 새로운 Active를 거부한다.
+- Passive는 하나만 장착하며 다른 Passive가 있으면 새로운 Passive를 거부한다.
+- 이미 장착된 같은 Skill ID는 같은 SkillType일 때만 Level을 올리고 Maximum Level `2`에서 거부한다.
+- 같은 Skill ID를 두 Slot에 중복 장착하지 않는다.
+- Common Upgrade는 Slot을 사용하지 않으며 SkillLoadout에 넣지 않는다.
+- U7-A Debug Placeholder ID는 규칙 검증용 상태일 뿐 실제 Skill Content가 아니다.
+- Magic Missile Test Caster는 SkillLoadout과 연결하지 않으며 자동 장착하지 않는다.
+- School, School Point, 실제 Skill Definition, Spell 효과 연동은 후속 Phase로 미룬다.
+
 ### Prototype Visual Baseline
 - Player와 Slime Gameplay Root는 Position과 Rotation을 담당하며 Rotation `(0, 0, 0)`을 유지한다.
 - SpriteRenderer와 `BillboardToCamera`는 각 Root 아래의 `Visual` Child에 둔다.
@@ -575,7 +600,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `GameSystems`
   - `EventSystem`
   - `Canvas`
-- 저장된 `player` Root는 `PlayerMovement`, `PlayerHealth`, Test-only `MagicMissileCaster`, `PlayerExperience`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다. U6-C의 `PlayerMagicPower` 추가는 Editor 적용 대기다.
+- 저장된 `player` Root는 `PlayerMovement`, `PlayerHealth`, Test-only `MagicMissileCaster`, `PlayerExperience`, `PlayerMagicPower`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
 - `player/Visual` Child는 기존 Square SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0.5, 0)`이다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
 - U1-A / U1-A2의 World XZ 이동 동작은 Unity Editor에서 검증됐다.
@@ -590,7 +615,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Look At Height `0.5`
 - U1 Camera Follow는 Unity Editor에서 검증됐다.
 - `player`에는 `PlayerHealth`가 연결되어 있으며 Maximum HP는 `100`이다.
-- `player`의 Test-only `MagicMissileCaster`에는 실제 Magic Missile Prefab과 `EnemySpawner`가 연결되어 있으며 U4-A Play Mode 검증이 완료됐다.
+- `player`의 Test-only `MagicMissileCaster`에는 실제 Magic Missile Prefab, `EnemySpawner`, `PlayerMagicPower`가 연결되어 있으며 Base Damage + Bonus 적용을 검증했다.
 - `player` Root의 `PlayerExperience`는 U5-A Play Mode 검증에 사용됐다.
 - `player/Visual`의 중복 PlayerExperience는 제거됐으며 Root에 하나만 남아 있다.
 - 수동 배치 Slime은 Scene에서 제거됐다.
@@ -605,10 +630,12 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `GameSystems`에는 `LevelUpController`가 연결되어 있다.
   - Player Experience: `player` Root의 `PlayerExperience`
   - Level Up Choice UI: `Canvas`의 `LevelUpChoiceUI`
+  - Common Upgrade Controller: 같은 `GameSystems`의 `CommonUpgradeController`
   - Pending Level Ups `0`
 - `Canvas`, `EventSystem`, 비활성 `LevelUpPanel`, Title과 세 Choice Button이 Main Scene에 존재한다.
-- 저장된 Main Scene의 `LevelUpChoiceUI`에는 Button/Label 세 쌍이 연결되어 있지만 `Level Up Panel` Field는 현재 `None`이다. U6-B 검증 결과와 저장 파일이 다르므로 U6-C Editor Setup에서 다시 연결하고 Scene을 저장해야 한다.
-- `GameSystems`의 `CommonUpgradeController`와 `LevelUpController.Common Upgrade Controller` 연결은 U6-C Editor 적용 대기다.
+- 저장된 Main Scene의 `LevelUpChoiceUI`에는 LevelUpPanel과 Button/Label 세 쌍이 모두 연결되어 있다.
+- `GameSystems`에는 PlayerHealth/PlayerMagicPower가 연결된 `CommonUpgradeController`가 있으며 U6-C Play Mode 검증이 완료됐다.
+- `GameSystems`의 `SkillLoadout` 추가는 U7-A Editor 적용 대기다. 다른 Reference는 필요하지 않다.
 - U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
@@ -741,6 +768,14 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 살아 있고 Maximum 미만일 때 `Time.deltaTime` 기반 회복, Pause 중 정지
   - Player Death 없음
   - Editor 연결 및 Play Mode 검증 완료
+- `Assets/Scripts/Skills/SkillLoadout.cs`
+  - `SkillType.Active/Passive` 최소 enum
+  - Active Slot 1/2와 Passive Slot 1의 private 직렬화 Skill ID/Level 상태
+  - 시작 Empty/Level `0`, School Skill Maximum Level `2`
+  - `CanAcquireOrUpgrade`와 `AcquireOrUpgrade`의 슬롯/Type/Level 규칙
+  - Null/공백 ID, Type 불일치, 중복 Slot, Level Cap 방어
+  - 실제 콘텐츠가 아닌 Debug Placeholder Context Menu와 Reset
+  - 외부 System Reference 및 Spell/Common Upgrade 연동 없음
 - `Assets/Scripts/Visual/BillboardToCamera.cs`
   - Camera Transform 참조
   - Spawn된 Visual용 Runtime `SetCamera(Transform)` 연결 지점
@@ -751,9 +786,9 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U6-C Script는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
-- 저장된 `Main.unity`의 `LevelUpChoiceUI.Level Up Panel` Reference가 `None`이다. U6-B 검증 세션에서는 Panel 표시가 성공했으므로 저장 상태와 차이가 있으며, Editor에서 재연결 후 Scene 저장이 필요하다.
-- `PlayerMagicPower`, `CommonUpgradeController`, Test Caster/LevelUpController의 새 Reference는 아직 Main Scene에 추가/연결되지 않았다.
+- U7-A `SkillLoadout`은 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
+- `SkillLoadout` Component는 아직 저장된 Main Scene의 `GameSystems`에 추가되지 않았다.
+- Debug Placeholder Skill ID는 슬롯 규칙 검증용이며 실제 Spell/Passive가 아니다.
 - Player Death와 HP UI는 구현되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
@@ -767,14 +802,14 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
 - Lightning Stagger anti-permastun 필요 여부
 - 최종 Balance
-- U7 이후 Starting Spell Selection, Skill, School, Synergy 구현
+- U8 이후 Skill Definition, School, Starting Spell Selection, Synergy 구현
 - XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U6-C Editor Verification**
+**Pending U7-A Editor Verification**
 
-먼저 `PlayerMagicPower`와 `CommonUpgradeController`를 Scene에 추가하고 새 Reference를 연결한 뒤 세 Common Upgrade 효과, Label Level 갱신, Multiple Pending, Pause/Resume와 기존 Gameplay Regression을 검증한다.
+먼저 `GameSystems`에 `SkillLoadout`을 추가하고 Empty 시작 상태, Active 2 Slot, Passive 1 Slot, 동일 Skill Lv.2 Cap, 새 Skill 거부, Debug Reset과 기존 Gameplay Regression을 검증한다.
 
-검증 성공 후 다음 Phase로 `U7-A — Skill Loadout Core (Active 1 / Active 2 / Passive 1)`을 제안한다. 이번 작업에서는 U7, Random Pool, Starting Spell Selection을 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U8-A — Skill Definition + School Metadata`를 제안한다. 이번 작업에서는 U8, School Point, Starting Spell Selection을 구현하지 않는다.
