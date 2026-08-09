@@ -6,6 +6,9 @@ public sealed class LevelUpController : MonoBehaviour
     [SerializeField]
     private PlayerExperience playerExperience;
 
+    [SerializeField]
+    private LevelUpChoiceUI levelUpChoiceUI;
+
     [SerializeField, Min(0)]
     private int pendingLevelUps;
 
@@ -26,6 +29,21 @@ public sealed class LevelUpController : MonoBehaviour
             "LevelUpController requires the Player's PlayerExperience component.",
             this);
         enabled = false;
+        return;
+    }
+
+    private void Start()
+    {
+        if (levelUpChoiceUI != null
+            && levelUpChoiceUI.Initialize(this))
+        {
+            return;
+        }
+
+        Debug.LogError(
+            "LevelUpController requires a configured LevelUpChoiceUI.",
+            this);
+        enabled = false;
     }
 
     private void OnEnable()
@@ -40,6 +58,7 @@ public sealed class LevelUpController : MonoBehaviour
         if (pendingLevelUps > 0)
         {
             PauseGameplay();
+            levelUpChoiceUI?.ShowChoices();
         }
     }
 
@@ -50,11 +69,13 @@ public sealed class LevelUpController : MonoBehaviour
             playerExperience.LevelsGained -= HandleLevelsGained;
         }
 
+        levelUpChoiceUI?.HideChoices();
         ResumeGameplay();
     }
 
     private void OnDestroy()
     {
+        levelUpChoiceUI?.HideChoices();
         ResumeGameplay();
     }
 
@@ -70,6 +91,22 @@ public sealed class LevelUpController : MonoBehaviour
             ? int.MaxValue
             : (int)updatedPending;
         PauseGameplay();
+        levelUpChoiceUI?.ShowChoices();
+    }
+
+    public void SelectChoice(int choiceIndex)
+    {
+        if (choiceIndex < 0
+            || choiceIndex >= LevelUpChoiceUI.ChoiceCount
+            || pendingLevelUps <= 0
+            || levelUpChoiceUI == null
+            || !levelUpChoiceUI.IsShowing)
+        {
+            return;
+        }
+
+        // U6-B validates the UI flow only. Upgrade effects begin in U6-C.
+        CompletePendingLevelUp();
     }
 
     public void CompletePendingLevelUp()
@@ -81,13 +118,22 @@ public sealed class LevelUpController : MonoBehaviour
 
         pendingLevelUps--;
 
+        if (pendingLevelUps > 0)
+        {
+            PauseGameplay();
+            levelUpChoiceUI?.ShowChoices();
+            return;
+        }
+
+        levelUpChoiceUI?.HideChoices();
+
         if (pendingLevelUps == 0)
         {
             ResumeGameplay();
         }
     }
 
-    // Temporary Editor verification hook until U6-B completes choices.
+    // Editor fallback while U6-B verifies the normal Button flow.
     [ContextMenu("Debug Complete Pending Level Up")]
     private void DebugCompletePendingLevelUp()
     {

@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U6-A — Level Progression + Level-Up Pause / Editor Verification Pending**
+**U6-B — Level-Up 3-Choice UI Skeleton / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -33,13 +33,15 @@ Test-only Magic Missile의 자동 Target 선택, Homing, Damage, Target 선행 �
 
 Slime Death 시 Experience Orb 생성, Reward `4`, Pickup Radius `1.1`, 직접 Pickup과 `0 → 4 → 8` 누적을 Unity Editor에서 검증했다. Magnet과 중복 획득은 없으며 기존 Combat/Spawn/Movement도 정상이고 Console Error가 없다.
 
-현재 XP Threshold 도달 시 Level 증가, 초과 XP 이월, 다중 Level 계산과 Pending Level-Up 기반 Gameplay Pause를 처리하는 U6-A를 진행 중이다.
+Level `1`, XP `0/8`, 두 Orb 후 Level `2`, XP `0/12`, Pending `1`, `Time.timeScale = 0`과 전체 Gameplay Pause를 Unity Editor에서 검증했다. Debug Pending 완료 후 `Time.timeScale = 1` Resume와 다음 Requirement `12`도 정상이며 Console Error가 없다.
+
+현재 Level Up마다 정확히 3개의 Placeholder Choice를 표시하고 Pending을 순차 처리하는 U6-B UI Skeleton을 진행 중이다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U6-A — Level Progression + Level-Up Pause**다.
+현재 구현 범위는 **U6-B — Level-Up 3-Choice UI Skeleton**이다.
 
 ## Completed Features
 
@@ -153,32 +155,40 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - Combat, Spawn, Movement Regression 없음
 - Unity Editor Play Mode 및 Console Error 검증 완료
 
+### U6-A — Level Progression + Level-Up Pause
+- Level `1`, XP `0/8` 시작
+- 첫 Orb 후 XP `4/8`, 두 번째 Orb 후 Level `2`, XP `0/12`
+- Pending Level Ups `1`과 `Time.timeScale = 0` 확인
+- Player, Enemy, Spawn, Projectile 등 Gameplay 전체 Pause 정상
+- Debug Pending 완료 후 Pending `0`, `Time.timeScale = 1`, Gameplay Resume 정상
+- 다음 Level Requirement `12` 확인
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
 ## Current Work
 
-### U6-A — Level Progression + Level-Up Pause
-- Starting Level `1`, Starting Experience `0`
-- Base Experience To Level `8`, Experience Growth Per Level `4`
-- 현재 Requirement: `8 + (Level - 1) * 4`
-- Threshold 도달 시 XP 차감, Level 증가, 다음 Requirement 계산
-- 초과 XP 이월과 한 번의 XP 추가에서 모든 Level Up 계산
-- `LevelsGained` 알림으로 획득 Level 수 전달
-- `LevelUpController`가 Pending Level Ups를 누적하고 `Time.timeScale = 0`으로 Pause
-- Debug Context Menu로 Pending을 하나씩 완료하고 `0`에서 `Time.timeScale = 1` 복구
-- Controller Disable/Destroy 시 자신이 소유한 Pause 복구
-- Pause 중 추가 Experience Orb Pickup 차단
-- Player/Slime/Spawner/Test Caster/Projectile Update 진입부에서 Pause 상태를 확인해 Pause 직후의 추가 Gameplay 처리도 차단
-- Upgrade Choice UI, Upgrade 적용, Starting Spell Pause는 구현하지 않음
-- Unity 6 프로젝트 Reference를 사용한 독립 C# Compile 검사 통과, Unity Editor Import/Play Mode 검증 대기
+### U6-B — Level-Up 3-Choice UI Skeleton
+- 설치된 uGUI `2.0.0`의 Canvas, Button, Legacy Text 사용
+- Level Up 시 중앙 Panel과 정확히 3개의 Placeholder Choice 표시
+- `Prototype Choice A/B/C` Label
+- 세 Button 모두 동일한 Pending Completion Flow 사용
+- UI 미표시 상태와 같은 화면의 중복 Choice 처리 방어
+- Pending이 남으면 Pause를 유지하고 다음 3 Choice를 즉시 다시 표시
+- 마지막 Pending 완료 시 Panel 숨김과 `Time.timeScale = 1` Resume
+- Debug Complete Pending Level Up fallback 유지
+- Placeholder Choice는 실제 Stat, Skill, Upgrade 데이터를 변경하지 않음
+- Random Choice Pool, Upgrade Application, Starting Spell UI는 구현하지 않음
+- Unity 6 uGUI Reference를 포함한 독립 C# Compile 검사 통과, Unity Editor Import/Play Mode 검증 대기
 
 남은 확인:
 - Unity Editor Script Import 및 C# Compile
-- `player/Visual`에 잘못 중복된 `PlayerExperience` 제거
-- `GameSystems` Root와 `LevelUpController` Editor 생성/연결
-- Level `1`, XP `0/8` 시작과 Orb 2개 후 Level `2`, XP `0/12`, Pending `1` 확인
-- Pause 중 Player/Slime/Spawn/Projectile 정지 확인
-- Debug Pending 완료 후 Resume 확인
-- 다음 Level Requirement `12`와 Orb 3개 후 Level `3` 확인
-- U1~U5 Gameplay Regression 확인
+- Canvas/EventSystem/LevelUpPanel/Title/3 Button Editor 생성
+- `LevelUpChoiceUI`의 Panel/Button/Label Reference 연결
+- `GameSystems/LevelUpController`의 Level Up Choice UI Reference 연결
+- 시작 시 Panel 숨김, Level Up에서 3 Choice 표시와 Pause 확인
+- 세 Button의 동일 Completion Flow와 중복 처리 방어 확인
+- Pending `2+`에서 중간 Resume 없이 다음 Choice 표시되는지 확인
+- 마지막 Pending에서 Panel 숨김과 Resume 확인
+- U1~U6-A Gameplay Regression 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -305,11 +315,15 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Level-Up Pause / Debug Resume
 
 ### U6-B — Level-Up 3-Choice UI Skeleton
-- Upgrade Choice UI
-- 3-choice 표시
+- Placeholder Choice UI
+- 정확히 3개 Choice 표시
 - Pending Level Up 순차 완료
-- Upgrade Apply
 - Resume
+
+### U6-C — Common Upgrade Choices + Application
+- Common Upgrade Choice 데이터
+- Maximum Health / Magic Power / Regeneration
+- 실제 Upgrade Apply
 
 ### U7 — Skill Loadout
 - Active Slot 2
@@ -468,6 +482,17 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Player Movement, Slime AI/Attack, Enemy Spawn, Test Caster, Projectile, Orb Pickup은 `Time.timeScale = 0`일 때 Update Gameplay를 처리하지 않는다.
 - Starting Spell Selection Pause와 Upgrade Choice UI는 U6-A에서 구현하지 않는다.
 
+### Level-Up Choice UI Skeleton
+- 기존 uGUI `2.0.0`의 Canvas, Button, Legacy Text를 사용하고 새 Package를 설치하지 않는다.
+- `LevelUpChoiceUI`는 Panel 하나, 서로 다른 Button 세 개와 Label 세 개만 관리한다.
+- Label은 `Prototype Choice A/B/C`이며 U6-B에서는 실제 Gameplay 효과가 없다.
+- Level Up 발생 시 Controller가 Pause와 Pending 누적 후 UI를 표시한다.
+- Button 클릭 시 해당 화면의 세 Button을 즉시 잠그고 Pending을 정확히 하나만 감소시킨다.
+- Pending이 남으면 `Time.timeScale = 0`을 유지하고 같은 Panel에 다음 세 Choice를 즉시 표시한다.
+- Pending이 `0`일 때만 Panel을 숨기고 Gameplay를 Resume한다.
+- UI가 숨겨진 상태의 Choice, 범위 밖 Choice Index, 중복 Button Reference는 안전하게 거부한다.
+- U6-B Placeholder는 Upgrade 데이터, Random Pool, Stat/Skill 적용으로 간주하지 않는다.
+
 ### Prototype Visual Baseline
 - Player와 Slime Gameplay Root는 Position과 Rotation을 담당하며 Rotation `(0, 0, 0)`을 유지한다.
 - SpriteRenderer와 `BillboardToCamera`는 각 Root 아래의 `Visual` Child에 둔다.
@@ -529,6 +554,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `player`
   - `ground`
   - `EnemySpawner`
+  - `GameSystems`
 - `player` Root는 `PlayerMovement`, `PlayerHealth`, Test-only `MagicMissileCaster`, `PlayerExperience`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
 - `player/Visual` Child는 기존 Square SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0.5, 0)`이다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
@@ -546,7 +572,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `player`에는 `PlayerHealth`가 연결되어 있으며 Maximum HP는 `100`이다.
 - `player`의 Test-only `MagicMissileCaster`에는 실제 Magic Missile Prefab과 `EnemySpawner`가 연결되어 있으며 U4-A Play Mode 검증이 완료됐다.
 - `player` Root의 `PlayerExperience`는 U5-A Play Mode 검증에 사용됐다.
-- 실제 Scene에는 `player/Visual` Child에도 `PlayerExperience`가 하나 더 붙어 있다. Gameplay가 사용하는 것은 Root Component이며 Visual의 중복 Component는 U6-A Editor Setup에서 제거한다.
+- `player/Visual`의 중복 PlayerExperience는 제거됐으며 Root에 하나만 남아 있다.
 - 수동 배치 Slime은 Scene에서 제거됐다.
 - `EnemySpawner` Root에는 `EnemySpawner` Component가 연결되어 있다.
   - Player: `player`
@@ -556,6 +582,10 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Spawn Distance `14`
   - Maximum Enemy Count `20`
 - Experience Orb Prefab: `Assets/Prefabs/Pickups/ExperienceOrb.prefab`
+- `GameSystems`에는 `LevelUpController`가 연결되어 있다.
+  - Player Experience: `player` Root의 `PlayerExperience`
+  - Pending Level Ups `0`
+- Canvas, EventSystem, LevelUpPanel은 아직 Scene에 없으며 U6-B Editor Setup에서 생성한다.
 - U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
@@ -657,9 +687,18 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `Assets/Scripts/Progression/LevelUpController.cs`
   - PlayerExperience `LevelsGained` 구독
   - Pending Level Ups 누적과 `Time.timeScale = 0` Pause
+  - Level Up 시 `LevelUpChoiceUI` 표시
+  - UI Choice Index 검증과 Pending 하나 완료
+  - Pending이 남으면 다음 Choice 표시, 마지막 Pending에서 UI 숨김과 Resume
   - Debug Context Menu로 Pending 하나씩 완료
   - Pending `0`에서 `Time.timeScale = 1` Resume
-  - Disable/Destroy Pause 복구와 PlayerExperience Null 방어
+  - Disable/Destroy UI 숨김/Pause 복구와 필수 Reference Null 방어
+- `Assets/Scripts/UI/LevelUpChoiceUI.cs`
+  - Panel 한 개와 서로 다른 uGUI Button/Text Reference 세 쌍 관리
+  - 시작 시 Panel 숨김
+  - Placeholder Label `Prototype Choice A/B/C`
+  - Button 클릭 잠금과 UI 미표시 상태 중복 처리 방어
+  - Controller에 Choice Index 전달
 - `Assets/Scripts/Player/PlayerHealth.cs`
   - Maximum HP 기본값 `100`
   - Current HP Inspector 확인 가능
@@ -677,10 +716,9 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U6-A Script는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
-- `GameSystems`와 `LevelUpController`는 아직 Main Scene에 추가되지 않았다.
-- `player/Visual`에 불필요한 두 번째 `PlayerExperience`가 붙어 있어 Editor에서 제거해야 한다.
-- Level-Up Upgrade Choice UI는 아직 없으며 U6-A에서는 Debug Context Menu로 Pending을 완료한다.
+- U6-B Script는 아직 Unity Editor Compile 및 Play Mode 검증 전이다.
+- Canvas, EventSystem, LevelUpPanel, 3 Button과 UI Reference는 아직 Main Scene에 생성/연결되지 않았다.
+- U6-B Choice는 UI 흐름 검증용 Placeholder이며 실제 Gameplay Upgrade를 적용하지 않는다.
 - Player Death와 HP UI는 구현되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
@@ -694,15 +732,15 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
 - Lightning Stagger anti-permastun 필요 여부
 - 최종 Balance
-- U6-B Level-Up 3-Choice UI / 실제 Upgrade 적용
+- U6-C Common Upgrade Choice 데이터와 실제 Upgrade 적용
 - U7 이후 Starting Spell Selection, Skill, School, Synergy 구현
 - XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U6-A Editor Verification**
+**Pending U6-B Editor Verification**
 
-먼저 중복 PlayerExperience를 제거하고 `GameSystems/LevelUpController`를 연결한 뒤 Level/Threshold/초과 XP/Pending/Pause/Debug Resume와 기존 Gameplay Regression을 검증한다.
+먼저 Canvas/EventSystem/LevelUpPanel/정확히 3개 Button을 만들고 `LevelUpChoiceUI`와 `LevelUpController` Reference를 연결한 뒤 UI 표시/클릭/Pending 순차 처리/Resume를 검증한다.
 
-검증 성공 후 다음 Phase로 `U6-B — Level-Up 3-Choice UI Skeleton`을 제안한다. 이번 작업에서는 U6-B, Upgrade 적용, Starting Spell Selection을 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U6-C — Common Upgrade Choices + Application`을 제안한다. 이번 작업에서는 U6-C, Random Pool, Starting Spell Selection을 구현하지 않는다.
