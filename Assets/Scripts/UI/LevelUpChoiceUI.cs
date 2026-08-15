@@ -4,7 +4,7 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class LevelUpChoiceUI : MonoBehaviour
 {
-    public const int ChoiceCount = CommonUpgradeController.ChoiceCount;
+    public const int ChoiceCount = 3;
 
     [SerializeField]
     private GameObject levelUpPanel;

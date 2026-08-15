@@ -6,6 +6,8 @@ using UnityEngine;
 public sealed class MagicMissileCaster : MonoBehaviour
 {
     private const float LaunchHeight = 1.25f;
+    private const float LevelTwoDamageBonus = 1f;
+    private const float MultiProjectileSpacing = 0.32f;
     private const string MagicMissileSkillId = "magic-missile";
 
     [SerializeField]
@@ -36,6 +38,7 @@ public sealed class MagicMissileCaster : MonoBehaviour
     [SerializeField, Min(0f)]
     private float projectileCollisionRadius = 0.22f;
 
+    private readonly List<SlimeController> projectileTargets = new();
     private float cooldownRemaining;
 
     private void Awake()
@@ -87,8 +90,15 @@ public sealed class MagicMissileCaster : MonoBehaviour
 
     private void Update()
     {
-        if (Time.timeScale <= 0f
-            || skillLoadout.GetSkillLevel(MagicMissileSkillId) <= 0)
+        if (Time.timeScale <= 0f)
+        {
+            return;
+        }
+
+        int skillLevel = skillLoadout.GetSkillLevel(
+            MagicMissileSkillId);
+
+        if (skillLevel <= 0)
         {
             return;
         }
@@ -102,65 +112,70 @@ public sealed class MagicMissileCaster : MonoBehaviour
             return;
         }
 
-        SlimeController target = FindNearestAliveSlime();
+        int projectileCount = (skillLevel >= 2 ? 2 : 1)
+            + SchoolSynergyUtility.GetArcaneProjectileBonus(skillLoadout);
+        ProjectileTargetingUtility.GetNearestAliveTargets(
+            enemySpawner.SpawnedEnemies,
+            transform.position,
+            projectileCount,
+            projectileTargets);
 
-        if (target == null)
+        if (projectileTargets.Count == 0)
         {
             return;
         }
 
-        Vector3 launchPosition = transform.position
+        float levelDamage = damage
+            + (skillLevel >= 2 ? LevelTwoDamageBonus : 0f);
+        float modifiedDamage = SchoolSynergyUtility
+            .GetModifiedMagicDamage(
+                skillLoadout,
+                playerMagicPower,
+                levelDamage);
+        Vector3 launchCenter = transform.position
             + Vector3.up * LaunchHeight;
-        MagicMissileProjectile projectile = Instantiate(
-            projectilePrefab,
-            launchPosition,
-            Quaternion.identity);
-        float modifiedDamage = playerMagicPower
-            .GetModifiedMagicDamage(damage);
+        Vector3 lateralDirection = GetLateralDirection(
+            projectileTargets[0].transform.position - transform.position);
 
-        if (!projectile.Setup(
-                target,
-                modifiedDamage,
-                projectileSpeed,
-                projectileLifetime,
-                projectileCollisionRadius,
-                enemySpawner.BillboardCamera))
+        for (int index = 0; index < projectileCount; index++)
         {
-            enabled = false;
-            Destroy(projectile.gameObject);
-            return;
+            SlimeController target = projectileTargets[index];
+            float offset = projectileCount == 1
+                ? 0f
+                : (index - (projectileCount - 1) * 0.5f)
+                    * MultiProjectileSpacing;
+            MagicMissileProjectile projectile = Instantiate(
+                projectilePrefab,
+                launchCenter + lateralDirection * offset,
+                Quaternion.identity);
+
+            if (!projectile.Setup(
+                    target,
+                    modifiedDamage,
+                    projectileSpeed,
+                    projectileLifetime,
+                    projectileCollisionRadius,
+                    enemySpawner.BillboardCamera))
+            {
+                enabled = false;
+                Destroy(projectile.gameObject);
+                return;
+            }
         }
 
-        cooldownRemaining = Mathf.Max(0f, cooldown);
+        cooldownRemaining = skillLoadout
+            .GetModifiedSpellCooldown(cooldown);
     }
 
-    private SlimeController FindNearestAliveSlime()
+    private static Vector3 GetLateralDirection(Vector3 direction)
     {
-        IReadOnlyList<SlimeController> enemies = enemySpawner.SpawnedEnemies;
-        SlimeController nearestEnemy = null;
-        float nearestDistanceSquared = float.PositiveInfinity;
-        Vector3 casterPosition = transform.position;
+        direction.y = 0f;
 
-        for (int index = 0; index < enemies.Count; index++)
+        if (direction.sqrMagnitude <= 0.0001f)
         {
-            SlimeController enemy = enemies[index];
-
-            if (enemy == null || !enemy.IsAlive)
-            {
-                continue;
-            }
-
-            Vector3 toEnemy = enemy.transform.position - casterPosition;
-            toEnemy.y = 0f;
-            float distanceSquared = toEnemy.sqrMagnitude;
-
-            if (distanceSquared < nearestDistanceSquared)
-            {
-                nearestDistanceSquared = distanceSquared;
-                nearestEnemy = enemy;
-            }
+            return Vector3.right;
         }
 
-        return nearestEnemy;
+        return Vector3.Cross(Vector3.up, direction.normalized);
     }
 }

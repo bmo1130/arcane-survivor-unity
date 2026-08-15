@@ -2,15 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class MagicBoltCaster : MonoBehaviour
+public sealed class IceBoltCaster : MonoBehaviour
 {
     private const float LaunchHeight = 1.25f;
-    private const float LevelTwoDamageBonus = 1f;
     private const float MultiProjectileSpacing = 0.22f;
-    private const string MagicBoltSkillId = "magic-bolt";
+    private const string IceBoltSkillId = "ice-bolt";
 
     [SerializeField]
-    private MagicBoltProjectile projectilePrefab;
+    private IceBoltProjectile projectilePrefab;
 
     [SerializeField]
     private EnemySpawner enemySpawner;
@@ -21,21 +20,37 @@ public sealed class MagicBoltCaster : MonoBehaviour
     [SerializeField]
     private SkillLoadout skillLoadout;
 
+    [Header("Ice Bolt")]
     [SerializeField, Min(0f)]
-    [Tooltip("Base damage before the Player's Magic Damage Bonus.")]
-    private float damage = 4f;
+    private float damage = 1f;
 
     [SerializeField, Min(0f)]
-    private float cooldown = 0.9f;
+    private float cooldown = 0.85f;
 
     [SerializeField, Min(0f)]
-    private float projectileSpeed = 9f;
+    private float projectileSpeed = 8f;
 
     [SerializeField, Min(0f)]
     private float projectileLifetime = 4f;
 
     [SerializeField, Min(0f)]
     private float projectileCollisionRadius = 0.2f;
+
+    [SerializeField, Min(0f)]
+    private float levelTwoAreaRadius = 1.8f;
+
+    [Header("Slow")]
+    [SerializeField, Min(0f)]
+    private float slowDuration = 2.5f;
+
+    [SerializeField, Range(0f, 1f)]
+    private float baseSlowMoveMultiplier = 0.7f;
+
+    [SerializeField, Range(0f, 1f)]
+    private float frostMasteryAttackSpeedMultiplier = 0.65f;
+
+    [SerializeField, Range(0f, 1f)]
+    private float frostMasteryLevelTwoMoveMultiplier = 0.5f;
 
     private readonly List<SlimeController> projectileTargets = new();
     private float cooldownRemaining;
@@ -44,59 +59,38 @@ public sealed class MagicBoltCaster : MonoBehaviour
     {
         if (projectilePrefab == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires a Projectile Prefab.",
-                this);
-            enabled = false;
+            DisableWithError("IceBoltCaster requires a Projectile Prefab.");
             return;
         }
 
         if (enemySpawner == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires an EnemySpawner reference.",
-                this);
-            enabled = false;
+            DisableWithError("IceBoltCaster requires an EnemySpawner reference.");
             return;
         }
 
         if (playerMagicPower == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires the Player's PlayerMagicPower component.",
-                this);
-            enabled = false;
+            DisableWithError("IceBoltCaster requires PlayerMagicPower on the Player.");
             return;
         }
 
         if (skillLoadout == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires a SkillLoadout reference.",
-                this);
-            enabled = false;
+            DisableWithError("IceBoltCaster requires a SkillLoadout reference.");
             return;
         }
 
         if (enemySpawner.BillboardCamera == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires the EnemySpawner Billboard Camera.",
-                this);
-            enabled = false;
+            DisableWithError("IceBoltCaster requires the EnemySpawner Billboard Camera.");
         }
     }
 
     private void Update()
     {
-        if (Time.timeScale <= 0f)
-        {
-            return;
-        }
-
-        int skillLevel = skillLoadout.GetSkillLevel(MagicBoltSkillId);
-
-        if (skillLevel <= 0)
+        if (Time.timeScale <= 0f
+            || skillLoadout.GetSkillLevel(IceBoltSkillId) <= 0)
         {
             return;
         }
@@ -110,7 +104,7 @@ public sealed class MagicBoltCaster : MonoBehaviour
             return;
         }
 
-        int projectileCount = (skillLevel >= 2 ? 2 : 1)
+        int projectileCount = 1
             + SchoolSynergyUtility.GetArcaneProjectileBonus(skillLoadout);
         ProjectileTargetingUtility.GetNearestAliveTargets(
             enemySpawner.SpawnedEnemies,
@@ -123,8 +117,7 @@ public sealed class MagicBoltCaster : MonoBehaviour
             return;
         }
 
-        SlimeController firstTarget = projectileTargets[0];
-        Vector3 firstDirection = firstTarget.transform.position
+        Vector3 firstDirection = projectileTargets[0].transform.position
             - transform.position;
         firstDirection.y = 0f;
 
@@ -133,13 +126,6 @@ public sealed class MagicBoltCaster : MonoBehaviour
             return;
         }
 
-        float levelDamage = damage
-            + (skillLevel >= 2 ? LevelTwoDamageBonus : 0f);
-        float modifiedDamage = SchoolSynergyUtility
-            .GetModifiedMagicDamage(
-                skillLoadout,
-                playerMagicPower,
-                levelDamage);
         Vector3 launchCenter = transform.position
             + Vector3.up * LaunchHeight;
         Vector3 lateralDirection = Vector3.Cross(
@@ -148,8 +134,7 @@ public sealed class MagicBoltCaster : MonoBehaviour
 
         for (int index = 0; index < projectileCount; index++)
         {
-            SlimeController target = projectileTargets[index];
-            Vector3 direction = target.transform.position
+            Vector3 direction = projectileTargets[index].transform.position
                 - transform.position;
             direction.y = 0f;
 
@@ -162,18 +147,25 @@ public sealed class MagicBoltCaster : MonoBehaviour
                 ? 0f
                 : (index - (projectileCount - 1) * 0.5f)
                     * MultiProjectileSpacing;
-            MagicBoltProjectile projectile = Instantiate(
+            IceBoltProjectile projectile = Instantiate(
                 projectilePrefab,
                 launchCenter + lateralDirection * offset,
                 Quaternion.identity);
 
             if (!projectile.Setup(
                     direction.normalized,
-                    modifiedDamage,
+                    damage,
                     projectileSpeed,
                     projectileLifetime,
                     projectileCollisionRadius,
+                    levelTwoAreaRadius,
+                    slowDuration,
+                    baseSlowMoveMultiplier,
+                    frostMasteryAttackSpeedMultiplier,
+                    frostMasteryLevelTwoMoveMultiplier,
                     enemySpawner,
+                    playerMagicPower,
+                    skillLoadout,
                     enemySpawner.BillboardCamera))
             {
                 enabled = false;
@@ -186,4 +178,9 @@ public sealed class MagicBoltCaster : MonoBehaviour
             .GetModifiedSpellCooldown(cooldown);
     }
 
+    private void DisableWithError(string message)
+    {
+        Debug.LogError(message, this);
+        enabled = false;
+    }
 }

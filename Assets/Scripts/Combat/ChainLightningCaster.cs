@@ -2,12 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class FireZoneCaster : MonoBehaviour
+public sealed class ChainLightningCaster : MonoBehaviour
 {
-    private const string FireZoneSkillId = "fire-zone";
-
-    [SerializeField]
-    private FireZoneArea areaPrefab;
+    private const string ChainLightningSkillId = "chain-lightning";
+    private const string LightningMasterySkillId = "lightning-mastery";
 
     [SerializeField]
     private EnemySpawner enemySpawner;
@@ -18,57 +16,46 @@ public sealed class FireZoneCaster : MonoBehaviour
     [SerializeField]
     private SkillLoadout skillLoadout;
 
-    [Header("Fire Zone")]
     [SerializeField, Min(0f)]
-    private float cooldown = 4f;
+    private float damage = 1f;
 
     [SerializeField, Min(0f)]
-    private float duration = 4f;
+    private float levelTwoDamageBonus = 1f;
 
     [SerializeField, Min(0f)]
-    private float burnApplyInterval = 0.5f;
+    private float cooldown = 1.1f;
+
+    [SerializeField, Min(0)]
+    private int baseBounceCount = 2;
 
     [SerializeField, Min(0f)]
-    private float levelOneRadius = 2.2f;
+    private float bounceRange = 5.5f;
 
     [SerializeField, Min(0f)]
-    private float levelTwoRadius = 3.5f;
-
-    [Header("Burning")]
-    [SerializeField, Min(0f)]
-    private float burnDamage = 1f;
-
-    [SerializeField, Min(0f)]
-    private float burnDuration = 3f;
-
-    [SerializeField, Min(0f)]
-    private float burnTickInterval = 1f;
+    private float staggerDuration = 0.1f;
 
     private float cooldownRemaining;
 
     private void Awake()
     {
-        if (areaPrefab == null)
-        {
-            DisableWithError("FireZoneCaster requires an Area Prefab.");
-            return;
-        }
-
         if (enemySpawner == null)
         {
-            DisableWithError("FireZoneCaster requires an EnemySpawner reference.");
+            DisableWithError(
+                "ChainLightningCaster requires an EnemySpawner reference.");
             return;
         }
 
         if (playerMagicPower == null)
         {
-            DisableWithError("FireZoneCaster requires PlayerMagicPower on the Player.");
+            DisableWithError(
+                "ChainLightningCaster requires PlayerMagicPower on the Player.");
             return;
         }
 
         if (skillLoadout == null)
         {
-            DisableWithError("FireZoneCaster requires a SkillLoadout reference.");
+            DisableWithError(
+                "ChainLightningCaster requires a SkillLoadout reference.");
         }
     }
 
@@ -79,9 +66,10 @@ public sealed class FireZoneCaster : MonoBehaviour
             return;
         }
 
-        int fireZoneLevel = skillLoadout.GetSkillLevel(FireZoneSkillId);
+        int skillLevel = skillLoadout.GetSkillLevel(
+            ChainLightningSkillId);
 
-        if (fireZoneLevel <= 0)
+        if (skillLevel <= 0)
         {
             return;
         }
@@ -102,31 +90,24 @@ public sealed class FireZoneCaster : MonoBehaviour
             return;
         }
 
-        float radius = fireZoneLevel >= 2
-            ? levelTwoRadius
-            : levelOneRadius;
-        Vector3 areaPosition = target.transform.position;
-        areaPosition.y = 0f;
-        FireZoneArea area = Instantiate(
-            areaPrefab,
-            areaPosition,
-            Quaternion.identity);
-
-        if (!area.Setup(
-                radius,
-                duration,
-                burnApplyInterval,
-                burnDamage,
-                burnDuration,
-                burnTickInterval,
-                enemySpawner,
+        float levelDamage = damage
+            + (skillLevel >= 2 ? levelTwoDamageBonus : 0f);
+        float modifiedDamage = SchoolSynergyUtility
+            .GetModifiedMagicDamage(
+                skillLoadout,
                 playerMagicPower,
-                skillLoadout))
-        {
-            enabled = false;
-            Destroy(area.gameObject);
-            return;
-        }
+                levelDamage);
+        int bounceCount = Mathf.Max(0, baseBounceCount)
+            + GetLightningMasteryBounceBonus();
+
+        LightningChainUtility.Strike(
+            target,
+            enemySpawner.SpawnedEnemies,
+            modifiedDamage,
+            bounceCount,
+            Mathf.Max(0f, bounceRange),
+            Mathf.Max(0f, staggerDuration),
+            skillLoadout);
 
         cooldownRemaining = skillLoadout
             .GetModifiedSpellCooldown(cooldown);
@@ -160,6 +141,14 @@ public sealed class FireZoneCaster : MonoBehaviour
         }
 
         return nearestEnemy;
+    }
+
+    private int GetLightningMasteryBounceBonus()
+    {
+        return Mathf.Clamp(
+            skillLoadout.GetSkillLevel(LightningMasterySkillId),
+            0,
+            SkillLoadout.MaximumSkillLevel);
     }
 
     private void DisableWithError(string message)

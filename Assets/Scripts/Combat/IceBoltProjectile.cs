@@ -1,21 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class FireballProjectile : MonoBehaviour
+public sealed class IceBoltProjectile : MonoBehaviour
 {
+    private const string IceBoltSkillId = "ice-bolt";
+
     private Vector3 direction;
     private EnemySpawner enemySpawner;
     private PlayerMagicPower playerMagicPower;
     private SkillLoadout skillLoadout;
     private BillboardToCamera[] billboards;
-    private float directDamage;
+    private float baseDamage;
     private float speed;
     private float lifetime;
     private float collisionRadius;
-    private float explosionRadius;
-    private float burnDamage;
-    private float burnDuration;
-    private float burnTickInterval;
+    private float levelTwoAreaRadius;
+    private float slowDuration;
+    private float baseSlowMoveMultiplier;
+    private float frostMasteryAttackSpeedMultiplier;
+    private float frostMasteryLevelTwoMoveMultiplier;
     private float age;
     private float fixedHeight;
     private bool isInitialized;
@@ -29,14 +32,15 @@ public sealed class FireballProjectile : MonoBehaviour
 
     public bool Setup(
         Vector3 newDirection,
-        float newDirectDamage,
+        float newDamage,
         float newSpeed,
         float newLifetime,
         float newCollisionRadius,
-        float newExplosionRadius,
-        float newBaseBurnDamage,
-        float newBurnDuration,
-        float newBurnTickInterval,
+        float newLevelTwoAreaRadius,
+        float newSlowDuration,
+        float newBaseSlowMoveMultiplier,
+        float newFrostMasteryAttackSpeedMultiplier,
+        float newFrostMasteryLevelTwoMoveMultiplier,
         EnemySpawner newEnemySpawner,
         PlayerMagicPower newPlayerMagicPower,
         SkillLoadout newSkillLoadout,
@@ -46,17 +50,18 @@ public sealed class FireballProjectile : MonoBehaviour
 
         if (!IsFinite(newDirection)
             || newDirection.sqrMagnitude <= 0.0001f
-            || !IsPositiveFinite(newDirectDamage)
+            || !IsPositiveFinite(newDamage)
             || !IsNonNegativeFinite(newSpeed)
-            || !IsNonNegativeFinite(newLifetime)
+            || !IsPositiveFinite(newLifetime)
             || !IsNonNegativeFinite(newCollisionRadius)
-            || !IsNonNegativeFinite(newExplosionRadius)
-            || !IsPositiveFinite(newBaseBurnDamage)
-            || !IsPositiveFinite(newBurnDuration)
-            || !IsPositiveFinite(newBurnTickInterval))
+            || !IsNonNegativeFinite(newLevelTwoAreaRadius)
+            || !IsPositiveFinite(newSlowDuration)
+            || !IsSlowMultiplier(newBaseSlowMoveMultiplier)
+            || !IsSlowMultiplier(newFrostMasteryAttackSpeedMultiplier)
+            || !IsSlowMultiplier(newFrostMasteryLevelTwoMoveMultiplier))
         {
             Debug.LogError(
-                "FireballProjectile received invalid gameplay values.",
+                "IceBoltProjectile received invalid gameplay values.",
                 this);
             return false;
         }
@@ -67,7 +72,7 @@ public sealed class FireballProjectile : MonoBehaviour
             || billboardCamera == null)
         {
             Debug.LogError(
-                "FireballProjectile requires EnemySpawner, PlayerMagicPower, SkillLoadout, and Billboard Camera references.",
+                "IceBoltProjectile requires EnemySpawner, PlayerMagicPower, SkillLoadout, and Billboard Camera references.",
                 this);
             return false;
         }
@@ -75,20 +80,23 @@ public sealed class FireballProjectile : MonoBehaviour
         if (billboards.Length == 0)
         {
             Debug.LogError(
-                "FireballProjectile requires BillboardToCamera in its hierarchy.",
+                "IceBoltProjectile requires BillboardToCamera in its hierarchy.",
                 this);
             return false;
         }
 
         direction = newDirection.normalized;
-        directDamage = newDirectDamage;
+        baseDamage = newDamage;
         speed = newSpeed;
         lifetime = newLifetime;
         collisionRadius = newCollisionRadius;
-        explosionRadius = newExplosionRadius;
-        burnDamage = newBaseBurnDamage;
-        burnDuration = newBurnDuration;
-        burnTickInterval = newBurnTickInterval;
+        levelTwoAreaRadius = newLevelTwoAreaRadius;
+        slowDuration = newSlowDuration;
+        baseSlowMoveMultiplier = newBaseSlowMoveMultiplier;
+        frostMasteryAttackSpeedMultiplier =
+            newFrostMasteryAttackSpeedMultiplier;
+        frostMasteryLevelTwoMoveMultiplier =
+            newFrostMasteryLevelTwoMoveMultiplier;
         enemySpawner = newEnemySpawner;
         playerMagicPower = newPlayerMagicPower;
         skillLoadout = newSkillLoadout;
@@ -112,12 +120,17 @@ public sealed class FireballProjectile : MonoBehaviour
             return;
         }
 
-        age += Time.deltaTime;
-
-        if (age >= lifetime
-            || enemySpawner == null
+        if (enemySpawner == null
             || playerMagicPower == null
             || skillLoadout == null)
+        {
+            Finish();
+            return;
+        }
+
+        age += Time.deltaTime;
+
+        if (age >= lifetime)
         {
             Finish();
             return;
@@ -140,26 +153,38 @@ public sealed class FireballProjectile : MonoBehaviour
             return;
         }
 
-        Vector3 impactPosition = Vector3.Lerp(
+        transform.position = Vector3.Lerp(
             startPosition,
             endPosition,
             hitProgress);
-        transform.position = impactPosition;
-        hitEnemy.TakeDamage(directDamage);
-        ApplyBurnInRadius(impactPosition);
+
+        if (skillLoadout.GetSkillLevel(IceBoltSkillId) >= 2)
+        {
+            ApplyLevelTwoImpact(hitEnemy);
+        }
+        else
+        {
+            ApplyHit(hitEnemy);
+        }
+
         Finish();
     }
 
-    private void ApplyBurnInRadius(Vector3 impactPosition)
+    private void ApplyLevelTwoImpact(SlimeController directTarget)
     {
+        ApplyHit(directTarget);
+
         IReadOnlyList<SlimeController> enemies = enemySpawner.SpawnedEnemies;
-        float radiusSquared = explosionRadius * explosionRadius;
+        float radiusSquared = levelTwoAreaRadius * levelTwoAreaRadius;
+        Vector3 impactPosition = transform.position;
 
         for (int index = 0; index < enemies.Count; index++)
         {
             SlimeController enemy = enemies[index];
 
-            if (enemy == null || !enemy.IsAlive)
+            if (enemy == null
+                || enemy == directTarget
+                || !enemy.IsAlive)
             {
                 continue;
             }
@@ -167,22 +192,34 @@ public sealed class FireballProjectile : MonoBehaviour
             Vector3 toEnemy = enemy.transform.position - impactPosition;
             toEnemy.y = 0f;
 
-            if (toEnemy.sqrMagnitude > radiusSquared)
+            if (toEnemy.sqrMagnitude <= radiusSquared)
             {
-                continue;
-            }
-
-            if (enemy.TryGetComponent(out BurnStatus burnStatus))
-            {
-                burnStatus.ApplyBurn(
-                    burnDamage,
-                    burnDuration,
-                    burnTickInterval,
-                    enemySpawner,
-                    playerMagicPower,
-                    skillLoadout);
+                ApplyHit(enemy);
             }
         }
+    }
+
+    private void ApplyHit(SlimeController enemy)
+    {
+        if (enemy == null || !enemy.IsAlive)
+        {
+            return;
+        }
+
+        float modifiedDamage = SchoolSynergyUtility
+            .GetModifiedMagicDamage(
+                skillLoadout,
+                playerMagicPower,
+                baseDamage);
+        enemy.TakeDamage(modifiedDamage);
+
+        FrostSlowUtility.ApplySlow(
+            enemy,
+            skillLoadout,
+            slowDuration,
+            baseSlowMoveMultiplier,
+            frostMasteryAttackSpeedMultiplier,
+            frostMasteryLevelTwoMoveMultiplier);
     }
 
     private SlimeController FindFirstHitOnSegment(
@@ -294,6 +331,11 @@ public sealed class FireballProjectile : MonoBehaviour
         return IsFinite(value.x)
             && IsFinite(value.y)
             && IsFinite(value.z);
+    }
+
+    private static bool IsSlowMultiplier(float value)
+    {
+        return IsPositiveFinite(value) && value <= 1f;
     }
 
     private static bool IsNonNegativeFinite(float value)

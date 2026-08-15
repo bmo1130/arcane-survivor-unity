@@ -46,6 +46,8 @@ public sealed class SlimeController : MonoBehaviour
     private ExperienceOrb experienceOrbPrefab;
     private PlayerExperience playerExperience;
     private Transform billboardCamera;
+    private StaggerStatus staggerStatus;
+    private SlowStatus slowStatus;
 
     public float CurrentHealth => currentHealth;
     public float MaximumHealth => maximumHealth;
@@ -55,6 +57,8 @@ public sealed class SlimeController : MonoBehaviour
     {
         maximumHealth = Mathf.Max(0f, maximumHealth);
         currentHealth = maximumHealth;
+        staggerStatus = GetComponent<StaggerStatus>();
+        slowStatus = GetComponent<SlowStatus>();
 
         int fallbackIndex = unchecked(GetInstanceID() * 397) & 1023;
         float fallbackAngle = fallbackIndex
@@ -144,14 +148,19 @@ public sealed class SlimeController : MonoBehaviour
         if (Time.timeScale <= 0f
             || isDead
             || target == null
-            || playerHealth == null)
+            || playerHealth == null
+            || (staggerStatus != null && staggerStatus.IsStaggered))
         {
             return;
         }
 
+        float attackSpeedMultiplier = slowStatus != null
+            ? slowStatus.AttackSpeedMultiplier
+            : 1f;
         attackCooldownRemaining = Mathf.Max(
             0f,
-            attackCooldownRemaining - Time.deltaTime);
+            attackCooldownRemaining
+                - Time.deltaTime * attackSpeedMultiplier);
 
         Vector3 currentPosition = transform.position;
         Vector3 toTarget = target.position - currentPosition;
@@ -159,7 +168,12 @@ public sealed class SlimeController : MonoBehaviour
 
         float distance = toTarget.magnitude;
         float minimumDistance = Mathf.Max(0f, stopDistance);
-        float maxMoveDistance = Mathf.Max(0f, moveSpeed) * Time.deltaTime;
+        float moveMultiplier = slowStatus != null
+            ? slowStatus.MoveMultiplier
+            : 1f;
+        float maxMoveDistance = Mathf.Max(0f, moveSpeed)
+            * moveMultiplier
+            * Time.deltaTime;
         Vector3 chaseMovement = Vector3.zero;
 
         if (distance <= minimumDistance)

@@ -10,6 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2987699627798415699}
   - component: {fileID: 3677997162334901888}
+  - component: {fileID: 4717724275232795229}
+  - component: {fileID: 2243899844175532502}
+  - component: {fileID: 6101840141957440739}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Untagged
@@ -54,6 +57,56 @@ MonoBehaviour:
   maximumHealth: 10
   currentHealth: 0
   debugDamage: 3
+  experienceReward: 4
+  separationRadius: 0.75
+  separationStrength: 0.35
+--- !u!114 &4717724275232795229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1371422842487776076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95e99a98108d4cd0ab78c5fd18b958b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurnStatus
+  isBurning: 0
+  remainingDuration: 0
+  currentTickDamage: 0
+  currentTickInterval: 0
+  tickProgress: 0
+--- !u!114 &2243899844175532502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1371422842487776076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ee2defc7d104115b52299525bd7ba17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaggerStatus
+  isStaggered: 0
+  remainingDuration: 0
+--- !u!114 &6101840141957440739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1371422842487776076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13780d1c2764a8d96ff8df43a256c42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlowStatus
+  isSlowed: 0
+  remainingDuration: 0
+  moveMultiplier: 1
+  attackSpeedMultiplier: 1
 --- !u!1 &3690307266966055564
 GameObject:
   m_ObjectHideFlags: 0

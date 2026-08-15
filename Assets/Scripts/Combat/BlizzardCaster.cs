@@ -2,12 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class FireZoneCaster : MonoBehaviour
+public sealed class BlizzardCaster : MonoBehaviour
 {
-    private const string FireZoneSkillId = "fire-zone";
+    private const string BlizzardSkillId = "blizzard";
 
     [SerializeField]
-    private FireZoneArea areaPrefab;
+    private BlizzardArea areaPrefab;
 
     [SerializeField]
     private EnemySpawner enemySpawner;
@@ -18,31 +18,37 @@ public sealed class FireZoneCaster : MonoBehaviour
     [SerializeField]
     private SkillLoadout skillLoadout;
 
-    [Header("Fire Zone")]
+    [Header("Blizzard")]
     [SerializeField, Min(0f)]
-    private float cooldown = 4f;
+    private float damage = 1f;
+
+    [SerializeField, Min(0f)]
+    private float cooldown = 4.5f;
 
     [SerializeField, Min(0f)]
     private float duration = 4f;
 
     [SerializeField, Min(0f)]
-    private float burnApplyInterval = 0.5f;
+    private float tickInterval = 1f;
 
     [SerializeField, Min(0f)]
-    private float levelOneRadius = 2.2f;
+    private float levelOneRadius = 2.4f;
 
     [SerializeField, Min(0f)]
-    private float levelTwoRadius = 3.5f;
+    private float levelTwoRadius = 3.6f;
 
-    [Header("Burning")]
+    [Header("Slow")]
     [SerializeField, Min(0f)]
-    private float burnDamage = 1f;
+    private float slowDuration = 2.5f;
 
-    [SerializeField, Min(0f)]
-    private float burnDuration = 3f;
+    [SerializeField, Range(0f, 1f)]
+    private float baseSlowMoveMultiplier = 0.7f;
 
-    [SerializeField, Min(0f)]
-    private float burnTickInterval = 1f;
+    [SerializeField, Range(0f, 1f)]
+    private float frostMasteryAttackSpeedMultiplier = 0.65f;
+
+    [SerializeField, Range(0f, 1f)]
+    private float frostMasteryLevelTwoMoveMultiplier = 0.5f;
 
     private float cooldownRemaining;
 
@@ -50,25 +56,25 @@ public sealed class FireZoneCaster : MonoBehaviour
     {
         if (areaPrefab == null)
         {
-            DisableWithError("FireZoneCaster requires an Area Prefab.");
+            DisableWithError("BlizzardCaster requires an Area Prefab.");
             return;
         }
 
         if (enemySpawner == null)
         {
-            DisableWithError("FireZoneCaster requires an EnemySpawner reference.");
+            DisableWithError("BlizzardCaster requires an EnemySpawner reference.");
             return;
         }
 
         if (playerMagicPower == null)
         {
-            DisableWithError("FireZoneCaster requires PlayerMagicPower on the Player.");
+            DisableWithError("BlizzardCaster requires PlayerMagicPower on the Player.");
             return;
         }
 
         if (skillLoadout == null)
         {
-            DisableWithError("FireZoneCaster requires a SkillLoadout reference.");
+            DisableWithError("BlizzardCaster requires a SkillLoadout reference.");
         }
     }
 
@@ -79,9 +85,9 @@ public sealed class FireZoneCaster : MonoBehaviour
             return;
         }
 
-        int fireZoneLevel = skillLoadout.GetSkillLevel(FireZoneSkillId);
+        int skillLevel = skillLoadout.GetSkillLevel(BlizzardSkillId);
 
-        if (fireZoneLevel <= 0)
+        if (skillLevel <= 0)
         {
             return;
         }
@@ -102,12 +108,12 @@ public sealed class FireZoneCaster : MonoBehaviour
             return;
         }
 
-        float radius = fireZoneLevel >= 2
+        float radius = skillLevel >= 2
             ? levelTwoRadius
             : levelOneRadius;
         Vector3 areaPosition = target.transform.position;
         areaPosition.y = 0f;
-        FireZoneArea area = Instantiate(
+        BlizzardArea area = Instantiate(
             areaPrefab,
             areaPosition,
             Quaternion.identity);
@@ -115,10 +121,12 @@ public sealed class FireZoneCaster : MonoBehaviour
         if (!area.Setup(
                 radius,
                 duration,
-                burnApplyInterval,
-                burnDamage,
-                burnDuration,
-                burnTickInterval,
+                tickInterval,
+                damage,
+                slowDuration,
+                baseSlowMoveMultiplier,
+                frostMasteryAttackSpeedMultiplier,
+                frostMasteryLevelTwoMoveMultiplier,
                 enemySpawner,
                 playerMagicPower,
                 skillLoadout))

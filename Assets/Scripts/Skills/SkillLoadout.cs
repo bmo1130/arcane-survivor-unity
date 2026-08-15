@@ -13,6 +13,7 @@ public sealed class SkillLoadout : MonoBehaviour
     public const int MaximumSkillLevel =
         SkillDefinition.SchoolSkillMaximumLevel;
 
+    private const string ArcaneMasterySkillId = "arcane-mastery";
     private const string DebugActiveAId = "debug-active-a";
     private const string DebugActiveBId = "debug-active-b";
     private const string DebugActiveCId = "debug-active-c";
@@ -135,6 +136,32 @@ public sealed class SkillLoadout : MonoBehaviour
                 passiveSlot1SkillId,
                 passiveSlot1Level,
                 school);
+    }
+
+    public float GetSpellCooldownMultiplier()
+    {
+        int masteryLevel = GetSkillLevel(ArcaneMasterySkillId);
+
+        if (masteryLevel >= 2)
+        {
+            return 0.85f;
+        }
+
+        return masteryLevel >= 1 ? 0.9f : 1f;
+    }
+
+    public float GetModifiedSpellCooldown(float baseCooldown)
+    {
+        if (float.IsNaN(baseCooldown)
+            || float.IsInfinity(baseCooldown)
+            || baseCooldown <= 0f)
+        {
+            return 0f;
+        }
+
+        return Mathf.Max(
+            0f,
+            baseCooldown * GetSpellCooldownMultiplier());
     }
 
     private bool CanAcquireOrUpgradeInternal(
@@ -295,6 +322,42 @@ public sealed class SkillLoadout : MonoBehaviour
         RunDebugAcquireDefinition("fire-mastery");
     }
 
+    [ContextMenu("Debug Acquire Chain Lightning")]
+    private void DebugAcquireChainLightning()
+    {
+        RunDebugAcquireDefinition("chain-lightning");
+    }
+
+    [ContextMenu("Debug Acquire Lightning Orb")]
+    private void DebugAcquireLightningOrb()
+    {
+        RunDebugAcquireDefinition("lightning-orb");
+    }
+
+    [ContextMenu("Debug Acquire Lightning Mastery")]
+    private void DebugAcquireLightningMastery()
+    {
+        RunDebugAcquireDefinition("lightning-mastery");
+    }
+
+    [ContextMenu("Debug Acquire Ice Bolt")]
+    private void DebugAcquireIceBolt()
+    {
+        RunDebugAcquireDefinition("ice-bolt");
+    }
+
+    [ContextMenu("Debug Acquire Blizzard")]
+    private void DebugAcquireBlizzard()
+    {
+        RunDebugAcquireDefinition("blizzard");
+    }
+
+    [ContextMenu("Debug Acquire Frost Mastery")]
+    private void DebugAcquireFrostMastery()
+    {
+        RunDebugAcquireDefinition("frost-mastery");
+    }
+
     [ContextMenu("Debug Reset Loadout")]
     private void DebugResetLoadout()
     {
@@ -326,6 +389,35 @@ public sealed class SkillLoadout : MonoBehaviour
             + $"Fire: {GetSchoolPoints(SkillSchool.Fire)} | "
             + $"Lightning: {GetSchoolPoints(SkillSchool.Lightning)} | "
             + $"Frost: {GetSchoolPoints(SkillSchool.Frost)}",
+            this);
+    }
+
+    [ContextMenu("Debug Log Active Synergies")]
+    private void DebugLogActiveSynergies()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning(
+                "Debug Log Active Synergies is available only in Play Mode.",
+                this);
+            return;
+        }
+
+        int arcanePoints = GetSchoolPoints(SkillSchool.Arcane);
+        int firePoints = GetSchoolPoints(SkillSchool.Fire);
+        int lightningPoints = GetSchoolPoints(SkillSchool.Lightning);
+        int frostPoints = GetSchoolPoints(SkillSchool.Frost);
+
+        Debug.Log(
+            $"Arcane {arcanePoints}: Projectiles +{SchoolSynergyUtility.GetArcaneProjectileBonus(this)}, "
+            + $"Magic Damage +{SchoolSynergyUtility.GetArcaneMagicDamageBonus(this)} | "
+            + $"Fire {firePoints}: Duration {SchoolSynergyUtility.GetFireBurnDuration(this, 3f):0.##}s, "
+            + $"Tick {SchoolSynergyUtility.GetFireBurnTickInterval(this, 1f):0.##}s, "
+            + $"Spread {SchoolSynergyUtility.IsFireSpreadActive(this)} | "
+            + $"Lightning {lightningPoints}: Stagger {SchoolSynergyUtility.GetLightningStaggerDuration(this, 0.1f):0.##}s, "
+            + $"Hit Scaling {lightningPoints >= 4}, Bounces +{SchoolSynergyUtility.GetLightningBounceBonus(this)} | "
+            + $"Frost {frostPoints}: Slow {SchoolSynergyUtility.GetFrostSlowDuration(this, 2.5f):0.##}s, "
+            + $"Progressive {SchoolSynergyUtility.IsFrostProgressiveSlowActive(this)}",
             this);
     }
 

@@ -108,7 +108,9 @@ public sealed class CommonUpgradeController : MonoBehaviour
         string effectDescription)
     {
         int nextLevel = IncrementLevel(currentLevel);
-        return $"{upgradeName}\nLv.{currentLevel} → Lv.{nextLevel}\n{effectDescription}";
+        return $"Common · {upgradeName}\n"
+            + $"Lv.{currentLevel} → Lv.{nextLevel}\n"
+            + effectDescription;
     }
 
     private static int IncrementLevel(int currentLevel)

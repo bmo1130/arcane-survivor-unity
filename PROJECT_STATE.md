@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U10-Fire — Complete Fire School Runtime / Editor Verification Pending**
+**U12 — Complete School Synergy 2/4/6 / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -51,13 +51,23 @@ Play 시작 Starting UI 표시, Active 8 Button, Pause, UI 선택 후 Active Slo
 
 Magic Bolt Starting 선택, `magic-bolt` Loadout gating, non-homing 직선 발사, Magic Missile과 독립 동작, Damage/Collision/Lifetime을 Unity Editor에서 검증했다. Console Error가 없으며 U10-A는 완료됐다.
 
-현재 Fireball, Fire Zone, Burning, Fire Mastery와 각 Active Lv.2 반경 효과를 구현하는 U10-Fire를 진행 중이다.
+Fireball/Lv.2 Radius, Burning과 Tick Progress 유지, Fire Zone/Lv.2 Radius, Fire Mastery Lv.1/Lv.2, Magic Power와 Pause를 Unity Editor에서 검증했다. 기존 Gameplay Regression과 Console Error가 없으며 U10-Fire는 완료됐다.
+
+Chain Lightning/Lv.2 Damage, Lightning Orb/Lv.2 Bounce, Lightning Mastery Lv.1/Lv.2, Stagger, Pause와 기존 Gameplay Regression을 Unity Editor에서 검증했다. Console Error가 없으며 U10-Lightning은 완료됐다.
+
+Ice Bolt/Lv.2 AoE, Blizzard/Lv.2 Radius, Slow, Frost Mastery Lv.1/Lv.2, Burn/Stagger/Slow 공존과 Pause를 Unity Editor에서 검증했다. 복원한 Lightning Caster도 Main Scene에 저장됐으며 기존 Gameplay Regression과 Console Error가 없다. U10-Frost는 완료됐다.
+
+Magic Missile/Magic Bolt Lv.2, Arcane Mastery Lv.1/Lv.2와 8 Active Spell 전체 Cooldown 적용을 Unity Editor에서 검증했다. 기존 Gameplay Regression과 Console Error가 없으며 U10-Arcane은 완료됐다.
+
+Common Upgrade와 현재 SkillLoadout 규칙상 eligible한 School Skill을 통합한 무작위 3-choice, Slot/Max Lv.2 필터, Runtime 즉시 반영과 Multi-Level Queue를 Unity Editor에서 검증했다. Console Error가 없으며 U11은 완료됐다.
+
+현재 네 School의 2/4/6 Point Synergy를 별도 Point State 없이 현재 Loadout에서 실시간 계산해 전투 Runtime에 적용하는 U12의 Editor 검증을 기다리고 있다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U10-Fire — Complete Fire School Runtime**이다.
+현재 구현 범위는 **U12 — Complete School Synergy 2/4/6**이다.
 
 ## Completed Features
 
@@ -255,32 +265,73 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - Damage, 첫 Collision, Lifetime 처리 정상
 - Unity Editor Play Mode 및 Console Error 검증 완료
 
+### U10-Fire — Complete Fire School Runtime
+- Fireball과 Fireball Lv.2 Explosion Radius 정상
+- Burning과 Burn Refresh 중 Tick Progress 유지 정상
+- Fire Zone과 Fire Zone Lv.2 Radius 정상
+- Fire Mastery Lv.1/Lv.2 및 PlayerMagicPower 적용 정상
+- Pause와 기존 Gameplay Regression 정상
+- Unity Editor Play Mode 및 Console Error 검증 완료
+
+### U10-Lightning — Complete Lightning School Runtime
+- Chain Lightning과 Lv.2 Damage 정상
+- Lightning Orb가 Enemy Collision로 사라지지 않고 Lifetime 동안 Pulse
+- Lightning Orb Lv.2 Bounce 정상
+- Lightning Mastery Lv.1/Lv.2 Bounce Bonus 정상
+- Stagger와 Pause 정상
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
+### U10-Frost — Complete Frost School Runtime
+- Ice Bolt Lv.1/Lv.2 Damage, Slow와 AoE 정상
+- Blizzard Lv.1/Lv.2 Tick, 고정 Area와 Radius 정상
+- Frost Mastery Lv.1/Lv.2의 Attack/Movement Slow 정상
+- Burn, Stagger, Slow 공존과 Pause 정상
+- Lightning Caster 복원 후 Main Scene 저장 완료
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
+### U10-Arcane — Complete Arcane School Runtime
+- Magic Missile Lv.2 Damage/Projectile Count 정상
+- Magic Bolt Lv.2 Damage/Projectile Count와 non-homing 정상
+- Arcane Mastery Lv.1/Lv.2 Cooldown Multiplier 정상
+- Arcane Mastery의 8 Active Spell 전체 Cooldown 적용 정상
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
+### U11 — Level-Up School Skill Pool
+- Common Upgrade와 eligible School Skill이 섞인 중복 없는 Random 3-choice 정상
+- Starting Skill Lv.1 → Lv.2 후보와 실제 Upgrade 정상
+- Active 2/Passive 1 Slot 제한과 Max Lv.2 후보 제거 정상
+- Common Upgrade는 Slot 상태와 관계없이 계속 후보가 될 수 있음
+- Level-Up으로 획득한 Active Runtime 즉시 동작 정상
+- Multiple Pending마다 현재 Loadout 기준 새 Candidate Pool 생성과 Queue 처리 정상
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
 ## Current Work
 
-### U10-Fire — Complete Fire School Runtime
-- `BurnStatus` Slime 전용 Component 구현
-- Burn 재적용 시 Duration/Damage/Tick Interval 갱신과 기존 Tick 진행도 유지
-- Fireball non-homing 직선 Projectile과 첫 Segment Hit 구현
-- Fireball Direct Damage `1`, Cooldown `1.35`, Speed `7.5`, Lifetime `4`, Collision Radius `0.22`
-- Fireball Lv.1/Lv.2 Explosion Radius `2.2/3.4`
-- Fire Zone 고정 World Position, Cooldown/Duration `4`, Burn Apply Interval `0.5`
-- Fire Zone Lv.1/Lv.2 Radius `2.2/3.5`
-- Burn Base Damage `1`, Duration `3`, Tick Interval `1`
-- Fire Mastery Lv.1/Lv.2 Burn Bonus `+1/+3`
-- Fireball Direct와 Burn 모두 PlayerMagicPower 적용
-- Fireball/Fire Zone/Fire Mastery Level을 SkillLoadout 공개 API로 조회
-- Pause 중 Caster, Projectile, Zone, Burn의 모든 시간 진행 정지
-- Fire Synergy, Generic Status/Ability Framework, Physics와 Object Pool 없음
+### U12 — Complete School Synergy 2/4/6
+- 모든 Synergy는 `SkillLoadout.GetSchoolPoints`에서 현재 Loadout Level 합을 실시간 조회하며 별도 Point Counter를 저장하지 않음
+- Arcane 2/4/6: 지정된 다섯 Spell Projectile 총 `+1/+1/+2`, 모든 Magic Damage 총 `+0/+1/+2`
+- Fire 2: Burn Duration `3 → 5`초
+- Fire 4: Burn Tick Interval `1 → 0.65`초
+- Fire 6: Burning Enemy가 반경 `3.2`의 살아 있고 Burning이 아닌 Enemy에 `1`초 간격으로 Burn 전염
+- Lightning 2: Lightning Stagger Duration 최소 `0.15`초
+- Lightning 4: Chain Hit Index마다 Damage `+0/+1/+2...`
+- Lightning 6: Chain/Orb Bounce Count `+2`
+- Frost 2/4: Slow Duration `2.5 → 4 → 5.5`초
+- Frost 6: Slow 경과 시간당 Move Multiplier `0.06` 감소, 최소 `0.25`
+- Breakpoint 효과는 누적되며 기존 Mastery/Common Magic Power/Spell Lv.2 효과와 함께 적용
+- 기존 Scene/Prefab Reference와 Component 추가 없음
+- Synergy UI, VFX와 별도 Manager/Counter 없음
 
 남은 확인:
-- Slime Prefab Root에 `BurnStatus` 추가
-- `Fireball.prefab`과 `FireZone.prefab` 생성 및 Runtime Visual 확인
-- Player에 `FireballCaster`와 `FireZoneCaster` 추가 및 Reference 연결
-- Fireball Lv.1/Lv.2 Direct Damage, Explosion Radius와 Burn 확인
-- Fire Zone Lv.1/Lv.2 고정 위치, Radius, Duration과 Burn refresh 확인
-- Fire Mastery Lv.1/Lv.2 및 Magic Power Damage 계산 확인
-- Pause 중 Fire Runtime 전체 정지 확인
-- 기존 U1~U10-A Gameplay Regression과 Console Error 확인
+- Arcane 2/4/6의 Projectile 수와 모든 Direct/Status Magic Damage 확인
+- Fire 2/4의 Duration/Tick, Fire 6의 비-Burning 이웃 전염과 Pause 확인
+- Lightning 2/4/6의 Stagger/Hit Scaling/Bounce 확인
+- Frost 2/4 Duration과 Frost 6 Progressive Slow/Refresh/Expiry 확인
+- 기존 U1~U11 Gameplay Regression과 Console Error 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -448,7 +499,13 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Fireball, Fire Zone, Burning, Fire Mastery와 Active Lv.2 반경 효과
 
 ### U10-Lightning — Complete Lightning School Runtime
-- Fire School Editor 검증 후 진행할 다음 School Runtime
+- Chain Lightning, Lightning Orb, Stagger, Lightning Mastery와 Active Lv.2 효과
+
+### U10-Frost — Complete Frost School Runtime
+- Ice Bolt, Blizzard, Slow, Frost Mastery와 Active Lv.2 효과
+
+### U10-Arcane — Complete Arcane School Runtime
+- Magic Missile/Magic Bolt Lv.2와 모든 Active Cooldown에 적용되는 Arcane Mastery
 
 ### U10 — Complete School Skills
 - Arcane
@@ -456,10 +513,13 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Lightning
 - Frost
 
-### U11 — Synergy
+### U11 — Level-Up School Skill Pool
+- 실제 Level-Up 3-choice에 School Skill과 Common Upgrade 후보 연결
+
+### U12 — Synergy
 - 각 School 2/4/6
 
-### U12 — Prototype Demo Pass
+### U13 — Prototype Demo Pass
 - 최소 Visual
 - Effect
 - UI 정리
@@ -554,33 +614,52 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - `MagicMissileCaster`는 Player에 유지하되 현재 `SkillLoadout`에 `magic-missile`이 Lv.1 이상 장착된 경우에만 동작한다.
 - Empty Loadout 또는 다른 Starting Spell 선택 시 Target을 찾거나 Projectile을 발사하지 않는다.
 - Magic Missile 선택 시 기존 U4-A 전투 동작을 그대로 사용한다.
-- 기존 EnemySpawner 목록에서 Player와 XZ 기준 가장 가까운 살아 있는 Slime 하나를 선택한다.
+- 기존 EnemySpawner 목록에서 현재 Projectile 수만큼 Player와 XZ 기준 가까운 살아 있는 Slime을 선택한다.
+- Lv.1은 Base Damage `3`, Projectile `1`이고 Lv.2는 Base Damage `4`, Projectile `2`다.
+- Lv.2는 가장 가까운 두 Enemy를 우선 각각 Target으로 사용하며 Enemy가 하나면 두 Projectile 모두 같은 Enemy를 Target으로 사용할 수 있다.
+- Lv.2 두 Projectile은 Player Y `+1.25` Launch Center에서 XZ lateral 방향으로 `0.32` 간격을 두고 생성한다.
 - Target이 없으면 발사하지 않고 Cooldown 준비 상태를 유지한다.
 - Reference Prototype과 같이 Projectile은 살아 있는 Target을 매 Frame 추적하는 Homing 방식이다.
 - Target이 먼저 죽으면 Retarget하지 않고 Projectile을 제거한다.
-- 기본값은 Damage `3`, Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`다.
+- Inspector 기본값은 Damage `3`, Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`로 유지한다.
 - Slime HP `10`에는 네 번 명중해야 Death가 발생한다.
 - Projectile은 Player Y `+1.25`에서 생성되고 XZ 평면으로 이동하며 시각 높이를 유지한다.
 - Rigidbody, Collider, Physics, FindObjectsByType, 범용 Combat/Projectile Framework를 사용하지 않는다.
 
 ### Magic Bolt Runtime
 - Magic Bolt는 `magic-bolt`가 현재 SkillLoadout에 Lv.1 이상 장착된 경우에만 자동 시전한다.
-- Cast 시 Player와 XZ 기준 가장 가까운 살아 있는 Slime 방향을 정하고 이후 Target을 보관하지 않는다.
+- Cast 시 현재 Projectile 수만큼 Player와 XZ 기준 가까운 살아 있는 Slime을 선택하고 각 Projectile의 고정 방향을 계산한 뒤 Target을 보관하지 않는다.
+- Lv.1은 Base Damage `4`, Projectile `1`이고 Lv.2는 Base Damage `5`, Projectile `2`다.
+- Lv.2는 가장 가까운 두 Enemy를 우선 각각 방향 Target으로 사용하며 Enemy가 하나면 두 Projectile 모두 같은 Enemy 방향으로 발사한다.
+- Lv.2 두 Projectile은 Player Y `+1.25` Launch Center에서 XZ lateral 방향으로 `0.22` 간격을 두고 생성한다.
 - Projectile은 초기 Direction으로만 직진하며 Enemy 이동이나 원래 Target Death에 반응해 방향을 바꾸지 않는다.
 - 빠른 이동의 Frame 통과를 줄이기 위해 이전→다음 XZ Segment와 각 살아 있는 Slime 중심의 Collision Radius 교차를 계산한다.
 - 하나의 Segment에서 가장 이른 충돌 한 개만 처리하며 Piercing과 다중 Hit는 없다.
-- Base Damage `4`, Cooldown `0.9`, Speed `9`, Lifetime `4`, Collision Radius `0.2`를 사용한다.
+- Inspector 기본값은 Base Damage `4`, Cooldown `0.9`, Speed `9`, Lifetime `4`, Collision Radius `0.2`로 유지한다.
 - PlayerMagicPower Bonus는 Caster에서 Base Damage에 더해 최종 Damage로 Projectile에 전달한다.
 - Projectile은 Player Y `+1.25`에서 생성되고 그 높이를 유지한다.
 - Pause 중 Cooldown, Projectile 이동과 Lifetime은 진행하지 않는다.
-- Magic Bolt Lv.2 전용 Damage/Projectile Count 효과는 아직 없으며 Lv.1 Runtime과 동일하게 동작한다.
 - Magic Missile과 별도 작은 구현을 유지하며 Generic Projectile Base, Rigidbody/Collider와 Object Pool을 사용하지 않는다.
+
+### Arcane Mastery Runtime
+- 별도 MonoBehaviour 없이 `SkillLoadout.GetSkillLevel("arcane-mastery")`를 조회한다.
+- Lv.0/Lv.1/Lv.2의 Spell Cooldown Multiplier는 각각 `1/0.9/0.85`다.
+- Lv.2는 Lv.1과 합산한 25% 감소가 아니라 총 15% 감소다.
+- `GetModifiedSpellCooldown(float)`은 Invalid/0 이하 Base Cooldown을 안전한 `0`으로 처리한다.
+- Magic Missile, Magic Bolt, Fireball, Fire Zone, Chain Lightning, Lightning Orb, Ice Bolt, Blizzard가 Cast에 성공한 뒤 설정하는 다음 Cooldown에 적용한다.
+- 진행 중인 Cooldown은 Mastery 획득 시 소급 재계산하지 않고 다음 Cast부터 새 배율을 사용한다.
+- Inspector의 각 Caster Base Cooldown 값은 변경하지 않는다.
+- Arcane Mastery는 Damage, Projectile Count, Radius, Status 강도에 영향을 주지 않는다.
+- Arcane Point `2/4/6`은 누적으로 지정된 다섯 Spell Projectile `+1/+1/+2`, 모든 Magic Damage `+0/+1/+2`를 적용한다.
+- 추가 Projectile은 가까운 서로 다른 Enemy를 우선하고 Target이 부족하면 기존 Target을 재사용한다. Magic Missile만 Homing을 유지한다.
 
 ### Burning Runtime
 - `BurnStatus`는 Slime Root에 하나만 부착하는 Fire 전용 상태 Component다.
-- Burn 재적용은 중첩 Stack을 추가하지 않고 남은 Duration, Tick Damage와 Tick Interval을 최신 값으로 갱신한다.
+- Burn 재적용은 중첩 Stack을 추가하지 않고 남은 Duration, Tick Damage와 Tick Interval을 현재 Loadout 기준 최신 값으로 갱신한다.
 - 재적용 시 기존 Tick Progress는 유지하므로 Fire Zone의 `0.5`초 재적용이 `1`초 Burn Tick을 막지 않는다.
 - 기본 Tick Damage `1`, Duration `3`, Tick Interval `1`을 사용한다.
+- Fire 2/4에서 Duration `5`, Tick Interval `0.65`를 사용하며 Fire 6은 반경 `3.2`의 살아 있고 Burning이 아닌 Enemy에게 `1`초마다 Burn을 전염한다.
+- 전염 Burn도 현재 Fire Mastery, PlayerMagicPower, Arcane Damage와 Fire 2/4를 다시 계산하며 이미 Burning인 Enemy를 전염으로 Refresh하지 않는다.
 - Tick은 기존 `SlimeController.TakeDamage` 단일 Damage/Death 경로를 사용한다.
 - Pause 중 Duration과 Tick Progress는 진행하지 않는다.
 - Generic Status Framework와 Status Manager는 사용하지 않는다.
@@ -606,8 +685,73 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - 별도 MonoBehaviour 없이 `SkillLoadout.GetSkillLevel("fire-mastery")`를 조회한다.
 - Lv.0/Lv.1/Lv.2 Burn Bonus는 각각 `0/+1/+3`이다.
 - Fireball Direct Damage에는 적용하지 않고 Fireball/Fire Zone이 적용하는 Burn Tick Damage에만 적용한다.
-- Burn 최종 Damage는 Base Burn + Fire Mastery Bonus + PlayerMagicPower Bonus다.
-- Fire 2/4/6 Synergy는 아직 구현하지 않는다.
+- Burn 최종 Damage는 Base Burn + Fire Mastery Bonus + Arcane Synergy Damage + PlayerMagicPower Bonus다.
+
+### Stagger Runtime
+- `StaggerStatus`는 Slime Root에 하나만 부착하는 Lightning 전용 상태 Component다.
+- 기본 Duration은 Lightning 공격이 전달하는 `0.1`이며 Lightning 2에서는 최소 `0.15`다. 재적용은 현재 Remaining Duration과 새 Duration 중 더 긴 값을 사용한다.
+- `SlimeController`는 Stagger 중 Update의 이동, Separation, 공격과 Attack Cooldown 진행을 모두 중단한다.
+- Pause 중 Stagger Timer도 진행하지 않으며 종료 후 기존 Slime 행동을 재개한다.
+- BurnStatus와 독립 Component로 공존하며 Generic Status Framework는 사용하지 않는다.
+
+### Lightning Chain Runtime
+- `LightningChainUtility`는 Chain Lightning과 Lightning Orb만 공유하는 작은 Lightning 전용 helper다.
+- 최초 Target을 Hit한 뒤 현재 Target 위치에서 Bounce Range 안의 아직 맞지 않은 가장 가까운 살아 있는 Slime을 고른다.
+- 하나의 Chain에서 같은 Slime을 중복 Hit하지 않으며 최대 Enemy `20`에서 단순 O(n²) 탐색을 사용한다.
+- 각 Hit는 `SlimeController.TakeDamage`와 `StaggerStatus.ApplyStagger`를 사용한다.
+- Lightning 4는 최초 Hit Index `0`부터 `+0/+1/+2...` Damage를 적용하고 Lightning 6은 Chain과 Orb Pulse에 Bounce `+2`를 적용한다.
+- Lightning Arc VFX, Generic Ability/Damage Framework와 Spatial Partition은 사용하지 않는다.
+
+### Chain Lightning Runtime
+- `chain-lightning`이 SkillLoadout에 Lv.1 이상 장착된 경우 Player 기준 최근접 Slime부터 즉시 자동 공격한다.
+- Base Damage는 Lv.1 `1`, Lv.2 `2`이며 PlayerMagicPower Bonus를 모든 Hit에 적용한다.
+- Cooldown `1.1`, Base Bounce Count `2`, Bounce Range `5.5`, Stagger Duration `0.1`을 사용한다.
+- Base Bounce Count `2`는 최초 Target 외 추가 두 명, 즉 Mastery가 없을 때 최대 세 Target Hit를 의미한다.
+- Lightning Mastery는 Damage를 바꾸지 않고 Bounce Count만 증가시킨다.
+- Projectile과 Collision Object는 생성하지 않는다.
+
+### Lightning Orb Runtime
+- `lightning-orb`가 SkillLoadout에 Lv.1 이상 장착된 경우 Cast 순간 최근접 Slime 방향으로 non-homing 직선 Orb를 발사한다.
+- Orb는 Speed `2.2`, Lifetime `6`으로 이동하며 Enemy Collision로 Destroy되지 않는다.
+- `0.75`초마다 Orb 기준 Radius `4.5` 안의 최근접 살아 있는 Slime을 최초 Target으로 Lightning Chain을 실행한다.
+- Damage `1`, Cooldown `3`, Bounce Range `5.5`, Stagger Duration `0.1`을 사용한다.
+- Orb Lv.1/Lv.2 Base Bounce는 `0/1`이며 Lightning Mastery Bonus를 더한다.
+- 각 Pulse는 현재 SkillLoadout의 Orb/Mastery Level과 현재 PlayerMagicPower를 다시 읽어 이미 존재하는 Orb에도 Upgrade를 반영한다.
+- Pause 중 이동, Lifetime과 Pulse Timer를 모두 정지한다.
+
+### Lightning Mastery Runtime
+- 별도 MonoBehaviour 없이 `SkillLoadout.GetSkillLevel("lightning-mastery")`를 조회한다.
+- Lv.0/Lv.1/Lv.2 Bounce Bonus는 각각 `0/+1/+2`다.
+- Chain Lightning과 Lightning Orb의 모든 Chain에 적용하지만 Damage에는 영향을 주지 않는다.
+- Lightning Mastery Bounce와 Lightning 6 Bounce는 합산하며 Lightning 4 Hit Scaling은 Chain Lightning과 Orb Pulse 모두에 적용한다.
+
+### Frost Slow Runtime
+- `SlowStatus`는 Slime Root에 하나만 부착하는 Frost 전용 상태 Component다.
+- 재적용 시 Duration과 현재 전달된 Move/Attack Speed Multiplier를 갱신하지만 활성 Slow의 경과 시간은 Reset하지 않는다.
+- 기본 Slow는 Duration `2.5`, Move Multiplier `0.7`, Attack Speed Multiplier `1`이다.
+- Frost Mastery Lv.1은 Attack Speed Multiplier를 `0.65`, Lv.2는 추가로 Move Multiplier를 `0.5`로 만든다.
+- `SlimeController`는 직렬화 Move Speed `2.6`과 Attack Cooldown `1.2`를 바꾸지 않고 최종 이동 거리와 Cooldown 진행률에만 Slow 배율을 곱한다.
+- Stagger 중에는 기존처럼 전체 Slime 행동과 Cooldown 진행이 먼저 정지하며 Slow/Burn/Stagger는 서로 제거하지 않는다.
+- Frost 2/4는 Slow Duration을 `4/5.5`초로 늘리고 Frost 6은 Slow 경과 시간당 Move Multiplier를 `0.06`씩 줄이되 `0.25` 아래로 내리지 않는다.
+- Pause 중 Slow Duration과 경과 시간은 진행하지 않고 완전 종료 시 경과 시간을 Reset하며 두 Multiplier는 자동으로 `1`로 돌아온다.
+- `FrostSlowUtility`는 Ice Bolt와 Blizzard만 공유하는 작은 Frost 전용 Mastery 계산 helper이며 별도 상태 Counter나 Generic Modifier Framework를 만들지 않는다.
+
+### Ice Bolt Runtime
+- `ice-bolt`가 SkillLoadout에 Lv.1 이상 장착된 경우 XZ 최근접 살아 있는 Slime 방향으로 non-homing 직선 Projectile을 자동 발사한다.
+- Base Damage `1`, Cooldown `0.85`, Speed `8`, Lifetime `4`, Collision Radius `0.2`를 사용한다.
+- 이전→다음 XZ Segment에서 첫 충돌 Enemy를 찾으며 Lv.1은 그 Enemy 한 명에게 Damage와 Slow를 적용하고 Projectile을 Destroy한다.
+- Lv.2는 Impact Position Radius `1.8` 안의 살아 있는 Enemy 모두에게 Damage와 Slow를 적용하되 직접 Target을 포함해 Enemy별 한 번만 처리한다.
+- Lifetime 동안 Hit가 없으면 AoE 없이 Destroy한다.
+- Hit 시 현재 PlayerMagicPower와 Frost Mastery Level을 읽으며 Rigidbody, Collider와 Generic Projectile Framework를 사용하지 않는다.
+
+### Blizzard Runtime
+- `blizzard`가 SkillLoadout에 Lv.1 이상 장착된 경우 Player 기준 최근접 살아 있는 Slime의 Cast 시점 위치에 고정 Area를 생성한다.
+- Base Damage `1`, Cooldown `4.5`, Duration `4`, Tick Interval `1`을 사용한다.
+- Radius는 Lv.1 `2.4`, Lv.2 `3.6`이며 Runtime이 Visual Diameter를 각각 `4.8/7.2`로 설정한다.
+- 생성 즉시 반복 Hit하지 않고 1초마다 범위 내 살아 있는 Enemy를 한 번씩 Damage하고 Slow를 갱신한다.
+- Damage는 Tick 시점 PlayerMagicPower, Slow는 적용 시점 Frost Mastery Level을 사용한다.
+- Area는 Enemy를 따라가지 않으며 Pause 중 Duration과 Tick Timer를 모두 정지한다.
+- Frost 2/4/6은 Ice Bolt와 Blizzard가 적용하는 모든 Slow에 적용하며 Frost VFX는 아직 없다.
 
 ### Player Experience / Experience Orb
 - `PlayerExperience`는 게임 시작 시 Level `1`, Current Experience `0`으로 초기화한다.
@@ -639,13 +783,16 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 ### Level-Up Choice UI
 - 기존 uGUI `2.0.0`의 Canvas, Button, Legacy Text를 사용하고 새 Package를 설치하지 않는다.
 - `LevelUpChoiceUI`는 Panel 하나, 서로 다른 Button 세 개와 Label 세 개만 관리한다.
-- Label은 Maximum Health, Magic Power, Regeneration의 현재 Level, 다음 Level과 고정 효과를 표시한다.
+- Label은 Common/School/Type/Skill 이름, 현재 Level, 다음 Level과 짧은 기능 설명을 세 줄로 표시한다.
 - Level Up 발생 시 Controller가 Pause와 Pending 누적 후 UI를 표시한다.
 - Button 클릭 시 해당 화면의 세 Button을 즉시 잠그고 선택 효과를 적용한 뒤 Pending을 정확히 하나만 감소시킨다.
-- Pending이 남으면 `Time.timeScale = 0`을 유지하고 같은 Panel에 다음 세 Choice를 즉시 표시한다.
+- Pending이 남으면 `Time.timeScale = 0`을 유지하고 현재 Loadout 기준 Candidate Pool을 다시 만든 뒤 같은 Panel에 새로운 세 Choice를 즉시 표시한다.
 - Pending이 `0`일 때만 Panel을 숨기고 Gameplay를 Resume한다.
 - UI가 숨겨진 상태의 Choice, 범위 밖 Choice Index, 중복 Button Reference는 안전하게 거부한다.
-- 이번 Phase에서는 세 Common Upgrade가 항상 표시되며 Random Pool을 사용하지 않는다.
+- Candidate Pool은 항상 포함되는 Common 3종과 `SkillLoadout.CanAcquireOrUpgrade`를 통과한 Catalog School Skill로 구성한다.
+- Candidate 전체를 Unity Random 기반 Fisher–Yates 방식으로 섞고 앞의 세 개만 사용하므로 한 화면의 중복 Choice가 없다.
+- School Skill 선택은 `SkillLoadout.AcquireOrUpgrade(SkillDefinition)`을 사용하고 Slot/Level 규칙을 Level-Up System에서 복제하지 않는다.
+- 기존 `LevelUpController`와 `SkillLoadout`이 같은 GameSystems에 있으므로 `GetComponent`로 연결하며 새 Inspector Reference가 없다.
 
 ### Common Upgrade
 - Common Upgrade는 Slot과 School Point를 사용하지 않으며 반복 선택할 수 있다.
@@ -654,7 +801,8 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Magic Power는 별도 `PlayerMagicPower`의 Magic Damage Bonus를 `+1`한다.
 - Magic Missile Runtime은 Inspector Damage `3`을 Base Damage로 유지하고 발사 시 Bonus를 더한 최종 Damage를 Projectile에 전달한다.
 - Regeneration은 PlayerHealth가 보유하며 선택당 `+0.5 HP/sec`다. Player HP가 `0`보다 크고 Maximum 미만일 때만 `Time.deltaTime`으로 회복한다.
-- Maximum Level, Random Upgrade Pool, ScriptableObject Upgrade Database, 범용 Damage/Ability Framework는 구현하지 않는다.
+- Common 3종은 Slot 상태와 무관하게 Level-Up Candidate Pool에 항상 들어가며 기존 Level과 효과 적용 경로를 재사용한다.
+- Maximum Level, weighted RNG, rarity, reroll, ScriptableObject Upgrade Database, 범용 Damage/Ability Framework는 구현하지 않는다.
 
 ### Skill Loadout Core
 - School Skill Slot은 Active Slot 1, Active Slot 2, Passive Slot 1로 고정한다.
@@ -667,7 +815,7 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - U7-A Debug Placeholder ID는 규칙 검증용 상태일 뿐 실제 Skill Content가 아니다.
 - `GetSkillLevel(string)`은 외부 Runtime이 직렬화 Slot Field를 직접 건드리지 않고 현재 장착 Level을 조회하는 최소 read-only API다.
 - Magic Missile은 자동 장착하지 않으며, `MagicMissileCaster`는 Loadout의 `magic-missile` Level이 `1` 이상일 때만 동작한다.
-- Magic Missile Lv.2 효과와 다른 Spell Runtime은 후속 Phase로 미룬다.
+- Level-Up 후보 판정과 적용도 동일한 `CanAcquireOrUpgrade`/`AcquireOrUpgrade` 공개 API를 사용한다.
 
 ### Skill Definition / Catalog
 - Definition은 ID, Display Name, School, SkillType, MaxLevel만 가진 불변 C# 데이터다.
@@ -739,7 +887,7 @@ Active 1 Empty / Active 2 Empty / Passive Empty
 - Empty, Level `0`, Catalog에 없는 Debug Placeholder Skill은 Point를 제공하지 않는다.
 - Loadout Reset 뒤 별도 Point Reset 없이 계산 결과가 자동으로 모두 `0`이 된다.
 - 별도 Point Field, 누적 Counter, Manager를 만들지 않는다.
-- 2/4/6 Synergy와 활성 여부는 아직 구현하지 않는다.
+- 2/4/6 Synergy는 이 실시간 Point API에서 직접 파생하며 활성 상태를 별도로 저장하지 않는다.
 
 ### Balance
 Prototype 구현 중 기존 Balance 수치를 이유 없이 재조정하지 않는다.
@@ -765,7 +913,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `GameSystems`
   - `EventSystem`
   - `Canvas`
-- 저장된 `player` Root는 `PlayerMovement`, `PlayerHealth`, `MagicMissileCaster`, `PlayerExperience`, `PlayerMagicPower`를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
+- 저장된 `player` Root는 `PlayerMovement`, `PlayerHealth`, `PlayerExperience`, `PlayerMagicPower`와 8개 Active의 Caster Component를 사용하며 Position `(0, 0, 0)`, Rotation `(0, 0, 0)`이다.
 - `player/Visual` Child는 기존 Square SpriteRenderer와 `BillboardToCamera`를 사용하며 Local Position은 `(0, 0.5, 0)`이다.
 - `player`의 `Player/Move` Input Action Reference는 연결되어 있다.
 - U1-A / U1-A2의 World XZ 이동 동작은 Unity Editor에서 검증됐다.
@@ -805,7 +953,9 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - 기존 Canvas에는 `StartingSpellSelectionUI`, Inactive 저장된 별도 `StartingSpellPanel`, Title과 서로 다른 Button/Label 8쌍이 연결되어 있다.
 - U9-B Starting UI 표시/선택/Close/Resume와 Level-Up UI 분리는 Unity Editor에서 검증 완료됐다.
 - `player`에는 `MagicBoltCaster`와 `MagicBolt.prefab`, EnemySpawner, PlayerMagicPower, SkillLoadout Reference 및 요청된 기본 수치가 저장되어 있고 U10-A Editor 검증이 완료됐다.
-- `player`의 `FireballCaster`와 `FireZoneCaster`는 U10-Fire Editor Setup에서 추가/연결해야 한다.
+- `player`에는 `FireballCaster`와 `FireZoneCaster`, 각 Prefab/EnemySpawner/PlayerMagicPower/SkillLoadout Reference와 요청된 수치가 저장되어 있고 U10-Fire Editor 검증이 완료됐다.
+- `player`에는 `ChainLightningCaster`와 `LightningOrbCaster`, 각 Prefab/EnemySpawner/PlayerMagicPower/SkillLoadout Reference와 요청된 수치가 저장되어 있고 U10-Lightning Editor 검증이 완료됐다.
+- `player`에는 `IceBoltCaster`와 `BlizzardCaster`, 각 Prefab/EnemySpawner/PlayerMagicPower/SkillLoadout Reference와 요청된 수치가 저장되어 있고 U10-Frost Editor 검증이 완료됐다.
 - U3-A Spawn/Runtime Reference/Count 회수와 U3-B Separation/Gameplay Regression은 Unity Editor에서 검증됐다.
 - `ground`는 Unity 기본 Square Sprite를 사용하며 Position `(0, -0.05, 0)`, Rotation `(90, 0, 0)`, Scale `(80, 80, 1)`이다.
 - `SampleScene`은 제거되었고 Build Scene List와 마지막 활성 Scene 기록에서 참조하지 않는다.
@@ -820,14 +970,24 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
     - `SpriteRenderer`
     - `BillboardToCamera`
 - Prefab의 Target, PlayerHealth, PlayerExperience, Experience Orb Prefab과 Billboard Camera는 Runtime에 연결된다.
-- `BurnStatus`는 U10-Fire Editor Setup에서 Slime Root에 추가해야 하며 현재 Prefab에는 아직 없다.
+- Slime Root에는 `BurnStatus`가 추가되어 있고 U10-Fire Editor 검증이 완료됐다.
+- Slime Root에는 `StaggerStatus`가 추가되어 있고 U10-Lightning Editor 검증이 완료됐다.
+- Slime Root에는 `SlowStatus`가 추가되어 있고 U10-Frost Editor 검증이 완료됐다.
 - U3-B Separation은 Script 기본값 Radius `0.75`, Strength `0.35`로 Editor 검증 완료됐다.
 - Magic Missile 실제 경로: `Assets/Prefabs/Projectiles/MagicMissile.prefab`
 - Magic Missile Root에는 `MagicMissileProjectile`, Visual Child에는 Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
 - Magic Bolt 실제 경로: `Assets/Prefabs/Projectiles/MagicBolt.prefab`
 - Magic Bolt Root에는 `MagicBoltProjectile`, Visual Child에는 SpriteRenderer와 `BillboardToCamera`가 있으며 Player Caster 연결과 Play Mode 검증이 완료됐다.
-- Fireball 권장 경로: `Assets/Prefabs/Projectiles/Fireball.prefab`이며 Editor 생성 전이다.
-- Fire Zone 권장 경로: `Assets/Prefabs/Areas/FireZone.prefab`이며 Editor 생성 전이다.
+- Fireball 실제 경로: `Assets/Prefabs/Projectiles/Fireball.prefab`
+- Fireball Root에는 `FireballProjectile`, Visual Child에는 Circle SpriteRenderer와 `BillboardToCamera`가 있으며 Player Caster 연결과 Play Mode 검증이 완료됐다.
+- Fire Zone 실제 경로: `Assets/Prefabs/Areas/FireZone.prefab`
+- Fire Zone Root에는 `FireZoneArea`, XZ Ground 방향의 반투명 Circle Visual이 있으며 Player Caster 연결과 Play Mode 검증이 완료됐다.
+- Lightning Orb 실제 경로: `Assets/Prefabs/Projectiles/LightningOrb.prefab`
+- Lightning Orb Root에는 `LightningOrbProjectile`, Visual Child에는 SpriteRenderer와 `BillboardToCamera`가 있으며 U10-Lightning Editor 검증이 완료됐다.
+- Ice Bolt 실제 경로: `Assets/Prefabs/Projectiles/IceBolt.prefab`
+- Ice Bolt Root에는 `IceBoltProjectile`, Visual Child에는 SpriteRenderer와 `BillboardToCamera`가 있으며 U10-Frost Editor 검증이 완료됐다.
+- Blizzard 실제 경로: `Assets/Prefabs/Areas/Blizzard.prefab`
+- Blizzard Root에는 `BlizzardArea`, XZ Ground 방향의 반투명 Circle Visual이 있으며 U10-Frost Editor 검증이 완료됐다.
 - Experience Orb 실제 경로: `Assets/Prefabs/Pickups/ExperienceOrb.prefab`
 - Experience Orb Root에는 `ExperienceOrb`, Visual Child에는 Cyan Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
 - Experience Orb Value `4`, Pickup Radius `1.1`, Visual Local Position `(0, 0.4, 0)`, Scale `(0.35, 0.35, 0.35)`다.
@@ -868,6 +1028,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Runtime `Setup`으로 Player/Health/Experience/Orb Prefab/Camera와 이웃 목록 연결
   - Separation Radius `0.75`, Strength `0.35`
   - XZ 이웃 거리 기반 Separation과 동일 위치 fallback
+  - 같은 Root의 `StaggerStatus`를 캐시하고 Stagger 중 이동/Separation/Attack/Cooldown 정지
+  - 같은 Root의 `SlowStatus`를 캐시하고 최종 이동 거리와 Attack Cooldown 진행률에 현재 Slow Multiplier 적용
   - 최종 Move Speed/Stop Distance/Y 보존
   - 외부 Targeting용 `IsAlive` 읽기 전용 상태
   - U2-C Editor 검증 완료
@@ -885,8 +1047,11 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Player의 기존 Magic Missile Runtime Component
   - `SkillLoadout` read-only 조회로 `magic-missile` Lv.1 이상 장착 여부 확인
   - Magic Missile 미장착 또는 Gameplay Pause 중에는 Target 검색과 발사를 수행하지 않음
-  - EnemySpawner 목록에서 XZ 최근접 살아 있는 Slime 선택
-  - 기본 Damage `3`을 Base Damage로 유지하며 `PlayerMagicPower` Bonus를 발사 시 합산
+  - EnemySpawner 목록에서 필요한 수만큼 XZ 최근접 살아 있는 Slime을 서로 다르게 우선 선택하고 부족하면 Target 재사용
+  - Lv.1/Lv.2 Base Damage `3/4`, 기본 Projectile Count `1/2`에 Arcane 2/6 Bonus 적용
+  - Lv.2는 서로 다른 최근접 Target을 우선하고 Enemy가 하나면 같은 Target 사용
+  - Lv.2 Launch Spacing `0.32`
+  - 각 Projectile에 `PlayerMagicPower` Bonus 합산
   - Cooldown `0.65`, Speed `6`, Lifetime `5`, Collision Radius `0.22`
   - Projectile 생성과 Runtime Target/Camera/수치 전달
   - Target 없음과 필수 Reference Null 방어
@@ -900,8 +1065,11 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - U4-A Projectile Prefab 생성 및 Play Mode 검증 완료
 - `Assets/Scripts/Combat/MagicBoltCaster.cs`
   - `magic-bolt` Loadout Lv.1 이상 gating
-  - XZ 최근접 살아 있는 Slime Target 선택과 발사 순간 고정 Direction 계산
-  - Base Damage `4` + PlayerMagicPower Bonus
+  - 필요한 수만큼 XZ 최근접 살아 있는 Slime을 선택하고 Projectile별 발사 순간 고정 Direction 계산
+  - Lv.1/Lv.2 Base Damage `4/5`, 기본 Projectile Count `1/2`에 Arcane 2/6 Bonus 적용
+  - Lv.2는 서로 다른 최근접 Target을 우선하고 Enemy가 하나면 같은 방향 Target 사용
+  - Lv.2 Launch Spacing `0.22`
+  - 각 Projectile에 PlayerMagicPower Bonus 적용
   - Cooldown `0.9`, Speed `9`, Lifetime `4`, Collision Radius `0.2`
   - Enemy 없음/Gameplay Pause에서 발사와 Cooldown 소비 없음
   - 필수 Prefab/Spawner/MagicPower/Loadout/Billboard Camera Reference 방어
@@ -914,23 +1082,64 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Pause 중 이동/Lifetime 정지, Invalid Setup 방어
 - `Assets/Scripts/Combat/BurnStatus.cs`
   - Slime별 단일 Burning 상태와 Inspector Runtime 값
-  - 재적용 시 Duration/Damage/Interval 갱신, Tick Progress 유지
+  - 재적용 시 현재 Loadout의 Fire/Arcane/Mastery/Magic Power로 Duration/Damage/Interval 갱신, Tick Progress 유지
   - `SlimeController.TakeDamage`를 사용하는 `1`초 Tick과 Pause 정지
+  - Fire 6에서 반경 `3.2`, 간격 `1`초의 비-Burning Enemy 전염
 - `Assets/Scripts/Combat/FireballCaster.cs`
   - `fireball` Loadout gating과 XZ 최근접 Target 방향 선택
-  - Direct/Burn Magic Power 및 Fire Mastery 계산
-  - 요청된 Fireball 수치와 Lv.1/Lv.2 Explosion Radius 전달
+  - Direct Arcane/Magic Power와 Burn Runtime 계산 Reference 전달
+  - 요청된 Fireball 수치, Lv.1/Lv.2 Explosion Radius와 Arcane 추가 Projectile 적용
 - `Assets/Scripts/Combat/FireballProjectile.cs`
   - Target Reference 없는 non-homing XZ 직선 이동과 Segment Collision
   - 첫 Enemy Direct Damage 후 Impact Radius 내 Burn 적용
   - Runtime Billboard Camera, Lifetime, Pause와 Invalid Setup 방어
 - `Assets/Scripts/Combat/FireZoneCaster.cs`
   - `fire-zone` Loadout gating과 최근접 Enemy 현재 위치에 고정 Zone 생성
-  - 요청된 Zone/Burn 수치, Lv.1/Lv.2 Radius 및 Mastery/Magic Power 계산
+  - 요청된 Zone/Burn 수치, Lv.1/Lv.2 Radius와 현재 Build 계산 Reference 전달
 - `Assets/Scripts/Combat/FireZoneArea.cs`
   - 고정 XZ Area, Duration `4`, Apply Interval `0.5`
   - 범위 내 살아 있는 Slime Burn 반복 갱신과 Radius 기반 Visual Scale
   - Pause 중 Timer 정지와 Direct Damage 없음
+- `Assets/Scripts/Combat/StaggerStatus.cs`
+  - Slime별 단일 Stagger 상태와 Inspector Runtime 값
+  - 더 긴 Remaining Duration 우선 Refresh와 Pause 중 Timer 정지
+- `Assets/Scripts/Combat/LightningChainUtility.cs`
+  - 최초 Target과 Bounce Range 내 최근접 미타격 Slime Chain 처리
+  - 같은 Chain 중복 Hit 방지와 각 Hit Damage/Stagger 및 Lightning 2/4/6 적용
+- `Assets/Scripts/Combat/ChainLightningCaster.cs`
+  - `chain-lightning` Loadout gating과 Player 기준 최근접 최초 Target
+  - Lv.1/Lv.2 Damage `1/2`, Cooldown `1.1`, Base Bounce `2`, Range `5.5`
+  - PlayerMagicPower와 Lightning Mastery Bounce 적용
+- `Assets/Scripts/Combat/LightningOrbCaster.cs`
+  - `lightning-orb` Loadout gating과 Cast 순간 XZ 고정 방향 선택
+  - Damage `1`, Cooldown `3`, Speed `2.2`, Lifetime `6`, Pulse `0.75/4.5`
+  - Orb Prefab과 Runtime Reference/수치 전달
+- `Assets/Scripts/Combat/LightningOrbProjectile.cs`
+  - Target Reference와 Collision Destroy 없는 non-homing 직선 이동
+  - Pulse마다 반경 내 최근접 Target부터 Lightning Chain 실행
+  - 현재 Orb/Mastery Level과 PlayerMagicPower 재조회
+  - Runtime Billboard Camera와 Pause 중 이동/Lifetime/Pulse 정지
+- `Assets/Scripts/Combat/SlowStatus.cs`
+  - Slime별 단일 Slow 상태, Remaining Duration과 Move/Attack Speed Multiplier Inspector 표시
+  - 재적용 시 Duration/Multiplier 갱신과 활성 경과 시간 유지, 종료 시 Multiplier `1`/경과 시간 복구
+  - Frost 6 Progressive Move Slow `0.06/sec`, 최소 Multiplier `0.25`, Pause 중 Timer 정지
+- `Assets/Scripts/Combat/FrostSlowUtility.cs`
+  - 현재 `frost-mastery` Level로 공통 Move/Attack Speed Multiplier를 선택해 `SlowStatus`에 전달
+  - Ice Bolt와 Blizzard만 공유하는 Frost 전용 helper
+- `Assets/Scripts/Combat/IceBoltCaster.cs`
+  - `ice-bolt` Loadout gating과 XZ 최근접 Target 발사 방향 선택
+  - Damage `1`, Cooldown `0.85`, Speed `8`, Lifetime `4`, Collision Radius `0.2`, Lv.2 AoE Radius `1.8`
+  - Projectile Prefab과 EnemySpawner/PlayerMagicPower/SkillLoadout/Billboard Camera Runtime 전달
+- `Assets/Scripts/Combat/IceBoltProjectile.cs`
+  - non-homing XZ Segment Collision과 첫 Hit 처리
+  - Lv.1 Direct Damage/Slow, Lv.2 Impact AoE의 Enemy별 단일 Damage/Slow
+  - Miss 시 AoE 없음, Runtime Billboard Camera와 Pause 중 이동/Lifetime 정지
+- `Assets/Scripts/Combat/BlizzardCaster.cs`
+  - `blizzard` Loadout gating과 최근접 Enemy 현재 위치에 고정 Area 생성
+  - Damage `1`, Cooldown `4.5`, Duration `4`, Tick `1`, Lv.1/Lv.2 Radius `2.4/3.6`
+- `Assets/Scripts/Combat/BlizzardArea.cs`
+  - 고정 XZ Area와 1초 간격 범위 Damage/Slow
+  - PlayerMagicPower/Frost Mastery Runtime 적용, Radius 기반 Visual Diameter와 Pause 정지
 - `Assets/Scripts/Player/PlayerExperience.cs`
   - Level `1`, Current Experience `0`, 첫 Requirement `8` 초기화
   - Base Requirement `8`, Level당 Growth `4`
@@ -948,9 +1157,12 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `Assets/Scripts/Progression/LevelUpController.cs`
   - PlayerExperience `LevelsGained` 구독
   - Pending Level Ups 누적과 `Time.timeScale = 0` Pause
-  - Level Up 시 `LevelUpChoiceUI` 표시
-  - UI Choice Index 검증 후 `CommonUpgradeController` 적용과 Pending 하나 완료
-  - Pending이 남으면 다음 Choice 표시, 마지막 Pending에서 UI 숨김과 Resume
+  - 같은 GameSystems의 `SkillLoadout`을 `GetComponent`로 재사용
+  - Common 3종과 `CanAcquireOrUpgrade`가 true인 School Skill의 통합 Candidate Pool 생성
+  - Unity Random Fisher–Yates Shuffle 후 중복 없는 세 Choice를 `LevelUpChoiceUI`에 표시
+  - Common은 `CommonUpgradeController`, School Skill은 `SkillLoadout.AcquireOrUpgrade`로 적용
+  - Pending이 남으면 현재 Loadout에서 새 Pool/Choice 생성, 마지막 Pending에서 UI 숨김과 Resume
+  - School Skill별 Lv.1/Lv.2 짧은 기능 설명 Label 생성
   - Debug Context Menu로 Pending 하나씩 완료
   - Pending `0`에서 `Time.timeScale = 1` Resume
   - Disable/Destroy UI 숨김/Pause 복구와 필수 Reference Null 방어
@@ -973,13 +1185,13 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `Assets/Scripts/UI/LevelUpChoiceUI.cs`
   - Panel 한 개와 서로 다른 uGUI Button/Text Reference 세 쌍 관리
   - 시작 시 Panel 숨김
-  - Common Upgrade 이름, 현재/다음 Level, 효과 Label 표시
+  - Controller가 제공하는 Common 또는 School Skill의 현재/다음 Level과 효과 Label 표시
   - Button 클릭 잠금과 UI 미표시 상태 중복 처리 방어
   - Controller에 Choice Index 전달
 - `Assets/Scripts/Progression/CommonUpgradeController.cs`
   - PlayerHealth와 PlayerMagicPower Reference 보유
   - Maximum Health, Magic Power, Regeneration 선택 Level을 각각 Inspector에 표시
-  - 세 고정 Choice 효과 적용과 현재 Level 기반 Label 생성
+  - Common 3종 효과 적용과 `Common · 이름` 형식의 현재 Level 기반 Label 생성
 - `Assets/Scripts/Player/PlayerMagicPower.cs`
   - Magic Damage Bonus `0` 초기화
   - 유효한 증가량 누적과 Base Damage + Bonus 계산
@@ -994,6 +1206,9 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 살아 있고 Maximum 미만일 때 `Time.deltaTime` 기반 회복, Pause 중 정지
   - Player Death 없음
   - Editor 연결 및 Play Mode 검증 완료
+- `Assets/Scripts/Combat/ProjectileTargetingUtility.cs`
+  - Arcane 추가 Projectile 대상인 다섯 Caster가 공유하는 최소 최근접 Target 선택 helper
+  - 서로 다른 살아 있는 Enemy 우선, Target 부족 시 기존 Target 재사용
 - `Assets/Scripts/Skills/SkillLoadout.cs`
   - `SkillType.Active/Passive` 최소 enum
   - Active Slot 1/2와 Passive Slot 1의 private 직렬화 Skill ID/Level 상태
@@ -1002,12 +1217,18 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Null/공백 ID, Type 불일치, 중복 Slot, Level Cap 방어
   - 실제 콘텐츠가 아닌 Debug Placeholder Context Menu와 Reset
   - `SkillDefinition` 기반 Can/Acquire 오버로드와 Definition MaxLevel 적용
-  - Magic Missile/Magic Bolt/Fireball/Fire Zone/Arcane Mastery/Fire Mastery Definition Debug Context Menu
+  - Magic Missile/Magic Bolt/Fireball/Fire Zone/Chain Lightning/Lightning Orb/Ice Bolt/Blizzard와 Arcane/Fire/Lightning/Frost Mastery Definition Debug Context Menu
   - Strict Empty 상태 조회와 `GetSkillLevel(string)` read-only Runtime API
   - 현재 세 Slot을 조회하는 `GetSchoolPoints(SkillSchool)` 실시간 계산 API
+  - Arcane Mastery Lv.0/Lv.1/Lv.2의 `1/0.9/0.85`를 반환하는 read-only Spell Cooldown 계산 API
+  - Invalid/0 이하 Base Cooldown 안전 처리와 8 Active Caster의 다음 Cast Cooldown 연동
   - Empty/Level 0/Unknown Debug ID 제외와 Invalid School 안전한 `0`
   - `Debug Log School Points` Context Menu
+  - `Debug Log Active Synergies` Context Menu
   - Starting Selection과 Magic Missile Runtime이 공개 API만 사용하며 직렬화 Slot Field에 직접 접근하지 않음
+- `Assets/Scripts/Skills/SchoolSynergyUtility.cs`
+  - 현재 `SkillLoadout.GetSchoolPoints`만 조회하는 Arcane/Fire/Lightning/Frost 2/4/6 계산 helper
+  - 별도 mutable Point State나 MonoBehaviour 없이 Projectile/Damage/Burn/Chain/Slow 보정값 제공
 - `Assets/Scripts/Skills/SkillDefinition.cs`
   - `SkillSchool.Arcane/Fire/Lightning/Frost`
   - ID, Display Name, School, 기존 SkillType, MaxLevel read-only Property
@@ -1028,15 +1249,14 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U10-Fire Script는 구현됐지만 Slime `BurnStatus`, Fireball/FireZone Prefab, Player Caster 연결과 Play Mode 검증 전이다.
-- Fireball 또는 Fire Zone 범위의 Slime Prefab에 `BurnStatus`가 없으면 NullReference는 발생하지 않지만 Burning이 적용되지 않는다.
-- Magic Bolt Lv.2는 안전하게 발사되지만 아직 Lv.1과 같은 Runtime이며 전용 Lv.2 효과가 없다.
+- U12의 Arcane/Fire/Lightning/Frost 2/4/6 Runtime 효과는 Play Mode 검증 전이다.
 - Fireball Lv.2는 Explosion Radius만, Fire Zone Lv.2는 Radius만 증가하며 요청 범위 외 추가 효과는 없다.
-- Magic Missile, Magic Bolt, Fireball, Fire Zone 외 4개 Starting Active는 선택/Loadout만 지원하며 실제 공격 Runtime은 아직 구현되지 않았다.
+- Chain Lightning Arc와 Stagger VFX는 아직 없으며 Inspector/행동으로 검증해야 한다.
+- Frost Impact, Slow 표시와 Blizzard Snow Particle VFX는 아직 없다.
 - U9-A Debug Context Menu는 개발용 fallback으로 남아 있다.
 - Skill Definition은 Metadata뿐이며 실제 Spell/Passive 효과를 실행하지 않는다.
 - U7-A Debug Placeholder Skill ID는 슬롯 규칙 검증용이며 Catalog의 실제 Skill이 아니다.
-- 2/4/6 Synergy 효과와 UI는 아직 구현되지 않았다.
+- Synergy 효과 UI/HUD와 전용 VFX는 아직 구현되지 않았다.
 - Player Death와 HP UI는 구현되지 않았다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
@@ -1047,17 +1267,16 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Physics2D 활용 범위
 - ScriptableObject 활용 범위
 - Common Upgrade 최대 Level
-- Ice Bolt Lv.2 Main Target 중복 Damage 유지 여부
-- Lightning Stagger anti-permastun 필요 여부
+- 다중 Lightning Source에서 Stagger anti-permastun이 필요한지 여부
 - 최종 Balance
-- 남은 Lightning/Frost Skill 효과와 2/4/6 Synergy 구현
+- Synergy UI/HUD와 전용 VFX
 - XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U10-Fire Editor Verification**
+**Pending U12 Editor Verification**
 
-Unity Editor에서 Slime Prefab에 `BurnStatus`를 추가하고 `Fireball.prefab`, `FireZone.prefab`, Player의 두 Caster와 Reference를 연결한 뒤 Fireball/Fire Zone/Burning/Fire Mastery/Lv.2 Radius와 Pause 동작을 검증한다.
+Unity Editor에서 새 Component나 Reference 없이 네 School의 2/4/6 누적 효과, 기존 Mastery/Common Upgrade 결합, Pause와 기존 U1~U11 Regression을 검증한다.
 
-검증 성공 후 다음 Phase로 `U10-Lightning — Complete Lightning School Runtime`을 제안한다. 이번 작업에서는 Lightning, Frost, Fire Synergy와 Level-Up Skill Pool을 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U13 — Prototype Demo Finish Pass`를 제안한다. 이번 작업에서는 Timer/Boss/HUD/VFX/Spawn·Balance 조정과 Demo 완료 판정을 구현하지 않는다.

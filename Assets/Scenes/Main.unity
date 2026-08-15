@@ -3194,6 +3194,12 @@ GameObject:
   - component: {fileID: 1779079784}
   - component: {fileID: 1779079785}
   - component: {fileID: 1779079786}
+  - component: {fileID: 1779079788}
+  - component: {fileID: 1779079787}
+  - component: {fileID: 1779079790}
+  - component: {fileID: 1779079789}
+  - component: {fileID: 1779079792}
+  - component: {fileID: 1779079791}
   m_Layer: 0
   m_Name: player
   m_TagString: Untagged
@@ -3319,6 +3325,153 @@ MonoBehaviour:
   projectileSpeed: 9
   projectileLifetime: 4
   projectileCollisionRadius: 0.2
+--- !u!114 &1779079787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e771f614ee42fb8306072c79ccbcd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireZoneCaster
+  areaPrefab: {fileID: 1360771214147691386, guid: 780bb22a9aabf7e488044a4154e08e6a, type: 3}
+  enemySpawner: {fileID: 1033940372}
+  playerMagicPower: {fileID: 1779079785}
+  skillLoadout: {fileID: 1448863806}
+  cooldown: 4
+  duration: 4
+  burnApplyInterval: 0.5
+  levelOneRadius: 2.2
+  levelTwoRadius: 3.5
+  burnDamage: 1
+  burnDuration: 3
+  burnTickInterval: 1
+--- !u!114 &1779079788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52b0eefcc6a0404287d8201408729b1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireballCaster
+  projectilePrefab: {fileID: 5642289557319352414, guid: 2861ce783b2d2554fba164edd83ab3fd, type: 3}
+  enemySpawner: {fileID: 1033940372}
+  playerMagicPower: {fileID: 1779079785}
+  skillLoadout: {fileID: 1448863806}
+  directDamage: 1
+  cooldown: 1.35
+  projectileSpeed: 7.5
+  projectileLifetime: 4
+  projectileCollisionRadius: 0.22
+  levelOneExplosionRadius: 2.2
+  levelTwoExplosionRadius: 3.4
+  burnDamage: 1
+  burnDuration: 3
+  burnTickInterval: 1
+--- !u!114 &1779079789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b53e43e65f94e6a9d7e36608abe135e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightningOrbCaster
+  projectilePrefab: {fileID: 5524520617225768728, guid: 59ef0973c388e2b4a84d3ebd9fe7c1b1, type: 3}
+  enemySpawner: {fileID: 1033940372}
+  playerMagicPower: {fileID: 1779079785}
+  skillLoadout: {fileID: 1448863806}
+  damage: 1
+  cooldown: 3
+  projectileSpeed: 2.2
+  projectileLifetime: 6
+  pulseInterval: 0.75
+  pulseRadius: 4.5
+  bounceRange: 5.5
+  staggerDuration: 0.1
+--- !u!114 &1779079790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c369e627ca42491ea774b2a3ca37e591, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChainLightningCaster
+  enemySpawner: {fileID: 1033940372}
+  playerMagicPower: {fileID: 1779079785}
+  skillLoadout: {fileID: 1448863806}
+  damage: 1
+  levelTwoDamageBonus: 1
+  cooldown: 1.1
+  baseBounceCount: 2
+  bounceRange: 5.5
+  staggerDuration: 0.1
+--- !u!114 &1779079791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2e0429826be45a78cd4b0152b4bd27a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IceBoltCaster
+  projectilePrefab: {fileID: 5139336630868158155, guid: 5289728b481d2cc4cbf718577a5d1f92, type: 3}
+  enemySpawner: {fileID: 1033940372}
+  playerMagicPower: {fileID: 1779079785}
+  skillLoadout: {fileID: 1448863806}
+  damage: 1
+  cooldown: 0.85
+  projectileSpeed: 8
+  projectileLifetime: 4
+  projectileCollisionRadius: 0.2
+  levelTwoAreaRadius: 1.8
+  slowDuration: 2.5
+  baseSlowMoveMultiplier: 0.7
+  frostMasteryAttackSpeedMultiplier: 0.65
+  frostMasteryLevelTwoMoveMultiplier: 0.5
+--- !u!114 &1779079792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779079778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47af87e752b0471ebdb168ef33de27c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlizzardCaster
+  areaPrefab: {fileID: 5411657953320549282, guid: ff9ac62a8f46fbd47b935c99c8d1758c, type: 3}
+  enemySpawner: {fileID: 1033940372}
+  playerMagicPower: {fileID: 1779079785}
+  skillLoadout: {fileID: 1448863806}
+  damage: 1
+  cooldown: 4.5
+  duration: 4
+  tickInterval: 1
+  levelOneRadius: 2.4
+  levelTwoRadius: 3.6
+  slowDuration: 2.5
+  baseSlowMoveMultiplier: 0.7
+  frostMasteryAttackSpeedMultiplier: 0.65
+  frostMasteryLevelTwoMoveMultiplier: 0.5
 --- !u!1 &1999773434
 GameObject:
   m_ObjectHideFlags: 0

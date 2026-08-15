@@ -2,15 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class MagicBoltCaster : MonoBehaviour
+public sealed class LightningOrbCaster : MonoBehaviour
 {
     private const float LaunchHeight = 1.25f;
-    private const float LevelTwoDamageBonus = 1f;
-    private const float MultiProjectileSpacing = 0.22f;
-    private const string MagicBoltSkillId = "magic-bolt";
+    private const float MultiProjectileSpacing = 0.24f;
+    private const string LightningOrbSkillId = "lightning-orb";
 
     [SerializeField]
-    private MagicBoltProjectile projectilePrefab;
+    private LightningOrbProjectile projectilePrefab;
 
     [SerializeField]
     private EnemySpawner enemySpawner;
@@ -22,20 +21,28 @@ public sealed class MagicBoltCaster : MonoBehaviour
     private SkillLoadout skillLoadout;
 
     [SerializeField, Min(0f)]
-    [Tooltip("Base damage before the Player's Magic Damage Bonus.")]
-    private float damage = 4f;
+    private float damage = 1f;
 
     [SerializeField, Min(0f)]
-    private float cooldown = 0.9f;
+    private float cooldown = 3f;
 
     [SerializeField, Min(0f)]
-    private float projectileSpeed = 9f;
+    private float projectileSpeed = 2.2f;
 
     [SerializeField, Min(0f)]
-    private float projectileLifetime = 4f;
+    private float projectileLifetime = 6f;
 
     [SerializeField, Min(0f)]
-    private float projectileCollisionRadius = 0.2f;
+    private float pulseInterval = 0.75f;
+
+    [SerializeField, Min(0f)]
+    private float pulseRadius = 4.5f;
+
+    [SerializeField, Min(0f)]
+    private float bounceRange = 5.5f;
+
+    [SerializeField, Min(0f)]
+    private float staggerDuration = 0.1f;
 
     private readonly List<SlimeController> projectileTargets = new();
     private float cooldownRemaining;
@@ -44,46 +51,36 @@ public sealed class MagicBoltCaster : MonoBehaviour
     {
         if (projectilePrefab == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires a Projectile Prefab.",
-                this);
-            enabled = false;
+            DisableWithError(
+                "LightningOrbCaster requires a Projectile Prefab.");
             return;
         }
 
         if (enemySpawner == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires an EnemySpawner reference.",
-                this);
-            enabled = false;
+            DisableWithError(
+                "LightningOrbCaster requires an EnemySpawner reference.");
             return;
         }
 
         if (playerMagicPower == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires the Player's PlayerMagicPower component.",
-                this);
-            enabled = false;
+            DisableWithError(
+                "LightningOrbCaster requires PlayerMagicPower on the Player.");
             return;
         }
 
         if (skillLoadout == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires a SkillLoadout reference.",
-                this);
-            enabled = false;
+            DisableWithError(
+                "LightningOrbCaster requires a SkillLoadout reference.");
             return;
         }
 
         if (enemySpawner.BillboardCamera == null)
         {
-            Debug.LogError(
-                "MagicBoltCaster requires the EnemySpawner Billboard Camera.",
-                this);
-            enabled = false;
+            DisableWithError(
+                "LightningOrbCaster requires the EnemySpawner Billboard Camera.");
         }
     }
 
@@ -94,7 +91,8 @@ public sealed class MagicBoltCaster : MonoBehaviour
             return;
         }
 
-        int skillLevel = skillLoadout.GetSkillLevel(MagicBoltSkillId);
+        int skillLevel = skillLoadout.GetSkillLevel(
+            LightningOrbSkillId);
 
         if (skillLevel <= 0)
         {
@@ -110,7 +108,7 @@ public sealed class MagicBoltCaster : MonoBehaviour
             return;
         }
 
-        int projectileCount = (skillLevel >= 2 ? 2 : 1)
+        int projectileCount = 1
             + SchoolSynergyUtility.GetArcaneProjectileBonus(skillLoadout);
         ProjectileTargetingUtility.GetNearestAliveTargets(
             enemySpawner.SpawnedEnemies,
@@ -123,8 +121,7 @@ public sealed class MagicBoltCaster : MonoBehaviour
             return;
         }
 
-        SlimeController firstTarget = projectileTargets[0];
-        Vector3 firstDirection = firstTarget.transform.position
+        Vector3 firstDirection = projectileTargets[0].transform.position
             - transform.position;
         firstDirection.y = 0f;
 
@@ -133,13 +130,6 @@ public sealed class MagicBoltCaster : MonoBehaviour
             return;
         }
 
-        float levelDamage = damage
-            + (skillLevel >= 2 ? LevelTwoDamageBonus : 0f);
-        float modifiedDamage = SchoolSynergyUtility
-            .GetModifiedMagicDamage(
-                skillLoadout,
-                playerMagicPower,
-                levelDamage);
         Vector3 launchCenter = transform.position
             + Vector3.up * LaunchHeight;
         Vector3 lateralDirection = Vector3.Cross(
@@ -148,8 +138,7 @@ public sealed class MagicBoltCaster : MonoBehaviour
 
         for (int index = 0; index < projectileCount; index++)
         {
-            SlimeController target = projectileTargets[index];
-            Vector3 direction = target.transform.position
+            Vector3 direction = projectileTargets[index].transform.position
                 - transform.position;
             direction.y = 0f;
 
@@ -162,18 +151,23 @@ public sealed class MagicBoltCaster : MonoBehaviour
                 ? 0f
                 : (index - (projectileCount - 1) * 0.5f)
                     * MultiProjectileSpacing;
-            MagicBoltProjectile projectile = Instantiate(
+            LightningOrbProjectile projectile = Instantiate(
                 projectilePrefab,
                 launchCenter + lateralDirection * offset,
                 Quaternion.identity);
 
             if (!projectile.Setup(
                     direction.normalized,
-                    modifiedDamage,
+                    damage,
                     projectileSpeed,
                     projectileLifetime,
-                    projectileCollisionRadius,
+                    pulseInterval,
+                    pulseRadius,
+                    bounceRange,
+                    staggerDuration,
                     enemySpawner,
+                    playerMagicPower,
+                    skillLoadout,
                     enemySpawner.BillboardCamera))
             {
                 enabled = false;
@@ -186,4 +180,9 @@ public sealed class MagicBoltCaster : MonoBehaviour
             .GetModifiedSpellCooldown(cooldown);
     }
 
+    private void DisableWithError(string message)
+    {
+        Debug.LogError(message, this);
+        enabled = false;
+    }
 }

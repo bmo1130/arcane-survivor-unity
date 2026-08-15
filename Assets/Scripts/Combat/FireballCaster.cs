@@ -5,8 +5,8 @@ using UnityEngine;
 public sealed class FireballCaster : MonoBehaviour
 {
     private const float LaunchHeight = 1.25f;
+    private const float MultiProjectileSpacing = 0.24f;
     private const string FireballSkillId = "fireball";
-    private const string FireMasterySkillId = "fire-mastery";
 
     [SerializeField]
     private FireballProjectile projectilePrefab;
@@ -52,6 +52,7 @@ public sealed class FireballCaster : MonoBehaviour
     [SerializeField, Min(0f)]
     private float burnTickInterval = 1f;
 
+    private readonly List<SlimeController> projectileTargets = new();
     private float cooldownRemaining;
 
     private void Awake()
@@ -109,17 +110,24 @@ public sealed class FireballCaster : MonoBehaviour
             return;
         }
 
-        SlimeController target = FindNearestAliveSlime();
+        int projectileCount = 1
+            + SchoolSynergyUtility.GetArcaneProjectileBonus(skillLoadout);
+        ProjectileTargetingUtility.GetNearestAliveTargets(
+            enemySpawner.SpawnedEnemies,
+            transform.position,
+            projectileCount,
+            projectileTargets);
 
-        if (target == null)
+        if (projectileTargets.Count == 0)
         {
             return;
         }
 
-        Vector3 direction = target.transform.position - transform.position;
-        direction.y = 0f;
+        Vector3 firstDirection = projectileTargets[0].transform.position
+            - transform.position;
+        firstDirection.y = 0f;
 
-        if (direction.sqrMagnitude <= 0.0001f)
+        if (firstDirection.sqrMagnitude <= 0.0001f)
         {
             return;
         }
@@ -127,79 +135,60 @@ public sealed class FireballCaster : MonoBehaviour
         float explosionRadius = fireballLevel >= 2
             ? levelTwoExplosionRadius
             : levelOneExplosionRadius;
-        float modifiedDirectDamage = playerMagicPower
-            .GetModifiedMagicDamage(directDamage);
-        float modifiedBurnDamage = playerMagicPower
+        float modifiedDirectDamage = SchoolSynergyUtility
             .GetModifiedMagicDamage(
-                burnDamage + GetFireMasteryBurnBonus());
-        Vector3 launchPosition = transform.position
+                skillLoadout,
+                playerMagicPower,
+                directDamage);
+        Vector3 launchCenter = transform.position
             + Vector3.up * LaunchHeight;
-        FireballProjectile projectile = Instantiate(
-            projectilePrefab,
-            launchPosition,
-            Quaternion.identity);
+        Vector3 lateralDirection = Vector3.Cross(
+            Vector3.up,
+            firstDirection.normalized);
 
-        if (!projectile.Setup(
-                direction.normalized,
-                modifiedDirectDamage,
-                projectileSpeed,
-                projectileLifetime,
-                projectileCollisionRadius,
-                explosionRadius,
-                modifiedBurnDamage,
-                burnDuration,
-                burnTickInterval,
-                enemySpawner,
-                enemySpawner.BillboardCamera))
+        for (int index = 0; index < projectileCount; index++)
         {
-            enabled = false;
-            Destroy(projectile.gameObject);
-            return;
-        }
+            Vector3 direction = projectileTargets[index].transform.position
+                - transform.position;
+            direction.y = 0f;
 
-        cooldownRemaining = Mathf.Max(0f, cooldown);
-    }
-
-    private SlimeController FindNearestAliveSlime()
-    {
-        IReadOnlyList<SlimeController> enemies = enemySpawner.SpawnedEnemies;
-        SlimeController nearestEnemy = null;
-        float nearestDistanceSquared = float.PositiveInfinity;
-        Vector3 casterPosition = transform.position;
-
-        for (int index = 0; index < enemies.Count; index++)
-        {
-            SlimeController enemy = enemies[index];
-
-            if (enemy == null || !enemy.IsAlive)
+            if (direction.sqrMagnitude <= 0.0001f)
             {
-                continue;
+                direction = firstDirection;
             }
 
-            Vector3 toEnemy = enemy.transform.position - casterPosition;
-            toEnemy.y = 0f;
-            float distanceSquared = toEnemy.sqrMagnitude;
+            float offset = projectileCount == 1
+                ? 0f
+                : (index - (projectileCount - 1) * 0.5f)
+                    * MultiProjectileSpacing;
+            FireballProjectile projectile = Instantiate(
+                projectilePrefab,
+                launchCenter + lateralDirection * offset,
+                Quaternion.identity);
 
-            if (distanceSquared < nearestDistanceSquared)
+            if (!projectile.Setup(
+                    direction.normalized,
+                    modifiedDirectDamage,
+                    projectileSpeed,
+                    projectileLifetime,
+                    projectileCollisionRadius,
+                    explosionRadius,
+                    burnDamage,
+                    burnDuration,
+                    burnTickInterval,
+                    enemySpawner,
+                    playerMagicPower,
+                    skillLoadout,
+                    enemySpawner.BillboardCamera))
             {
-                nearestDistanceSquared = distanceSquared;
-                nearestEnemy = enemy;
+                enabled = false;
+                Destroy(projectile.gameObject);
+                return;
             }
         }
 
-        return nearestEnemy;
-    }
-
-    private float GetFireMasteryBurnBonus()
-    {
-        int masteryLevel = skillLoadout.GetSkillLevel(FireMasterySkillId);
-
-        if (masteryLevel >= 2)
-        {
-            return 3f;
-        }
-
-        return masteryLevel >= 1 ? 1f : 0f;
+        cooldownRemaining = skillLoadout
+            .GetModifiedSpellCooldown(cooldown);
     }
 
     private void DisableWithError(string message)
