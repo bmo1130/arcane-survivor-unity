@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U13-B — Run Pacing + XP Curve / Editor Verification Pending**
+**U13-C — Burn + Slow Status VFX / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -65,13 +65,15 @@ Arcane/Fire/Lightning/Frost의 2/4/6, Mixed Build, Level-Up Breakpoint 즉시 �
 
 Starting/Level-Up Pause 동안 정지하는 300초 Run Timer, Boss Spawn과 기존 Spell/Status 적용, Victory/Defeat를 Unity Editor에서 검증했다. Console Error가 없으며 U13-A는 완료됐다.
 
-현재 0~240초 동안 Enemy Cap `25 → 100`, Spawn Interval `1.2 → 0.4`로 변화하는 Pacing과 `ceil(8 + 3n + 0.5n²)` XP Requirement Curve의 Editor 검증을 기다리고 있다.
+0~240초 Enemy Cap `25 → 100`, Spawn Interval `1.2 → 0.4` Pacing과 `ceil(8 + 3n + 0.5n²)` XP Requirement Curve를 Unity Editor에서 검증했다. Pause 중 Pacing 정지와 Boss Phase 일반 Spawn 중지도 정상이며 Console Error가 없다. U13-B는 완료됐다.
+
+현재 Burning 머리 위 Marker와 Slow 발밑 Marker를 독립 표시하는 U13-C의 Prefab 구성 및 Editor 검증을 기다리고 있다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U13-B — Run Pacing + XP Curve**다.
+현재 구현 범위는 **U13-C — Burn + Slow Status VFX**다.
 
 ## Completed Features
 
@@ -332,26 +334,32 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - 기존 Gameplay Regression과 Console Error 없음
 - Unity Editor Play Mode 검증 완료
 
+### U13-B — Run Pacing + XP Curve
+- Gameplay 0~240초 Enemy Cap `25 → 100`, Spawn Interval `1.2 → 0.4` 정상
+- Starting/Level-Up Pause 중 Pacing 정지 정상
+- Boss Phase의 일반 신규 Spawn 중지 유지
+- `ceil(8 + 3n + 0.5n²)` XP Requirement Curve 정상
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
 ## Current Work
 
-### U13-B — Run Pacing + XP Curve
-- `RunController.ElapsedGameplayTime`를 Pacing의 단일 시간 기준으로 사용
-- 0~240초 동안 Enemy Cap을 `25 → 100`, Spawn Interval을 `1.2 → 0.4`로 `Mathf.Lerp`
-- Cap은 반올림한 현재 Alive Enemy 상한이며 100마리 유지를 강제하지 않음
-- Spawn Timer는 매 Frame Reset하지 않고 Spawn 후 그 시점의 effective interval로 재설정
-- Boss Spawn은 normal Enemy Cap을 무시하며 기존 Boss Phase의 일반 Spawn 중지 유지
-- XP Requirement는 `n = Level - 1`, `ceil(8 + 3n + 0.5n²)` 사용
-- Slime XP Reward `4`, Boss XP 없음과 while 기반 Multi-Level 처리 유지
-- Pacing/Experience 확인용 Context Menu Debug Log 추가
-- Spatial Partition, Pooling, ECS, Jobs/Burst 등 최적화는 적용하지 않음
+### U13-C — Burn + Slow Status VFX
+- `StatusVfxController`가 같은 Enemy Root의 `BurnStatus.IsBurning`과 `SlowStatus.IsSlowed`를 read-only 조회
+- Burn과 Slow Marker GameObject를 독립적으로 활성/비활성화해 동시 표시 지원
+- Burn은 머리 위 Billboard Sprite, Slow는 발밑 XZ Ground 방향 Sprite 구조 사용
+- `LateUpdate` bool 확인만 수행하고 상태 Timer나 Gameplay 값을 변경하지 않음
+- Pause 중 현재 상태 표시를 유지하며 Status Timer의 기존 scaled-time 정지 규칙 보존
+- Marker는 Enemy Child이므로 Enemy Death 시 Root와 함께 제거
+- 기존 EnemySpawner가 비활성 Child를 포함한 모든 `BillboardToCamera`를 Runtime Camera에 연결하므로 Spawn/Boss 경로 수정 없음
+- Particle, Shader, Animation, Generic VFX Framework 없음
 
 남은 확인:
-- Inspector의 새 RunController/Pacing 및 XP Curve 값 연결·저장
-- 0/60/120/180/240초의 Cap과 Interval 변화 및 Pause 중 정지 확인
-- 50+/80+/100 Cap Stress 상태의 기능 오류와 체감 FPS 확인
-- XP Requirement `8, 12, 16, 22, 28, 36, 44, 54, 64, 76, 88, 102` 확인
-- 5분 Full Run Level, Peak Alive Enemy, 체감 최저 FPS 기록
-- 기존 U1~U13-A Gameplay Regression과 Console Error 확인
+- Slime/BossSlime Prefab에 StatusVfxController와 BurnVfx/SlowVfx Child 구성
+- Burn 시작/종료, Slow 시작/종료와 동시 상태 표시 확인
+- Spawn된 Slime과 Boss의 Burn Billboard Runtime Camera 연결 확인
+- Level-Up Pause 중 활성 Marker 유지 확인
+- 기존 Status Damage/Control, Spawner/Boss 및 Console Error 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -778,7 +786,16 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - 생성 즉시 반복 Hit하지 않고 1초마다 범위 내 살아 있는 Enemy를 한 번씩 Damage하고 Slow를 갱신한다.
 - Damage는 Tick 시점 PlayerMagicPower, Slow는 적용 시점 Frost Mastery Level을 사용한다.
 - Area는 Enemy를 따라가지 않으며 Pause 중 Duration과 Tick Timer를 모두 정지한다.
-- Frost 2/4/6은 Ice Bolt와 Blizzard가 적용하는 모든 Slow에 적용하며 Frost VFX는 아직 없다.
+- Frost 2/4/6은 Ice Bolt와 Blizzard가 적용하는 모든 Slow에 적용한다.
+
+### Burn / Slow Status VFX
+- Enemy 몸통 Sprite 색을 덮어쓰지 않고 Burn과 Slow를 별도 Child Marker로 표시한다.
+- Burn Marker는 Enemy 머리 위의 작은 주황/붉은 Billboard Sprite다.
+- Slow Marker는 Enemy 발밑 XZ 평면에 눕힌 반투명 Cyan/Blue Sprite이며 Billboard를 사용하지 않는다.
+- `StatusVfxController`는 기존 Burn/Slow read-only 상태만 조회하고 Gameplay Status를 소유하거나 변경하지 않는다.
+- 두 상태가 동시에 활성화되면 두 Marker도 동시에 표시하며 우선순위나 상호 제거가 없다.
+- 기존 EnemySpawner의 전체 하위 Billboard Runtime 연결을 재사용하므로 별도 Camera 검색이나 Service Locator가 없다.
+- Slime/Boss Prefab의 Marker 구성과 크기 조정은 U13-C Editor Verification 단계에서 저장한다.
 
 ### Run Flow / Boss / Run End
 - `RunController`는 Starting Spell 선택 완료 후에만 Run을 시작하고 매 Frame `Time.deltaTime`만 누적한다.
@@ -1013,6 +1030,10 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Slime Root에는 `StaggerStatus`가 추가되어 있고 U10-Lightning Editor 검증이 완료됐다.
 - Slime Root에는 `SlowStatus`가 추가되어 있고 U10-Frost Editor 검증이 완료됐다.
 - U3-B Separation은 Script 기본값 Radius `0.75`, Strength `0.35`로 Editor 검증 완료됐다.
+- U13-C Editor Setup 전 Slime Prefab에는 아직 `StatusVfxController`, `BurnVfx`, `SlowVfx`가 없다.
+- Boss Slime 실제 경로: `Assets/Prefabs/Enemies/BossSlime.prefab`
+- Boss Root에는 `SlimeController`, `BurnStatus`, `StaggerStatus`, `SlowStatus`가 있고 `Visual` Child Scale은 `(2.5, 2.5, 2.5)`다.
+- U13-C Editor Setup 전 Boss Prefab에도 아직 `StatusVfxController`, `BurnVfx`, `SlowVfx`가 없다.
 - Magic Missile 실제 경로: `Assets/Prefabs/Projectiles/MagicMissile.prefab`
 - Magic Missile Root에는 `MagicMissileProjectile`, Visual Child에는 Circle `SpriteRenderer`와 `BillboardToCamera`가 있다.
 - Magic Bolt 실제 경로: `Assets/Prefabs/Projectiles/MagicBolt.prefab`
@@ -1300,14 +1321,22 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Camera Null 방어
   - Player/Slime Visual Child와 Main Camera 연결 완료
   - U1-D 조작 수정 후 최종 Play Mode Regression 확인 완료
+- `Assets/Scripts/Visual/StatusVfxController.cs`
+  - 같은 Enemy Root의 BurnStatus/SlowStatus를 캐시하고 read-only 활성 상태 조회
+  - 서로 다른 Burn VFX/Slow VFX Child Reference 필수 검증
+  - `LateUpdate`에서 실제 상태와 Marker Active 상태 동기화
+  - Burn + Slow 동시 표시와 Pause 중 표시 유지
+  - Gameplay 값, Status Timer, Camera Reference를 소유하지 않음
 - Assembly Definition 없음
 
 ## Known Issues
-- U13-B Pacing/XP Curve는 새 Inspector 값과 RunController Reference 연결 후 Play Mode 검증 전이다.
+- U13-C Burn/Slow Marker는 Slime/Boss Prefab Editor 구성 후 Play Mode 검증 전이다.
+- Current XP / pacing can reach 6-synergy too early in a run; final tuning deferred to U13-F.
+- U13-B Play 검증은 완료됐지만 현재 디스크의 `Main.unity`에는 이전 XP Growth `4`와 이전 Spawn Field가 남아 있어, 검증에 사용한 Inspector 변경이 아직 저장되지 않았을 가능성이 있다.
 - 최대 100 Enemy에서 현재 O(n²) Separation과 단순 Target/Status 순회의 실제 성능은 Full Run Stress Test 전이다.
 - Fireball Lv.2는 Explosion Radius만, Fire Zone Lv.2는 Radius만 증가하며 요청 범위 외 추가 효과는 없다.
 - Chain Lightning Arc와 Stagger VFX는 아직 없으며 Inspector/행동으로 검증해야 한다.
-- Frost Impact, Slow 표시와 Blizzard Snow Particle VFX는 아직 없다.
+- Frost Impact와 Blizzard Snow Particle VFX는 아직 없다.
 - U9-A Debug Context Menu는 개발용 fallback으로 남아 있다.
 - Skill Definition은 Metadata뿐이며 실제 Spell/Passive 효과를 실행하지 않는다.
 - U7-A Debug Placeholder Skill ID는 슬롯 규칙 검증용이며 Catalog의 실제 Skill이 아니다.
@@ -1326,7 +1355,6 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - 최종 Balance
 - Synergy UI/HUD와 전용 VFX
 - Boss Special Attack, Boss Phase 2, Boss HP Bar와 Restart
-- U13-C Burn + Slow Status VFX
 - U13-D Minimal Synergy HUD
 - U13-E Chain Lightning Basic VFX
 - U13-F Full 5-minute Run + Final Prototype Balance
@@ -1335,8 +1363,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U13-B Editor Verification**
+**Pending U13-C Editor Verification**
 
-Unity Editor에서 EnemySpawner의 RunController와 Pacing 값, PlayerExperience XP Curve 값을 설정한 뒤 시간대별 Cap/Interval, Pause, Boss 일반 Spawn 중지, XP Requirement와 기존 U1~U13-A Regression을 검증한다.
+Unity Editor에서 Slime/BossSlime Prefab에 Burn/Slow Marker와 StatusVfxController Reference를 구성한 뒤 두 상태의 시작/종료/동시 표시, Pause 유지와 기존 U1~U13-B Regression을 검증한다.
 
-검증 성공 후 다음 Phase로 `U13-C — Burn + Slow Status VFX`를 제안한다. 이후 계획은 `U13-D — Minimal Synergy HUD`, `U13-E — Chain Lightning Basic VFX`, `U13-F — Full 5-minute Run + Final Prototype Balance` 순서이며 이번 작업에서는 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U13-D — Minimal Synergy HUD`를 제안한다. 이후 계획은 `U13-E — Chain Lightning Basic VFX`, `U13-F — Full 5-minute Run + Final Prototype Balance` 순서이며 이번 작업에서는 구현하지 않는다.

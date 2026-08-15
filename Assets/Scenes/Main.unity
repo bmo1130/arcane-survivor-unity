@@ -2413,9 +2413,13 @@ MonoBehaviour:
   slimePrefab: {fileID: 3677997162334901888, guid: 601ffc1ee84783441b1faea710f4ee97, type: 3}
   experienceOrbPrefab: {fileID: 6806973404670256577, guid: cd0bd3eb5712bbd4f990601131195186, type: 3}
   billboardCamera: {fileID: 519420032}
-  spawnInterval: 1.5
+  runController: {fileID: 1448863808}
+  pacingRampDuration: 240
+  startEnemyCap: 25
+  endEnemyCap: 100
+  startSpawnInterval: 1.2
+  endSpawnInterval: 0.4
   spawnDistance: 14
-  maximumEnemyCount: 20
 --- !u!4 &1033940373
 Transform:
   m_ObjectHideFlags: 0
@@ -3645,7 +3649,8 @@ MonoBehaviour:
   level: 1
   currentExperience: 0
   baseExperienceToLevel: 8
-  experienceGrowthPerLevel: 4
+  experienceGrowthPerLevel: 3
+  experienceAccelerationPerLevel: 0.5
   experienceToNextLevel: 8
 --- !u!114 &1779079785
 MonoBehaviour:
