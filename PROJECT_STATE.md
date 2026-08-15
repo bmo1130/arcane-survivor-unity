@@ -1,7 +1,7 @@
 # Arcane Survivor Unity — Project State
 
 ## Current Phase
-**U12 — Complete School Synergy 2/4/6 / Editor Verification Pending**
+**U13-B — Run Pacing + XP Curve / Editor Verification Pending**
 
 Unity 2D URP 프로젝트 생성과 기본 Repository 구성이 완료됐다.
 
@@ -61,13 +61,17 @@ Magic Missile/Magic Bolt Lv.2, Arcane Mastery Lv.1/Lv.2와 8 Active Spell 전체
 
 Common Upgrade와 현재 SkillLoadout 규칙상 eligible한 School Skill을 통합한 무작위 3-choice, Slot/Max Lv.2 필터, Runtime 즉시 반영과 Multi-Level Queue를 Unity Editor에서 검증했다. Console Error가 없으며 U11은 완료됐다.
 
-현재 네 School의 2/4/6 Point Synergy를 별도 Point State 없이 현재 Loadout에서 실시간 계산해 전투 Runtime에 적용하는 U12의 Editor 검증을 기다리고 있다.
+Arcane/Fire/Lightning/Frost의 2/4/6, Mixed Build, Level-Up Breakpoint 즉시 적용을 Unity Editor에서 검증했다. Console Error가 없으며 U12는 완료됐다.
+
+Starting/Level-Up Pause 동안 정지하는 300초 Run Timer, Boss Spawn과 기존 Spell/Status 적용, Victory/Defeat를 Unity Editor에서 검증했다. Console Error가 없으며 U13-A는 완료됐다.
+
+현재 0~240초 동안 Enemy Cap `25 → 100`, Spawn Interval `1.2 → 0.4`로 변화하는 Pacing과 `ceil(8 + 3n + 0.5n²)` XP Requirement Curve의 Editor 검증을 기다리고 있다.
 
 Three.js Prototype은 별도 Repository에 보존한다.
 
 Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype Demo 제작 및 재미 검증**이다.
 
-현재 구현 범위는 **U12 — Complete School Synergy 2/4/6**이다.
+현재 구현 범위는 **U13-B — Run Pacing + XP Curve**다.
 
 ## Completed Features
 
@@ -309,29 +313,45 @@ Unity 프로젝트의 목표는 상용 본개발 확정이 아니라 **Prototype
 - 기존 Gameplay Regression과 Console Error 없음
 - Unity Editor Play Mode 검증 완료
 
+### U12 — Complete School Synergy 2/4/6
+- Arcane 2/4/6 Projectile와 모든 Magic Damage 보정 정상
+- Fire 2/4/6 Burn Duration, Tick Interval과 Spread 정상
+- Lightning 2/4/6 Stagger, Hit Index Damage와 Bounce 정상
+- Frost 2/4/6 Slow Duration과 Progressive Slow 정상
+- Pure/Mixed Build의 독립적이고 누적되는 Breakpoint 정상
+- Level-Up으로 Breakpoint를 넘긴 직후 새 Synergy 효과 적용 정상
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
+### U13-A — Run Timer + Boss + Run End
+- Starting Spell 선택 후 진행하는 300초 Run Timer 정상
+- Starting Spell 및 Level-Up Pause 동안 Timer 정지 정상
+- 300초 Boss Spawn과 일반 신규 Spawn 중지 정상
+- Boss가 기존 Spell Target에 포함되고 Burn/Stagger/Slow 적용 정상
+- Boss Death Victory와 Player Death Defeat 정상
+- 기존 Gameplay Regression과 Console Error 없음
+- Unity Editor Play Mode 검증 완료
+
 ## Current Work
 
-### U12 — Complete School Synergy 2/4/6
-- 모든 Synergy는 `SkillLoadout.GetSchoolPoints`에서 현재 Loadout Level 합을 실시간 조회하며 별도 Point Counter를 저장하지 않음
-- Arcane 2/4/6: 지정된 다섯 Spell Projectile 총 `+1/+1/+2`, 모든 Magic Damage 총 `+0/+1/+2`
-- Fire 2: Burn Duration `3 → 5`초
-- Fire 4: Burn Tick Interval `1 → 0.65`초
-- Fire 6: Burning Enemy가 반경 `3.2`의 살아 있고 Burning이 아닌 Enemy에 `1`초 간격으로 Burn 전염
-- Lightning 2: Lightning Stagger Duration 최소 `0.15`초
-- Lightning 4: Chain Hit Index마다 Damage `+0/+1/+2...`
-- Lightning 6: Chain/Orb Bounce Count `+2`
-- Frost 2/4: Slow Duration `2.5 → 4 → 5.5`초
-- Frost 6: Slow 경과 시간당 Move Multiplier `0.06` 감소, 최소 `0.25`
-- Breakpoint 효과는 누적되며 기존 Mastery/Common Magic Power/Spell Lv.2 효과와 함께 적용
-- 기존 Scene/Prefab Reference와 Component 추가 없음
-- Synergy UI, VFX와 별도 Manager/Counter 없음
+### U13-B — Run Pacing + XP Curve
+- `RunController.ElapsedGameplayTime`를 Pacing의 단일 시간 기준으로 사용
+- 0~240초 동안 Enemy Cap을 `25 → 100`, Spawn Interval을 `1.2 → 0.4`로 `Mathf.Lerp`
+- Cap은 반올림한 현재 Alive Enemy 상한이며 100마리 유지를 강제하지 않음
+- Spawn Timer는 매 Frame Reset하지 않고 Spawn 후 그 시점의 effective interval로 재설정
+- Boss Spawn은 normal Enemy Cap을 무시하며 기존 Boss Phase의 일반 Spawn 중지 유지
+- XP Requirement는 `n = Level - 1`, `ceil(8 + 3n + 0.5n²)` 사용
+- Slime XP Reward `4`, Boss XP 없음과 while 기반 Multi-Level 처리 유지
+- Pacing/Experience 확인용 Context Menu Debug Log 추가
+- Spatial Partition, Pooling, ECS, Jobs/Burst 등 최적화는 적용하지 않음
 
 남은 확인:
-- Arcane 2/4/6의 Projectile 수와 모든 Direct/Status Magic Damage 확인
-- Fire 2/4의 Duration/Tick, Fire 6의 비-Burning 이웃 전염과 Pause 확인
-- Lightning 2/4/6의 Stagger/Hit Scaling/Bounce 확인
-- Frost 2/4 Duration과 Frost 6 Progressive Slow/Refresh/Expiry 확인
-- 기존 U1~U11 Gameplay Regression과 Console Error 확인
+- Inspector의 새 RunController/Pacing 및 XP Curve 값 연결·저장
+- 0/60/120/180/240초의 Cap과 Interval 변화 및 Pause 중 정지 확인
+- 50+/80+/100 Cap Stress 상태의 기능 오류와 체감 FPS 확인
+- XP Requirement `8, 12, 16, 22, 28, 36, 44, 54, 64, 76, 88, 102` 확인
+- 5분 Full Run Level, Peak Alive Enemy, 체감 최저 FPS 기록
+- 기존 U1~U13-A Gameplay Regression과 Console Error 확인
 
 ## Previous Prototype
 기존 Three.js Prototype은 다음까지 구현되었다.
@@ -571,7 +591,9 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - 게임 시작 시 Current HP는 Maximum HP로 초기화한다.
 - HP는 향후 Regeneration과 Maximum HP Upgrade를 위해 `float`를 사용한다.
 - 0 이하 Damage는 무시하고 Current HP는 `0` 아래로 내려가지 않는다.
-- Player Death와 HP UI는 현재 구현하지 않는다.
+- Current HP가 처음 `0`에 도달하면 `IsDead`를 설정하고 `Died`를 정확히 한 번 알린다.
+- Run 종료 이후 Maximum Health Upgrade나 Regeneration으로 Player를 부활시키지 않는다.
+- Player HP HUD는 아직 구현하지 않는다.
 
 ### Slime Attack
 - 기존 Stop Distance `1.15`를 Attack Range로 함께 사용한다.
@@ -587,17 +609,22 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Current Health가 `0`이면 중복 Death를 방지하고 Component를 비활성화한 뒤 Experience Orb를 한 번 생성하고 Slime Root GameObject를 Destroy한다.
 - Editor 검증용 Debug Damage 기본값은 `3`이며 Context Menu도 실제 `TakeDamage`를 호출한다.
 - Debug Damage와 Magic Missile Damage는 모두 같은 `TakeDamage → Die` 경로를 사용한다.
+- Runtime Boss도 같은 `TakeDamage → Die`와 Status 경로를 사용하되 Boss는 XP Orb를 생성하지 않고 `Died` 알림으로 Victory를 확정한다.
 - Death Animation, Effect, 범용 Enemy Health 구조는 현재 구현하지 않는다.
 
 ### Enemy Spawning
-- `EnemySpawner`가 첫 Spawn과 이후 Spawn을 기본 `1.5`초 간격으로 처리한다.
+- `EnemySpawner`는 `RunController.ElapsedGameplayTime`를 읽어 별도 Pacing State 없이 현재 값을 계산한다.
+- 0~240초 동안 Enemy Cap은 `25 → 100`, Spawn Interval은 `1.2 → 0.4`로 선형 변화하며 이후 End 값을 유지한다.
+- Spawn Timer는 `Time.deltaTime`으로 자연스럽게 감소하고 Spawn 후 최신 effective interval로 다음 Timer를 설정한다.
 - Spawn 위치는 Player의 X/Z와 임의 각도를 사용하며 반지름은 `14`, World Y는 항상 `0`이다.
-- Spawner가 생성한 살아 있는 Slime은 최대 `20`마리로 제한한다.
+- 현재 Enemy Cap은 살아 있는 일반/Boss 등록 목록의 상한 검사에 사용하지만 Boss 직접 Spawn 자체는 Cap과 무관하다.
 - Destroy된 Slime은 Unity Object의 Null 상태를 목록에서 제거해 Count를 회수한다.
 - Spawn 직후 `SlimeController.Setup`으로 Player Transform, PlayerHealth, PlayerExperience, Experience Orb Prefab과 Billboard Camera를 명시적으로 연결한다.
 - Spawn 직후 Slime 하위의 `BillboardToCamera`에 Inspector에서 받은 Main Camera Transform을 연결한다.
 - Runtime 연결을 위해 Scene 전체 검색, Enemy Manager Framework, Object Pool, Service Locator를 사용하지 않는다.
-- Difficulty Scaling, Wave, Spawn Interval 감소는 현재 구현하지 않는다.
+- Boss Phase에서는 `StopSpawning`으로 일반 신규 Spawn만 중단하고 기존 Enemy 목록은 유지한다.
+- Boss도 `TrySpawnBoss`를 통해 동일한 Runtime Reference와 Billboard를 연결하고 `SpawnedEnemies`에 등록한다.
+- Enemy HP/Damage/Speed Scaling, Wave와 추가 Enemy Type은 구현하지 않는다.
 
 ### Simple Enemy Separation
 - 현재 Maximum Enemy Count `20`에서는 각 Slime이 Spawned Slime 목록을 직접 순회하는 O(n²) 계산을 사용한다.
@@ -753,11 +780,22 @@ Unity Engine이 제공하는 기능이 적절하다면 활용한다.
 - Area는 Enemy를 따라가지 않으며 Pause 중 Duration과 Tick Timer를 모두 정지한다.
 - Frost 2/4/6은 Ice Bolt와 Blizzard가 적용하는 모든 Slow에 적용하며 Frost VFX는 아직 없다.
 
+### Run Flow / Boss / Run End
+- `RunController`는 Starting Spell 선택 완료 후에만 Run을 시작하고 매 Frame `Time.deltaTime`만 누적한다.
+- Run Duration은 `300`초이며 Starting Selection과 Level-Up의 기존 `Time.timeScale = 0` Pause를 변경하거나 강제로 Resume하지 않는다.
+- `300`초에 일반 Spawn을 중단하고 Player 기준 XZ 거리 `11`에 Boss를 정확히 한 번 생성한다.
+- Boss는 기존 Slime Prefab Duplicate와 `SlimeController`, `BurnStatus`, `StaggerStatus`, `SlowStatus`, Billboard 구조를 사용한다.
+- Boss 권장 값은 HP `120`, Move Speed `2`, Stop Distance `1.4`, Damage `16`, Attack Cooldown `1.1`이다.
+- Boss와 기존 Slime은 동시에 남을 수 있으며 Boss도 기존 Spell Target 목록에 포함된다.
+- Boss Death는 `VICTORY / Boss Defeated`, Player Death는 `DEFEAT / The run has ended`를 표시한다.
+- 먼저 확정된 Victory 또는 Defeat만 유지하며 Run End에서 Spawn과 전투를 `Time.timeScale = 0`으로 정지한다.
+- Boss Special Attack, Boss HP Bar, Restart와 Generic Game State Machine은 구현하지 않는다.
+
 ### Player Experience / Experience Orb
 - `PlayerExperience`는 게임 시작 시 Level `1`, Current Experience `0`으로 초기화한다.
 - `AddExperience(float)`는 NaN, Infinity, 0 이하 값을 무시하고 유효한 XP만 누적한다.
-- Base Experience To Level 기본값은 `8`, Experience Growth Per Level 기본값은 `4`다.
-- 현재 Requirement는 `8 + (Level - 1) * 4`이며 Inspector의 Experience To Next Level에서 확인한다.
+- Base Experience To Level은 `8`, Linear Growth는 `3`, Acceleration은 `0.5`다.
+- `n = Level - 1`일 때 Requirement는 `ceil(8 + 3n + 0.5n²)`이며 Inspector의 Experience To Next Level에서 확인한다.
 - Threshold 이상이면 현재 Requirement를 차감하고 Level을 올린 뒤 다음 Requirement를 계산한다.
 - 남는 XP는 보존하며 한 번의 AddExperience에서 모든 Level Up을 처리한다.
 - 한 번의 AddExperience에서 획득한 Level 수는 `LevelsGained` 알림으로 전달한다.
@@ -930,15 +968,16 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - `player`에는 `PlayerHealth`가 연결되어 있으며 Maximum HP는 `100`이다.
 - `player`의 `MagicMissileCaster`에는 실제 Magic Missile Prefab, `EnemySpawner`, `PlayerMagicPower`, `GameSystems`의 `SkillLoadout`이 연결되어 있으며 U9-A Loadout gating과 기존 Base Damage + Bonus 적용을 검증했다.
 - `player` Root의 `PlayerExperience`는 U5-A Play Mode 검증에 사용됐다.
+- 현재 저장된 Scene의 Experience Growth Per Level은 `4`이므로 U13-B Editor Verification에서 `3`으로 변경하고 새 Acceleration `0.5`를 확인해야 한다.
 - `player/Visual`의 중복 PlayerExperience는 제거됐으며 Root에 하나만 남아 있다.
 - 수동 배치 Slime은 Scene에서 제거됐다.
 - `EnemySpawner` Root에는 `EnemySpawner` Component가 연결되어 있다.
   - Player: `player`
   - Slime Prefab: 실제 Slime Prefab Asset
   - Billboard Camera: `Main Camera`
-  - Spawn Interval `1.5`
   - Spawn Distance `14`
-  - Maximum Enemy Count `20`
+  - 현재 저장된 Scene에는 제거 전 Field인 Spawn Interval `1.5`, Maximum Enemy Count `20`이 남아 있어 U13-B Script Compile 후 새 Pacing Field 설정이 필요함
+  - 새 Run Controller Reference와 Pacing `240 / 25→100 / 1.2→0.4`는 U13-B Editor Verification 전 연결·저장 필요
 - Experience Orb Prefab: `Assets/Prefabs/Pickups/ExperienceOrb.prefab`
 - `GameSystems`에는 `LevelUpController`가 연결되어 있다.
   - Player Experience: `player` Root의 `PlayerExperience`
@@ -1025,7 +1064,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - HP 0에서 Experience Orb 한 개 생성 후 Slime Root GameObject Destroy
   - Debug Damage 기본값 `3`과 `Debug Take Damage` Context Menu
   - Experience Reward 기본값 `4`
-  - Runtime `Setup`으로 Player/Health/Experience/Orb Prefab/Camera와 이웃 목록 연결
+  - Runtime `Setup`으로 Player/Health/Experience/Orb Prefab/Camera, 이웃 목록과 Boss 여부 연결
+  - `IsBoss`와 `Died` 알림, Boss Death의 XP Orb 생략
   - Separation Radius `0.75`, Strength `0.35`
   - XZ 이웃 거리 기반 Separation과 동일 위치 fallback
   - 같은 Root의 `StaggerStatus`를 캐시하고 Stagger 중 이동/Separation/Attack/Cooldown 정지
@@ -1034,13 +1074,16 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 외부 Targeting용 `IsAlive` 읽기 전용 상태
   - U2-C Editor 검증 완료
 - `Assets/Scripts/Enemies/EnemySpawner.cs`
-  - 첫 Spawn과 이후 Spawn Interval 기본값 `1.5`
+  - RunController Gameplay Elapsed Time 기반 0~240초 Pacing
+  - Enemy Cap `25 → 100`, Spawn Interval `1.2 → 0.4`
   - Player 주변 XZ 반지름 `14`, World Y `0` Spawn
-  - Maximum Enemy Count 기본값 `20`
   - Destroy된 Slime 목록 정리 및 Count 회수
   - Spawn 시 Player/PlayerHealth/PlayerExperience/Experience Orb Prefab/Billboard Camera Runtime 연결
   - 기존 Spawned Slime 목록을 각 Slime의 Separation 이웃 목록으로 전달
   - Magic Missile Runtime Targeting용 `SpawnedEnemies` 읽기 전용 목록과 Billboard Camera 제공
+  - 일반 Spawn을 영구 중지하는 `StopSpawning` API
+  - Player 주변 XZ 위치에 Boss를 생성하고 같은 `SpawnedEnemies`에 등록하는 `TrySpawnBoss` API
+  - 현재 effective Cap/Interval read-only API와 `Debug Log Pacing` Context Menu
   - 필수 Reference Null 방어
   - U3-A Editor 연결 및 Play Mode 검증 완료
 - `Assets/Scripts/Combat/MagicMissileCaster.cs`
@@ -1142,10 +1185,11 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - PlayerMagicPower/Frost Mastery Runtime 적용, Radius 기반 Visual Diameter와 Pause 정지
 - `Assets/Scripts/Player/PlayerExperience.cs`
   - Level `1`, Current Experience `0`, 첫 Requirement `8` 초기화
-  - Base Requirement `8`, Level당 Growth `4`
+  - Base `8`, Linear Growth `3`, Acceleration `0.5`의 `ceil(8 + 3n + 0.5n²)` Requirement
   - Invalid/0 이하 XP 방어와 유효 XP 누적
   - 초과 XP 보존과 다중 Level Up 계산
   - 획득 Level 수 `LevelsGained` 알림
+  - `Debug Log Experience` Context Menu
   - Inspector에서 Level, Current Experience, Experience To Next Level 확인 가능
 - `Assets/Scripts/Experience/ExperienceOrb.cs`
   - Value 기본값 `4`, Pickup Radius 기본값 `1.1`
@@ -1167,7 +1211,7 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - Pending `0`에서 `Time.timeScale = 1` Resume
   - Disable/Destroy UI 숨김/Pause 복구와 필수 Reference Null 방어
 - `Assets/Scripts/Progression/StartingSpellSelectionController.cs`
-  - 게임 시작 Pause와 `Awaiting Selection` 상태 관리
+  - 게임 시작 Pause와 `Awaiting Selection`/`SelectionCompleted` 상태 관리
   - SkillCatalog Active Definition 8개를 read-only Starting Choice로 제공
   - Empty 시작 Loadout 검증과 `TrySelectStartingSpell(string)` 1회 선택 API
   - `StartingSpellSelectionUI` 초기화와 시작 UI 표시
@@ -1182,6 +1226,9 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - 선택 중 Button 잠금, 성공 시 Hide, 실패 시 재활성화
   - SkillLoadout 직접 접근 없음
   - U9-B Editor 연결 및 Play Mode 검증 완료
+- `Assets/Scripts/UI/RunTimerUI.cs`
+  - 기존 Canvas의 Legacy Text 한 개를 `MM:SS` 또는 `MM:SS  BOSS`로 갱신
+  - Invalid Time 방어와 `00:00` 초기 표시
 - `Assets/Scripts/UI/LevelUpChoiceUI.cs`
   - Panel 한 개와 서로 다른 uGUI Button/Text Reference 세 쌍 관리
   - 시작 시 Panel 숨김
@@ -1204,8 +1251,15 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
   - `IncreaseMaximumHealth(float)`로 Maximum/Current HP 동시 증가
   - Health Regeneration `0` 초기값과 `IncreaseHealthRegeneration(float)`
   - 살아 있고 Maximum 미만일 때 `Time.deltaTime` 기반 회복, Pause 중 정지
-  - Player Death 없음
+  - HP `0`에서 `IsDead`와 단일 `Died` 알림, 사망 후 회복/Maximum Health 증가로 부활 방지
+  - U13-A Defeat 검증용 `Debug Take Lethal Damage` Context Menu
   - Editor 연결 및 Play Mode 검증 완료
+- `Assets/Scripts/Run/RunController.cs`
+  - Starting Spell 선택 후 Gameplay Timer 시작, Run Duration `300`초
+  - Boss Phase 진입, 일반 Spawn 중지, Boss 한 번 생성과 사망 구독
+  - Boss Death Victory와 Player Death Defeat를 상호 배타적으로 한 번만 확정
+  - Run End Text/Panel 표시와 `Time.timeScale = 0` Pause
+  - 실제 Spawn/Death 경로를 사용하는 `Debug Spawn Boss Now`와 `Debug Defeat Active Boss` Context Menu
 - `Assets/Scripts/Combat/ProjectileTargetingUtility.cs`
   - Arcane 추가 Projectile 대상인 다섯 Caster가 공유하는 최소 최근접 Target 선택 helper
   - 서로 다른 살아 있는 Enemy 우선, Target 부족 시 기존 Target 재사용
@@ -1249,7 +1303,8 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Assembly Definition 없음
 
 ## Known Issues
-- U12의 Arcane/Fire/Lightning/Frost 2/4/6 Runtime 효과는 Play Mode 검증 전이다.
+- U13-B Pacing/XP Curve는 새 Inspector 값과 RunController Reference 연결 후 Play Mode 검증 전이다.
+- 최대 100 Enemy에서 현재 O(n²) Separation과 단순 Target/Status 순회의 실제 성능은 Full Run Stress Test 전이다.
 - Fireball Lv.2는 Explosion Radius만, Fire Zone Lv.2는 Radius만 증가하며 요청 범위 외 추가 효과는 없다.
 - Chain Lightning Arc와 Stagger VFX는 아직 없으며 Inspector/행동으로 검증해야 한다.
 - Frost Impact, Slow 표시와 Blizzard Snow Particle VFX는 아직 없다.
@@ -1257,12 +1312,12 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - Skill Definition은 Metadata뿐이며 실제 Spell/Passive 효과를 실행하지 않는다.
 - U7-A Debug Placeholder Skill ID는 슬롯 규칙 검증용이며 Catalog의 실제 Skill이 아니다.
 - Synergy 효과 UI/HUD와 전용 VFX는 아직 구현되지 않았다.
-- Player Death와 HP UI는 구현되지 않았다.
+- Player Death/Defeat는 구현됐지만 Player HP HUD와 Boss HP Bar는 아직 없다.
 - `ProjectSettings.asset`의 프로젝트 템플릿 메타데이터에는 `templateDefaultScene: Assets/Scenes/SampleScene.unity`가 남아 있다. 실제 Build Scene과 활성 Scene은 모두 `Main.unity`를 사용한다.
 - Git commit / push는 현재 작업 범위에서 의도적으로 수행하지 않았다.
 
 ## Deferred Work
-- Spawn Difficulty Scaling, Wave, Spawn Interval 감소
+- Enemy HP/Damage/Speed Scaling, Wave와 추가 Enemy Type
 - Enemy Manager Framework와 Object Pool
 - Physics2D 활용 범위
 - ScriptableObject 활용 범위
@@ -1270,13 +1325,18 @@ Unity 자체 기능은 필요에 따라 사용할 수 있으나 미래 문제를
 - 다중 Lightning Source에서 Stagger anti-permastun이 필요한지 여부
 - 최종 Balance
 - Synergy UI/HUD와 전용 VFX
+- Boss Special Attack, Boss Phase 2, Boss HP Bar와 Restart
+- U13-C Burn + Slow Status VFX
+- U13-D Minimal Synergy HUD
+- U13-E Chain Lightning Basic VFX
+- U13-F Full 5-minute Run + Final Prototype Balance
 - XP Magnet, Pickup Attraction, XP Merge, Loot System, Object Pool
 
 위 항목은 해당 Phase에서 실제 필요가 생길 때 결정한다.
 
 ## Next Phase
-**Pending U12 Editor Verification**
+**Pending U13-B Editor Verification**
 
-Unity Editor에서 새 Component나 Reference 없이 네 School의 2/4/6 누적 효과, 기존 Mastery/Common Upgrade 결합, Pause와 기존 U1~U11 Regression을 검증한다.
+Unity Editor에서 EnemySpawner의 RunController와 Pacing 값, PlayerExperience XP Curve 값을 설정한 뒤 시간대별 Cap/Interval, Pause, Boss 일반 Spawn 중지, XP Requirement와 기존 U1~U13-A Regression을 검증한다.
 
-검증 성공 후 다음 Phase로 `U13 — Prototype Demo Finish Pass`를 제안한다. 이번 작업에서는 Timer/Boss/HUD/VFX/Spawn·Balance 조정과 Demo 완료 판정을 구현하지 않는다.
+검증 성공 후 다음 Phase로 `U13-C — Burn + Slow Status VFX`를 제안한다. 이후 계획은 `U13-D — Minimal Synergy HUD`, `U13-E — Chain Lightning Basic VFX`, `U13-F — Full 5-minute Run + Final Prototype Balance` 순서이며 이번 작업에서는 구현하지 않는다.

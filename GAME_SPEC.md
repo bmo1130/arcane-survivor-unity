@@ -250,12 +250,15 @@ Enemy AI 자체와 Status Effect 구현은 지나치게 강하게 결합하지 �
 - 3 Common Upgrade
 - Arcane / Fire / Lightning / Frost
 - 각 School 2/4/6 Synergy
+- 5-minute Run Timer
+- Gameplay 시간에 따라 증가하는 Enemy pressure
+- Boss Slime
+- Victory / Defeat
 - 간단한 Sprite 표현
 - 최소한의 Spell Effect
 - 한 판을 실제로 플레이할 수 있음
 
 현재 완료선에 포함하지 않음:
-- Boss
 - Meta Progression
 - Save
 - Account
@@ -266,6 +269,8 @@ Enemy AI 자체와 Status Effect 구현은 지나치게 강하게 결합하지 �
 - 상용 수준 Art/Audio
 - Steam 출시 준비
 - 최종 Balance
+
+현재 Pacing의 Enemy Cap 최대 `100`, Spawn Interval `1.2 → 0.4`, XP Requirement `ceil(8 + 3n + 0.5n²)`는 5분 Demo와 성능을 검증하기 위한 Prototype Playtest 수치이며 최종 Balance가 아니다.
 
 Prototype Demo 완성 후 가장 중요한 질문은:
 

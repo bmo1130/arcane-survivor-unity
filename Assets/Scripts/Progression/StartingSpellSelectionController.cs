@@ -20,14 +20,17 @@ public sealed class StartingSpellSelectionController : MonoBehaviour
     private bool awaitingSelection;
 
     private bool ownsPause;
+    private bool selectionCompleted;
 
     public bool AwaitingSelection => awaitingSelection;
+    public bool SelectionCompleted => selectionCompleted;
     public IReadOnlyList<SkillDefinition> StartingChoices =>
         ReadOnlyStartingChoices;
 
     private void Awake()
     {
         awaitingSelection = false;
+        selectionCompleted = false;
         PauseGameplay();
 
         if (skillLoadout != null
@@ -108,6 +111,7 @@ public sealed class StartingSpellSelectionController : MonoBehaviour
         }
 
         awaitingSelection = false;
+        selectionCompleted = true;
         startingSpellSelectionUI.HideChoices();
         ResumeGameplay();
         return true;

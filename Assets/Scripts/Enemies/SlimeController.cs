@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,6 +40,9 @@ public sealed class SlimeController : MonoBehaviour
     [SerializeField, Min(0f)]
     private float separationStrength = 0.35f;
 
+    [SerializeField]
+    private bool isBoss;
+
     private float attackCooldownRemaining;
     private bool isDead;
     private IReadOnlyList<SlimeController> separationNeighbors;
@@ -52,6 +56,9 @@ public sealed class SlimeController : MonoBehaviour
     public float CurrentHealth => currentHealth;
     public float MaximumHealth => maximumHealth;
     public bool IsAlive => !isDead && currentHealth > 0f;
+    public bool IsBoss => isBoss;
+
+    public event Action<SlimeController> Died;
 
     private void Awake()
     {
@@ -80,7 +87,8 @@ public sealed class SlimeController : MonoBehaviour
         IReadOnlyList<SlimeController> newSeparationNeighbors,
         ExperienceOrb newExperienceOrbPrefab,
         PlayerExperience newPlayerExperience,
-        Transform newBillboardCamera)
+        Transform newBillboardCamera,
+        bool newIsBoss)
     {
         target = newTarget;
         playerHealth = newPlayerHealth;
@@ -88,6 +96,7 @@ public sealed class SlimeController : MonoBehaviour
         experienceOrbPrefab = newExperienceOrbPrefab;
         playerExperience = newPlayerExperience;
         billboardCamera = newBillboardCamera;
+        isBoss = newIsBoss;
 
         return ValidateReferences();
     }
@@ -322,7 +331,13 @@ public sealed class SlimeController : MonoBehaviour
 
         isDead = true;
         enabled = false;
-        SpawnExperienceOrb();
+
+        if (!isBoss)
+        {
+            SpawnExperienceOrb();
+        }
+
+        Died?.Invoke(this);
         Destroy(gameObject);
     }
 

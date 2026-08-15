@@ -14,7 +14,10 @@ public sealed class PlayerExperience : MonoBehaviour
     private float baseExperienceToLevel = 8f;
 
     [SerializeField, Min(0f)]
-    private float experienceGrowthPerLevel = 4f;
+    private float experienceGrowthPerLevel = 3f;
+
+    [SerializeField, Min(0f)]
+    private float experienceAccelerationPerLevel = 0.5f;
 
     [SerializeField, Min(0f)]
     private float experienceToNextLevel = 8f;
@@ -35,6 +38,9 @@ public sealed class PlayerExperience : MonoBehaviour
         experienceGrowthPerLevel = Mathf.Max(
             0f,
             experienceGrowthPerLevel);
+        experienceAccelerationPerLevel = Mathf.Max(
+            0f,
+            experienceAccelerationPerLevel);
         experienceToNextLevel = CalculateExperienceToNextLevel();
     }
 
@@ -71,11 +77,25 @@ public sealed class PlayerExperience : MonoBehaviour
 
     private float CalculateExperienceToNextLevel()
     {
+        double levelOffset = level - 1d;
         double requirement = baseExperienceToLevel
-            + (double)(level - 1) * experienceGrowthPerLevel;
+            + levelOffset * experienceGrowthPerLevel
+            + levelOffset
+                * levelOffset
+                * experienceAccelerationPerLevel;
+        double roundedRequirement = Math.Ceiling(requirement);
 
-        return requirement >= float.MaxValue
+        return roundedRequirement >= float.MaxValue
             ? float.MaxValue
-            : (float)requirement;
+            : Mathf.Max(0.0001f, (float)roundedRequirement);
+    }
+
+    [ContextMenu("Debug Log Experience")]
+    private void DebugLogExperience()
+    {
+        Debug.Log(
+            $"Level: {level} | XP: {currentExperience:0.##} / "
+            + $"{experienceToNextLevel:0.##}",
+            this);
     }
 }
